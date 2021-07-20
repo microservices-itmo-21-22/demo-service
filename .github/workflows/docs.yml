@@ -1,0 +1,20 @@
+on:
+  push:
+    paths:
+      - README.md
+      - docs
+
+jobs:
+  render-uml:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Render PlantUML
+        uses: grassedge/generate-plantuml-action@v1.5
+        with:
+          path: docs
+          message: "Render PlantUML files"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

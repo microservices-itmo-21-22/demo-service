@@ -48,8 +48,8 @@ Input events:
 - **USER_CREATED** - send greeting e-mail
 - **TASK_ASSIGNED** - Notify user
 
-```plantuml
-@startuml messaging
+```plantuml:messaging
+@startuml
 node UserModule
 node TaskModule
 node NotificationModule
@@ -74,10 +74,12 @@ TASK_ASSIGNED --> NotificationModule: Notify user
 @enduml
 ```
 
+![messaging](./docs/messaging.svg)
+
 
 ## Entity-relationship model
 
-```plantuml
+```plantuml:entities
 @startuml entities
 entity User {
     username: text
@@ -108,3 +110,5 @@ Task::assignee }o..o| User::username
 Task::status }o--|| Status
 @enduml
 ```
+
+![entities](./docs/entities.svg)
