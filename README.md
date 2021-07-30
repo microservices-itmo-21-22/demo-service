@@ -2,6 +2,11 @@
 
 ## API
 
+### Authentication module
+
+- **POST /authentication**: Authenticate
+- **POST /authentication/refresh**: Refresh authentication
+
 ### User module
 
 - **POST /users**: Register
@@ -17,6 +22,46 @@
 - **GET /tasks/{id}**: Get task
 - **POST /tasks/{id}/assignee/{username}**: Assign task
 - **DELETE /tasks/{id}**: Delete task
+
+## Synchronous calls (through interfaces)
+
+`AuthService.authenticate` -> `UserServicegetUser(username)`
+
+## Authentication
+
+**Authenticate**
+
+Request:
+
+POST /authentication
+
+```json
+{
+    "username": "<username>",
+    "password": "<password>"
+}
+```
+
+Response:
+
+```json
+{
+    "accessToken": "<token>",
+    "refreshToken": "<token>"
+}
+```
+
+Access token should be used in all other requests as header:
+`Authorization: Bearer <access token>`
+
+**Refresh authentication**
+
+Request:
+
+POST /authentication/refresh
+
+As an auth token refresh token should be used in request header: `Authorization: Bearer <refresh token>`
+
 
 ## Messaging
 
