@@ -163,26 +163,31 @@ Task::status }o--|| Status
 ### Packages
 
 * users
-    * controller
-    * messaging
-    * service
-    * model
-    * repository
-    * entity
-    * config
+  * controller
+  * messaging
+  * service
+  * model
+  * repository
+  * entity
+  * config
+* auth
+  * controller
+  * service
+  * model
+  * config
 * tasks
-    * controller
-    * messaging
-    * service
-    * model
-    * repository
-    * entity
-    * config
+  * controller
+  * messaging
+  * service
+  * model
+  * repository
+  * entity
+  * config
 * notifications
-    * controller
-    * messaging  
-    * service
-    * model
-    * repository
-    * entity
-    * config
+  * controller
+  * messaging  
+  * service
+  * model
+  * repository
+  * entity
+  * config
