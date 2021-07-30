@@ -162,7 +162,7 @@ Task::status }o--|| Status
 
 ### Packages
 
-* userModule
+* users
     * controller
     * messaging
     * service
@@ -170,7 +170,7 @@ Task::status }o--|| Status
     * repository
     * entity
     * config
-* taskModule
+* tasks
     * controller
     * messaging
     * service
@@ -178,7 +178,7 @@ Task::status }o--|| Status
     * repository
     * entity
     * config
-* notificationModule
+* notifications
     * controller
     * messaging  
     * service
