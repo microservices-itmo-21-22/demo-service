@@ -112,3 +112,32 @@ Task::status }o--|| Status
 ```
 
 ![entities](./docs/entities.svg)
+
+## Project structure
+
+### Packages
+
+* userModule
+    * controller
+    * messaging
+    * service
+    * model
+    * repository
+    * entity
+    * config
+* taskModule
+    * controller
+    * messaging
+    * service
+    * model
+    * repository
+    * entity
+    * config
+* notificationModule
+    * controller
+    * messaging  
+    * service
+    * model
+    * repository
+    * entity
+    * config
