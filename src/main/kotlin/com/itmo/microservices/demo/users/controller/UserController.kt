@@ -1,7 +1,7 @@
 package com.itmo.microservices.demo.users.controller
 
 import com.itmo.microservices.demo.users.entity.AppUser
-import com.itmo.microservices.demo.users.model.AppUserDto
+import com.itmo.microservices.demo.users.model.AppUserModel
 import com.itmo.microservices.demo.users.model.RegistrationRequest
 import com.itmo.microservices.demo.users.service.UserService
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -16,7 +16,7 @@ class UserController(private val userService: UserService) {
     }
 
     @GetMapping("/me")
-    fun getCurrentUserInfo(@AuthenticationPrincipal user: AppUser): AppUserDto? = null
+    fun getCurrentUserInfo(@AuthenticationPrincipal user: AppUser): AppUserModel? = null
 
     @DeleteMapping("/me")
     fun deleteCurrentUser(@AuthenticationPrincipal user: AppUser) = Unit

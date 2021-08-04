@@ -1,6 +1,6 @@
 package com.itmo.microservices.demo.tasks.model
 
-data class TaskDto(
+data class TaskModel(
         val author: String?,
         val assignee: String?,
         val title: String,

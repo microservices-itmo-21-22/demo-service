@@ -2,15 +2,13 @@ package com.itmo.microservices.demo.tasks.service
 
 import com.itmo.microservices.demo.exception.NotFoundException
 import com.itmo.microservices.demo.tasks.entity.Task
-import lombok.AllArgsConstructor
 import com.itmo.microservices.demo.tasks.repository.TaskRepository
 import java.util.UUID
-import com.itmo.microservices.demo.tasks.model.TaskDto
+import com.itmo.microservices.demo.tasks.model.TaskModel
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
 @Service
-@AllArgsConstructor
 class TaskService(private val taskRepository: TaskRepository) {
 
     fun allTasks(): List<Task> = taskRepository.findAll().filterNotNull()
@@ -19,7 +17,7 @@ class TaskService(private val taskRepository: TaskRepository) {
         return taskRepository.findByIdOrNull(taskId) ?: throw NotFoundException("Task $taskId not found")
     }
 
-    fun addTask(task: TaskDto) {
+    fun addTask(task: TaskModel) {
         //TODO 04.08.2021 Ilya_Kuznetsov: pass author as AuthenticationPrincipal from controller
         val entity = Task(author=task.author, assignee=task.assignee, title = task.title, description = task.description, status = task.status)
         taskRepository.save(entity)
