@@ -8,4 +8,8 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     database: postgresql
-
+server:
+  error:
+    include-exception: false
+    include-message: always
+    include-stacktrace: never
