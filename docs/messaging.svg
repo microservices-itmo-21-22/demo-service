@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="600px" preserveAspectRatio="none" style="width:575px;height:600px;background:#FFFFFF;" version="1.1" viewBox="0 0 575 600" width="575px" zoomAndPan="magnify"><defs><filter height="300%" id="f5shbicb6zv4k" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[0c655cda326d832471fcaf7edd505170]
+entity UserModule--><polygon fill="#FEFECE" filter="url(#f5shbicb6zv4k)" points="71,16,81,6,193,6,193,42.2969,183,52.2969,71,52.2969,71,16" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="183" x2="193" y1="16" y2="6"/><line style="stroke:#000000;stroke-width:1.5;" x1="71" x2="183" y1="16" y2="16"/><line style="stroke:#000000;stroke-width:1.5;" x1="183" x2="183" y1="16" y2="52.2969"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="82" x="86" y="38.9951">UserModule</text><!--MD5=[5a93e7e0ed894465b8425c947fdf58cf]
+entity TaskModule--><polygon fill="#FEFECE" filter="url(#f5shbicb6zv4k)" points="215,299,225,289,339,289,339,325.2969,329,335.2969,215,335.2969,215,299" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="329" x2="339" y1="299" y2="289"/><line style="stroke:#000000;stroke-width:1.5;" x1="215" x2="329" y1="299" y2="299"/><line style="stroke:#000000;stroke-width:1.5;" x1="329" x2="329" y1="299" y2="335.2969"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="84" x="230" y="321.9951">TaskModule</text><!--MD5=[87366c18e65fd32406c91b24e1bc2b82]
+entity NotificationModule--><polygon fill="#FEFECE" filter="url(#f5shbicb6zv4k)" points="96,557,106,547,272,547,272,583.2969,262,593.2969,96,593.2969,96,557" style="stroke:#000000;stroke-width:1.5;"/><line style="stroke:#000000;stroke-width:1.5;" x1="262" x2="272" y1="557" y2="547"/><line style="stroke:#000000;stroke-width:1.5;" x1="96" x2="262" y1="557" y2="557"/><line style="stroke:#000000;stroke-width:1.5;" x1="262" x2="262" y1="557" y2="593.2969"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="136" x="111" y="579.9951">NotificationModule</text><!--MD5=[46aa8b69ff20746862c1162f120ec0ce]
+entity USER_CREATED--><ellipse cx="62" cy="230" fill="#FEFECE" filter="url(#f5shbicb6zv4k)" rx="8" ry="8" style="stroke:#A80036;stroke-width:1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="112" x="6" y="259.9951">USER_CREATED</text><!--MD5=[6770189fc257eef19d1cdbf042a4c575]
+entity USER_DELETED--><ellipse cx="262" cy="142" fill="#FEFECE" filter="url(#f5shbicb6zv4k)" rx="8" ry="8" style="stroke:#A80036;stroke-width:1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="110" x="207" y="171.9951">USER_DELETED</text><!--MD5=[ce224df609539405cbbe83e1a89d06be]
+entity TASK_CREATED--><ellipse cx="176" cy="441" fill="#FEFECE" filter="url(#f5shbicb6zv4k)" rx="8" ry="8" style="stroke:#A80036;stroke-width:1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="113" x="119.5" y="470.9951">TASK_CREATED</text><!--MD5=[43de54a69da4727b8e0518cd0c68dbde]
+entity TASK_DELETED--><ellipse cx="338" cy="441" fill="#FEFECE" filter="url(#f5shbicb6zv4k)" rx="8" ry="8" style="stroke:#A80036;stroke-width:1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="111" x="282.5" y="470.9951">TASK_DELETED</text><!--MD5=[6f04d481d1e8e04a40f463f16e62f0cb]
+entity TASK_ASSIGNED--><ellipse cx="503" cy="441" fill="#FEFECE" filter="url(#f5shbicb6zv4k)" rx="8" ry="8" style="stroke:#A80036;stroke-width:1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="118" x="444" y="470.9951">TASK_ASSIGNED</text><!--MD5=[2bb64a6386ea02a75b791c0d335ee601]
+link UserModule to USER_CREATED--><path d="M124.241,52.057 C109.577,93.745 78.2158,182.901 66.5205,216.149 " fill="none" id="UserModule-to-USER_CREATED" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="64.8178,220.989,71.5768,213.8255,66.4764,216.2721,64.0298,211.1717,64.8178,220.989" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[40ff2d9420df751f1d15d71004aeeee1]
+link UserModule to USER_DELETED--><path d="M157.995,52.196 C185.503,75.684 227.802,111.8 248.978,129.882 " fill="none" id="UserModule-to-USER_DELETED" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="252.922,133.248,248.6731,124.3628,249.1189,130.0021,243.4796,130.4478,252.922,133.248" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[957a635f12851ac046fdb318ceaa89e9]
+link USER_DELETED to TaskModule--><path d="M262.723,151.103 C264.841,174.814 271.093,244.843 274.58,283.9 " fill="none" id="USER_DELETED-to-TaskModule" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="275.033,288.967,278.2174,279.6472,274.5887,283.9868,270.2491,280.358,275.033,288.967" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="271" x="284.5" y="227.0669">Remove all tasks created by deleted user,</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="290" x="277" y="242.1997">remove assignee from tasks assigned to him</text><!--MD5=[240c822bf67e20b9779a4a5420414f78]
+link TaskModule to TASK_CREATED--><path d="M259.407,335.122 C238.001,362.038 202.623,406.524 185.658,427.856 " fill="none" id="TaskModule-to-TASK_CREATED" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="182.52,431.802,191.2534,427.2492,185.6328,427.8892,184.9928,422.2686,182.52,431.802" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[f925bfd5ed1851b9e26a6d24057cb6af]
+link TaskModule to TASK_DELETED--><path d="M287.625,335.122 C300.392,361.702 321.388,405.415 331.778,427.045 " fill="none" id="TaskModule-to-TASK_DELETED" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="334.062,431.802,333.772,421.9574,331.8976,427.2947,326.5603,425.4204,334.062,431.802" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[db7968de9e28d85ef5bf7cbe2f037247]
+link TaskModule to TASK_ASSIGNED--><path d="M316.366,335.122 C367.956,364.113 455.815,413.485 489.398,432.357 " fill="none" id="TaskModule-to-TASK_ASSIGNED" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="493.949,434.914,488.0624,427.0179,489.5901,432.4646,484.1434,433.9922,493.949,434.914" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[b2da34d1017414b06a13f8246e1c6d48]
+link USER_CREATED to NotificationModule--><path d="M61.3245,239.355 C59.107,271.205 54.3044,387.359 94,470 C107.766,498.659 132.54,524.973 152.615,543.2569 " fill="none" id="USER_CREATED-to-NotificationModule" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="156.563,546.8049,152.5437,537.8135,152.8445,543.4623,147.1956,543.7631,156.563,546.8049" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="133" x="69" y="378.0669">Send greeting e-mail</text><!--MD5=[baca508911cb630c648077ea5f700d33]
+link TASK_ASSIGNED to NotificationModule--><path d="M493.797,445.664 C457.639,460.059 323.42,513.4942 244.001,545.1126 " fill="none" id="TASK_ASSIGNED-to-NotificationModule" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="239.321,546.9757,249.1622,547.3645,243.9667,545.127,246.2042,539.9315,239.321,546.9757" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="70" x="354" y="513.0669">Notify user</text><!--MD5=[ed257d2c4d402bee09fccfea99e912cb]
+@startuml
+node UserModule
+node TaskModule
+node NotificationModule
+
+'UserModule outputs
+UserModule - -> USER_CREATED
+UserModule - -> USER_DELETED
+
+'TaskModule inputs
+USER_DELETED - -> TaskModule: Remove all tasks created by deleted user,\n remove assignee from tasks assigned to him
+'TaskModule outputs
+TaskModule - -> TASK_CREATED
+TaskModule - -> TASK_DELETED
+TaskModule - -> TASK_ASSIGNED
+
+'NotificationModule inputs
+USER_CREATED - -> NotificationModule: Send greeting e-mail
+TASK_ASSIGNED - -> NotificationModule: Notify user
+@enduml
+
+@startuml
+node UserModule
+node TaskModule
+node NotificationModule
+
+UserModule - -> USER_CREATED
+UserModule - -> USER_DELETED
+
+USER_DELETED - -> TaskModule: Remove all tasks created by deleted user,\n remove assignee from tasks assigned to him
+TaskModule - -> TASK_CREATED
+TaskModule - -> TASK_DELETED
+TaskModule - -> TASK_ASSIGNED
+
+USER_CREATED - -> NotificationModule: Send greeting e-mail
+TASK_ASSIGNED - -> NotificationModule: Notify user
+@enduml
+
+PlantUML version 1.2021.10beta2(Unknown compile time)
+(GPL source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>
