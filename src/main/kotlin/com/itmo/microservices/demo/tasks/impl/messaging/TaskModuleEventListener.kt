@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component
 
 @Component
 @Suppress("UnstableApiUsage")
-class EventListener(private val taskRepository: TaskRepository) {
+class TaskModuleEventListener(private val taskRepository: TaskRepository) {
 
     companion object {
-        val log: Logger = LoggerFactory.getLogger(EventListener::class.java)
+        val log: Logger = LoggerFactory.getLogger(TaskModuleEventListener::class.java)
     }
 
     @Subscribe

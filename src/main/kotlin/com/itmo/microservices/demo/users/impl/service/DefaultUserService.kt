@@ -2,6 +2,7 @@ package com.itmo.microservices.demo.users.impl.service
 
 import com.google.common.eventbus.EventBus
 import com.itmo.microservices.demo.common.exception.NotFoundException
+import com.itmo.microservices.demo.users.api.messaging.UserCreatedEvent
 import com.itmo.microservices.demo.users.api.messaging.UserDeletedEvent
 import com.itmo.microservices.demo.users.api.service.UserService
 import com.itmo.microservices.demo.users.impl.entity.AppUser
@@ -25,7 +26,8 @@ class DefaultUserService(private val userRepository: UserRepository,
             ?.let { entityToModel(it) }
 
     override fun registerUser(request: RegistrationRequest) {
-        userRepository.save(requestToEntity(request))
+        val userEntity = userRepository.save(requestToEntity(request))
+        eventBus.post(UserCreatedEvent(entityToModel(userEntity)))
     }
 
     override fun getAccountData(requester: UserDetails): AppUserModel =
