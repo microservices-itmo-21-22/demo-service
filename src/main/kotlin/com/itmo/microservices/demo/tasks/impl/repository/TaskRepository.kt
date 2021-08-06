@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface TaskRepository : JpaRepository<Task, UUID>
+interface TaskRepository : JpaRepository<Task, UUID> {
+    fun deleteAllByAuthor(author: String)
+}

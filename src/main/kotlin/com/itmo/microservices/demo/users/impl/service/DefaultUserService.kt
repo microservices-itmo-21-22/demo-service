@@ -1,6 +1,8 @@
 package com.itmo.microservices.demo.users.impl.service
 
+import com.google.common.eventbus.EventBus
 import com.itmo.microservices.demo.common.exception.NotFoundException
+import com.itmo.microservices.demo.users.api.messaging.UserDeletedEvent
 import com.itmo.microservices.demo.users.api.service.UserService
 import com.itmo.microservices.demo.users.impl.entity.AppUser
 import com.itmo.microservices.demo.users.api.model.AppUserModel
@@ -11,9 +13,11 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
+@Suppress("UnstableApiUsage")
 @Service
 class DefaultUserService(private val userRepository: UserRepository,
-                         private val passwordEncoder: PasswordEncoder
+                         private val passwordEncoder: PasswordEncoder,
+                         private val eventBus: EventBus
                          ): UserService {
 
     override fun findUser(username: String): AppUserModel? = userRepository
@@ -29,7 +33,13 @@ class DefaultUserService(private val userRepository: UserRepository,
             throw NotFoundException("User ${requester.username} not found")
 
     override fun deleteUser(user: UserDetails) {
-        userRepository.deleteById(user.username)
+        runCatching {
+            userRepository.deleteById(user.username)
+        }.onSuccess {
+            eventBus.post(UserDeletedEvent(user.username))
+        }.onFailure {
+            throw NotFoundException("User ${user.username} not found", it)
+        }
     }
 
     private fun entityToModel(entity: AppUser): AppUserModel = kotlin.runCatching {
