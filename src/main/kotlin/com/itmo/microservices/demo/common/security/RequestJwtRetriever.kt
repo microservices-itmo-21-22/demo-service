@@ -4,9 +4,7 @@ import org.springframework.http.HttpHeaders
 import javax.servlet.http.HttpServletRequest
 
 fun retrieveToken(request: HttpServletRequest): String? {
-    if (request.getHeader(HttpHeaders.AUTHORIZATION) == null)
-        return null
-    val authHeaderValue = request.getHeader(HttpHeaders.AUTHORIZATION)!!
+    val authHeaderValue = request.getHeader(HttpHeaders.AUTHORIZATION) ?: return null
     if (!authHeaderValue.startsWith("Bearer ", ignoreCase = true))
         return null
     return authHeaderValue.substring("Bearer ".length)

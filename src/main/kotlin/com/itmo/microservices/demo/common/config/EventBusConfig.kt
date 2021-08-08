@@ -11,8 +11,7 @@ import java.util.concurrent.Executors
 @Configuration
 class EventBusConfig {
 
-    @Bean
-    @Qualifier("eventBusExecutor")
+    @Bean(name = ["eventBusExecutor"])
     fun eventBusExecutor(): ExecutorService = Executors.newFixedThreadPool(5)
 
     @Bean
