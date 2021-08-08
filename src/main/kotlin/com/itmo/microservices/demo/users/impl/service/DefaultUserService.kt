@@ -9,6 +9,7 @@ import com.itmo.microservices.demo.users.impl.entity.AppUser
 import com.itmo.microservices.demo.users.api.model.AppUserModel
 import com.itmo.microservices.demo.users.api.model.RegistrationRequest
 import com.itmo.microservices.demo.users.impl.repository.UserRepository
+import com.itmo.microservices.demo.users.impl.util.toModel
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -22,16 +23,15 @@ class DefaultUserService(private val userRepository: UserRepository,
                          ): UserService {
 
     override fun findUser(username: String): AppUserModel? = userRepository
-            .findByIdOrNull(username)
-            ?.let { entityToModel(it) }
+            .findByIdOrNull(username)?.toModel()
 
     override fun registerUser(request: RegistrationRequest) {
         val userEntity = userRepository.save(requestToEntity(request))
-        eventBus.post(UserCreatedEvent(entityToModel(userEntity)))
+        eventBus.post(UserCreatedEvent(userEntity.toModel()))
     }
 
     override fun getAccountData(requester: UserDetails): AppUserModel =
-            userRepository.findByIdOrNull(requester.username)?.let { entityToModel(it) } ?:
+            userRepository.findByIdOrNull(requester.username)?.toModel() ?:
             throw NotFoundException("User ${requester.username} not found")
 
     override fun deleteUser(user: UserDetails) {
@@ -43,16 +43,6 @@ class DefaultUserService(private val userRepository: UserRepository,
             throw NotFoundException("User ${user.username} not found", it)
         }
     }
-
-    private fun entityToModel(entity: AppUser): AppUserModel = kotlin.runCatching {
-        AppUserModel(
-                username = entity.username!!,
-                name = entity.name!!,
-                surname = entity.surname!!,
-                email = entity.email!!,
-                password = entity.password!!
-        )
-    }.getOrElse { exception -> throw IllegalStateException("Some of user fields are null", exception) }
 
     private fun requestToEntity(request: RegistrationRequest): AppUser =
             AppUser(username = request.username,
