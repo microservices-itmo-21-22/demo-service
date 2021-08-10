@@ -93,6 +93,13 @@
         <tag>HEAD</tag>
         <url>https://https://github.com/${github}.git</url>
     </scm>
+    
+    <distributionManagement>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <url>http://artifactory:8081/artifactory/libs-snapshot-local</url>
+        </snapshotRepository>
+    </distributionManagement>
          
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
