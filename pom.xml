@@ -19,6 +19,8 @@
         <kotlin.version>1.5.21</kotlin.version>
         <guava.version>30.1.1-jre</guava.version>
         <jjwt.version>0.9.1</jjwt.version>
+        <buildnumber-maven-plugin.version>1.4</buildnumber-maven-plugin.version>
+        <jib-maven-plugin.version>2.8.0</jib-maven-plugin.version>
     </properties>
          
     <dependencies>
@@ -85,6 +87,13 @@
         </dependency>
     </dependencies>
 
+    <scm>
+        <connection>scm:git:https://https://github.com/${github}.git</connection>
+        <developerConnection>scm:git:https://https://github.com/${github}.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://https://github.com/${github}.git</url>
+    </scm>
+         
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
         <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
@@ -143,9 +152,26 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>${buildnumber-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <version>2.8.0</version>
+                <version>${jib-maven-plugin.version}</version>
                 <configuration>
                     <to>
                         <image>${env.DOCKER_REPO_HOST_INTERNAL}/${project.artifactId}</image>
