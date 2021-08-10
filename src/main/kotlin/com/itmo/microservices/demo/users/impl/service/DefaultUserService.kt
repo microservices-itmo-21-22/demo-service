@@ -26,7 +26,7 @@ class DefaultUserService(private val userRepository: UserRepository,
             .findByIdOrNull(username)?.toModel()
 
     override fun registerUser(request: RegistrationRequest) {
-        val userEntity = userRepository.save(requestToEntity(request))
+        val userEntity = userRepository.save(request.toEntity())
         eventBus.post(UserCreatedEvent(userEntity.toModel()))
     }
 
@@ -44,11 +44,11 @@ class DefaultUserService(private val userRepository: UserRepository,
         }
     }
 
-    private fun requestToEntity(request: RegistrationRequest): AppUser =
-            AppUser(username = request.username,
-                    name = request.name,
-                    surname = request.surname,
-                    email = request.email,
-                    password = passwordEncoder.encode(request.password)
-            )
+    fun RegistrationRequest.toEntity(): AppUser =
+        AppUser(username = this.username,
+            name = this.name,
+            surname = this.surname,
+            email = this.email,
+            password = passwordEncoder.encode(this.password)
+        )
 }
