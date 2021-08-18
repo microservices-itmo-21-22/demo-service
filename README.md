@@ -25,7 +25,7 @@
 
 ## Synchronous calls (through interfaces)
 
-`AuthService.authenticate` -> `UserServicegetUser(username)`
+`AuthService.authenticate` -> `UserService.getUser(username)`
 
 ## Authentication
 
@@ -162,32 +162,43 @@ Task::status }o--|| Status
 
 ### Packages
 
+Any module should be divided into `api` & `impl` base packages 
+to define classes that can be used in other modules.
+
 * users
-  * controller
-  * messaging
-  * service
-  * model
-  * repository
-  * entity
-  * config
+  * api
+    * controller
+    * messaging
+    * model
+    * service
+  * impl
+    * entity
+    * repository
+    * service
 * auth
-  * controller
-  * service
-  * model
-  * config
+  * api
+    * controller
+    * service
+    * model
+  * impl
+    * config
+    * service
 * tasks
-  * controller
-  * messaging
-  * service
-  * model
-  * repository
-  * entity
-  * config
+  * api
+    * controller
+    * messaging
+    * service
+  * impl
+    * entity
+    * repository
+    * service
 * notifications
-  * controller
-  * messaging  
-  * service
-  * model
-  * repository
-  * entity
-  * config
+  * api
+    * controller
+    * messaging
+    * model
+    * service
+  * impl
+    * config
+    * entity
+    * repository
