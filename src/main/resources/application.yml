@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: demo-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/demo_db
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database: postgresql
+
+server:
+  error:
+    include-exception: false
+    include-message: always
+    include-stacktrace: never
+
+security:
+  secret: secret12345678
+  token-lifetime: 15m
+  refresh-token-lifetime: 30d
