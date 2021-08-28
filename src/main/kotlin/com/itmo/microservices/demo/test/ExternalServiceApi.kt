@@ -12,7 +12,7 @@ interface ServiceApi {
 
     suspend fun getUser(id: UUID): User
 
-    suspend fun createOrder(): Order
+    suspend fun createOrder(userId: UUID): Order
     suspend fun getOrder(id: UUID): Order
     suspend fun getDeliverySlots(id: UUID): List<Int>
     suspend fun setDeliveryTime(id: UUID, time: Long)

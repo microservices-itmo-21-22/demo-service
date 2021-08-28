@@ -33,12 +33,12 @@ class ExternalServiceSimulator(
         TODO("Not yet implemented")
     }
 
-    override suspend fun createOrder(): Order {
+    override suspend fun createOrder(userId: UUID): Order { // todo sukhoa userId not used
         return orderStorage.create(Order())
     }
 
     override suspend fun getOrder(id: UUID): Order {
-        TODO("Not yet implemented")
+        return orderStorage.get(id)
     }
 
     override suspend fun getDeliverySlots(id: UUID): List<Int> {
@@ -60,7 +60,7 @@ class ExternalServiceSimulator(
                     100
                 ) // todo sukhoa Elina change hardcoded stuff
             } else {
-                financialLog[userId]!!.add(FinancialLogRecord(WITHDRAW, 100, orderId))
+//                financialLog[userId]!!.add(FinancialLogRecord(WITHDRAW, 100, orderId))
                 userStorage.getAndUpdate(userId) { user ->
                     user.copy(accountAmount = user.accountAmount - 100)
                 }
