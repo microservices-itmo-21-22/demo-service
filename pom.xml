@@ -204,9 +204,7 @@
                         <tags>${scmBranch}_${project.version}</tags>
                     </to>
                     <allowInsecureRegistries>true</allowInsecureRegistries>
-                    <container>
-                        <mainClass>com.itmo.microservices.demo.DemoServiceApplication</mainClass>
-                    </container>
+                    
                 </configuration>
                 <executions>
                     <execution>
