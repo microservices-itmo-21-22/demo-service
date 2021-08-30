@@ -105,6 +105,13 @@
         </dependency>
     </dependencies>
 
+    <scm>
+        <connection>scm:git:https://https://github.com/${github}.git</connection>
+        <developerConnection>scm:git:https://https://github.com/${github}.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://https://github.com/${github}.git</url>
+    </scm>
+         
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
         <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
