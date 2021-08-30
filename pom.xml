@@ -202,6 +202,7 @@
                     <to>
                         <image>${env.DOCKER_REPO_HOST_INTERNAL}/${project.artifactId}</image>
                         <tags>${scmBranch}_${project.version}</tags>
+                        <container.mainClass>src/main/kotlin/com/itmo/microservices/demo/DemoServiceApplication.kt</container.mainClass>
                     </to>
                     <allowInsecureRegistries>true</allowInsecureRegistries>
                 </configuration>
