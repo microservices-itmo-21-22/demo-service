@@ -205,7 +205,7 @@
                     </to>
                     <allowInsecureRegistries>true</allowInsecureRegistries>
                     <container>
-                        <mainClass>src/main/kotlin/com/itmo/microservices/demo/DemoServiceApplication.kt</mainClass>
+                        <mainClass>com.itmo.microservices.demo.DemoServiceApplication.kt</mainClass>
                     </container>
                 </configuration>
                 <executions>
