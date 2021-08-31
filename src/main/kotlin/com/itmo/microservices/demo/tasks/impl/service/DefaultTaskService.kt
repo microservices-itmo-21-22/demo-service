@@ -1,13 +1,17 @@
 package com.itmo.microservices.demo.tasks.impl.service
 
 import com.google.common.eventbus.EventBus
+import com.itmo.microservices.demo.common.annotations.InjectEventLogger
 import com.itmo.microservices.demo.common.exception.AccessDeniedException
 import com.itmo.microservices.demo.common.exception.NotFoundException
+import com.itmo.microservices.demo.common.logging.CommonNotableEvents
+import com.itmo.microservices.demo.common.logging.EventLogger
 import com.itmo.microservices.demo.tasks.api.messaging.TaskAssignedEvent
 import com.itmo.microservices.demo.tasks.api.messaging.TaskCreatedEvent
 import com.itmo.microservices.demo.tasks.api.messaging.TaskDeletedEvent
 import com.itmo.microservices.demo.tasks.api.model.TaskModel
 import com.itmo.microservices.demo.tasks.api.service.TaskService
+import com.itmo.microservices.demo.tasks.impl.logging.TaskServiceNotableEvents
 import com.itmo.microservices.demo.tasks.impl.util.toEntity
 import com.itmo.microservices.demo.tasks.impl.util.toModel
 import com.itmo.microservices.demo.tasks.impl.repository.TaskRepository
@@ -22,6 +26,9 @@ class DefaultTaskService(private val taskRepository: TaskRepository,
                          private val eventBus: EventBus
                          ) : TaskService {
 
+    @InjectEventLogger
+    private var eventLogger: EventLogger? = null
+
     override fun allTasks(): List<TaskModel> = taskRepository.findAll()
             .map { it.toModel() }
 
@@ -33,6 +40,10 @@ class DefaultTaskService(private val taskRepository: TaskRepository,
         val entity = task.toEntity().also { it.author = author.username }
         taskRepository.save(entity)
         eventBus.post(TaskCreatedEvent(entity.toModel()))
+        eventLogger?.info(
+            TaskServiceNotableEvents.I_TASK_CREATED,
+            entity
+        )
     }
 
     override fun assignTask(taskId: UUID, username: String, requester: UserDetails) {
@@ -42,13 +53,21 @@ class DefaultTaskService(private val taskRepository: TaskRepository,
         task.assignee = username
         taskRepository.save(task)
         eventBus.post(TaskAssignedEvent(task.toModel()))
+        eventLogger?.info(
+            TaskServiceNotableEvents.I_TASK_ASSIGNED,
+            task
+        )
     }
 
     override fun deleteTaskById(taskId: UUID, requester: UserDetails) {
         val task = taskRepository.findByIdOrNull(taskId) ?: return
         if (task.author != requester.username)
-            throw AccessDeniedException("Cannot change task that was not created by you")
+            throw AccessDeniedException("Cann" + "ot change task that was not created by you")
         taskRepository.deleteById(taskId)
         eventBus.post(TaskDeletedEvent(task.toModel()))
+        eventLogger?.info(
+            TaskServiceNotableEvents.I_TASK_DELETED,
+            task
+        )
     }
 }
