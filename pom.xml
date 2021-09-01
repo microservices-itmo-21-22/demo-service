@@ -21,12 +21,19 @@
         <kotlin.version>1.5.21</kotlin.version>
         <guava.version>30.1.1-jre</guava.version>
         <jjwt.version>0.9.1</jjwt.version>
+        <common-lib.version>0.0.1-SNAPSHOT</common-lib.version>
              
         <buildnumber-maven-plugin.version>1.4</buildnumber-maven-plugin.version>
         <jib-maven-plugin.version>2.8.0</jib-maven-plugin.version>
     </properties>
          
     <dependencies>
+        <dependency>
+            <groupId>com.itmo.microservices</groupId>
+            <artifactId>common-lib</artifactId>
+            <version>${common-lib.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-jdk8</artifactId>
@@ -106,13 +113,31 @@
         <tag>HEAD</tag>
         <url>https://https://github.com/${github}.git</url>
     </scm>
-    
+
     <distributionManagement>
         <snapshotRepository>
             <id>snapshots</id>
             <url>http://artifactory:8081/artifactory/libs-snapshot-local</url>
         </snapshotRepository>
     </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>central</id>
+            <url>https://repo1.maven.org/maven2/</url>
+        </repository>
+        <repository>
+            <id>itmo-central</id>
+            <url>http://77.234.215.138:30031/artifactory/libs-release</url>
+        </repository>
+        <repository>
+            <id>itmo-snapshots</id>
+            <url>http://77.234.215.138:30031/artifactory/libs-snapshot</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
          
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
