@@ -1,6 +1,6 @@
 package com.itmo.microservices.demo.users.impl.logging
 
-import com.itmo.microservices.demo.common.logging.NotableEvent
+import com.itmo.microservices.commonlib.logging.NotableEvent
 
 enum class UserServiceNotableEvents(private val template: String): NotableEvent {
     I_USER_CREATED("User created: {}"),

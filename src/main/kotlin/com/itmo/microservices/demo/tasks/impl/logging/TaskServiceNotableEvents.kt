@@ -1,6 +1,6 @@
 package com.itmo.microservices.demo.tasks.impl.logging
 
-import com.itmo.microservices.demo.common.logging.NotableEvent
+import com.itmo.microservices.commonlib.logging.NotableEvent
 
 enum class TaskServiceNotableEvents(private val template: String) : NotableEvent {
     I_TASK_CREATED("Task created: {}"),

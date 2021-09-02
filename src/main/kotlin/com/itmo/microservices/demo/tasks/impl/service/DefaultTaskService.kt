@@ -1,11 +1,10 @@
 package com.itmo.microservices.demo.tasks.impl.service
 
 import com.google.common.eventbus.EventBus
-import com.itmo.microservices.demo.common.annotations.InjectEventLogger
+import com.itmo.microservices.commonlib.annotations.InjectEventLogger
+import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.common.exception.AccessDeniedException
 import com.itmo.microservices.demo.common.exception.NotFoundException
-import com.itmo.microservices.demo.common.logging.CommonNotableEvents
-import com.itmo.microservices.demo.common.logging.EventLogger
 import com.itmo.microservices.demo.tasks.api.messaging.TaskAssignedEvent
 import com.itmo.microservices.demo.tasks.api.messaging.TaskCreatedEvent
 import com.itmo.microservices.demo.tasks.api.messaging.TaskDeletedEvent

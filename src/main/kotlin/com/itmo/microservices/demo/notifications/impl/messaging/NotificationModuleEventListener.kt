@@ -2,9 +2,9 @@ package com.itmo.microservices.demo.notifications.impl.messaging
 
 import com.google.common.eventbus.AllowConcurrentEvents
 import com.google.common.eventbus.Subscribe
-import com.itmo.microservices.demo.common.annotations.InjectEventLogger
+import com.itmo.microservices.commonlib.annotations.InjectEventLogger
+import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.common.logging.CommonNotableEvents
-import com.itmo.microservices.demo.common.logging.EventLogger
 import com.itmo.microservices.demo.notifications.api.service.NotificationService
 import com.itmo.microservices.demo.tasks.api.messaging.TaskAssignedEvent
 import com.itmo.microservices.demo.users.api.messaging.UserCreatedEvent

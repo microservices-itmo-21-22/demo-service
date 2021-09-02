@@ -1,5 +1,7 @@
 package com.itmo.microservices.demo.common.logging
 
+import com.itmo.microservices.commonlib.logging.NotableEvent
+
 enum class CommonNotableEvents(private val template: String): NotableEvent {
     I_EVENT_BUS_SENT_MESSAGE_SUCCESS("Event bus sent message: {}"),
     I_LISTENER_RECEIVED_MESSAGE("Received message: {}"),
