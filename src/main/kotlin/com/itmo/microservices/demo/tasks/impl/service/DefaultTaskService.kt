@@ -61,7 +61,7 @@ class DefaultTaskService(private val taskRepository: TaskRepository,
     override fun deleteTaskById(taskId: UUID, requester: UserDetails) {
         val task = taskRepository.findByIdOrNull(taskId) ?: return
         if (task.author != requester.username)
-            throw AccessDeniedException("Cann" + "ot change task that was not created by you")
+            throw AccessDeniedException("Cannot change task that was not created by you")
         taskRepository.deleteById(taskId)
         eventBus.post(TaskDeletedEvent(task.toModel()))
         eventLogger?.info(
