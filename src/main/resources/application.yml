@@ -13,7 +13,7 @@ server:
   error:
     include-exception: false
     include-message: always
-    include-stacktrace: never
+    include-stacktrace: always
 
 security:
   secret: secret12345678
