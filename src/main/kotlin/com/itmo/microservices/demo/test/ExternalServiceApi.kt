@@ -17,23 +17,31 @@ interface ServiceApi {
     suspend fun getDeliverySlots(id: UUID): List<Int>
     suspend fun setDeliveryTime(id: UUID, time: Long)
     suspend fun payOrder(userId: UUID, orderId: UUID): Order
+    suspend fun finalizeOrder(orderId: UUID): BookingDto //синхронный
+    suspend fun addItem(orderId: UUID, itemId: UUID, amount: Amount): Boolean
 
     suspend fun getItems(): List<Item>
 }
+//todo add booking history
 
 typealias Amount = Int
 
 data class User(
-    val id: UUID = UUID.randomUUID(),
-    val name: String,
-    val accountAmount: Amount
+        val id: UUID = UUID.randomUUID(),
+        val name: String,
+        val accountAmount: Amount
 )
 
-class FinancialLogRecord( // todo sukhoa think of renaming
-    val type: FinancialOperationType,
-    val amount: Amount,
-    val orderId: UUID? = null,
-    val timestamp: Long = System.currentTimeMillis()
+data class FinancialLogRecord( // todo sukhoa think of renaming
+        val type: FinancialOperationType,
+        val amount: Amount,
+        val orderId: UUID? = null,
+        val timestamp: Long = System.currentTimeMillis()
+)
+
+data class BookingDto(
+        val id: UUID,
+        val failedItems: List<UUID>
 )
 
 enum class FinancialOperationType {
@@ -42,9 +50,17 @@ enum class FinancialOperationType {
 }
 
 data class Item(
-    val id: UUID = UUID.randomUUID(),
-    val title: String,
-    val amount: Amount // number of items allowed for booking
+        val id: UUID = UUID.randomUUID(),
+        val title: String,
+        val price: Int = 100,
+        val amount: Amount, // number of items allowed for booking
+        val bookingLogRecord: List<BookingLogRecord> = listOf()
+)
+
+class BookingLogRecord(
+        val bookingId: UUID,
+        val amount: Amount,
+        val status: BookingStatus
 )
 
 sealed class OrderStatus {
@@ -58,11 +74,11 @@ sealed class OrderStatus {
 }
 
 val orderStateMachine = OrderStatusStateMachine(listOf(
-    OrderCollecting::class to OrderBooked::class,
-    OrderCollecting::class to OrderDiscarded::class,
-    OrderBooked::class to OrderCollecting::class, // payment haven't succeeded withing given time period or booking was cancelled
-    OrderBooked::class to OrderBooked::class, // still haven't been payed but timeout haven't passed
-    OrderBooked::class to OrderPayed::class,
+        OrderCollecting::class to OrderBooked::class,
+        OrderCollecting::class to OrderDiscarded::class,
+        OrderBooked::class to OrderCollecting::class, // payment haven't succeeded withing given time period or booking was cancelled
+        OrderBooked::class to OrderBooked::class, // still haven't been payed but timeout haven't passed
+        OrderBooked::class to OrderPayed::class,
 ))
 
 class OrderStatusStateMachine(legalTransitions: List<Pair<KClass<out OrderStatus>, KClass<out OrderStatus>>>) {
@@ -80,23 +96,28 @@ class OrderStatusStateMachine(legalTransitions: List<Pair<KClass<out OrderStatus
 }
 
 data class Order(
-    val id: UUID = UUID.randomUUID(),
-    val timeCreated: Long = System.currentTimeMillis(),
-    val status: OrderStatus = OrderCollecting,
-    val itemsMap: Map<Item, Amount> = emptyMap(),
-    val deliveryDuration: Int? = null,
-    val paymentHistory: List<PaymentLogRecord> = listOf()
+        val id: UUID = UUID.randomUUID(),
+        val timeCreated: Long = System.currentTimeMillis(),
+        val status: OrderStatus = OrderCollecting,
+        val itemsMap: Map<Item, Amount> = emptyMap(),
+        val deliveryDuration: Int? = null,
+        val paymentHistory: List<PaymentLogRecord> = listOf()
 )
 
 class PaymentLogRecord(
-    val timestamp: Long,
-    val status: PaymentStatus,
-    val amount: Amount
+        val timestamp: Long,
+        val status: PaymentStatus,
+        val amount: Amount
 )
 
 enum class PaymentStatus {
     FAILED,
     FAILED_NOT_ENOUGH_MONEY, // todo sukhoa Elina, rename
+    SUCCESS
+}
+
+enum class BookingStatus {
+    FAILED,
     SUCCESS
 }
 
