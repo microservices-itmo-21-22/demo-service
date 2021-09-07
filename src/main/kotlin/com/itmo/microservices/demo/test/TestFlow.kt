@@ -1,5 +1,7 @@
 package com.itmo.microservices.demo.test
 
+import com.itmo.microservices.demo.test.OrderStatus.OrderCollecting
+import com.itmo.microservices.demo.test.OrderStatus.OrderDiscarded
 import com.itmo.microservices.demo.test.PaymentStatus.FAILED
 import com.itmo.microservices.demo.test.PaymentStatus.SUCCESS
 import com.itmo.microservices.demo.test.TestContinuationType.*
@@ -27,8 +29,8 @@ class TestFlow(
     val testStages = listOf(
             ChoosingUserAccountStage(userManagement),
             OrderCreationStage(serviceApi),
-            OrderCollectingStage(serviceApi), //бросание корзины, финализирование заказа (c возвратом всех зафейленных items). Если какой-то не получилось, то ничего не бронируем
-            OrderFinalizingStage(serviceApi),
+            OrderCollectingStage(serviceApi), //бросание корзины, финализирование заказа (c возвратом всех зафейленных items). Если какой-то не получилось, то ничего не бронируем доставка
+//            OrderFinalizingStage(serviceApi),
             OrderPaymentStage(serviceApi).asRetryable()
     )
 
@@ -174,6 +176,62 @@ class OrderCollectingStage(private val serviceApi: ServiceApi) : TestStage {
 
 }
 
+class OrderAbandonedStage(private val serviceApi: ServiceApi) : TestStage {
+    companion object {
+        val log = LoggerFactory.getLogger(OrderAbandonedStage::class.java)
+    }
+
+    override suspend fun run() = try {
+        val shouldBeAbandoned = Random.nextBoolean()
+        if (shouldBeAbandoned) {
+            val lastBucketTimestamp = serviceApi.getBucketAliveLogRecord(testCtx().orderId!!)
+                    .map { it.timestamp }
+                    .maxByOrNull { it }?: 0
+            delay(120_000) //todo shine2
+
+            ConditionAwaiter.awaitAtMost(30, TimeUnit.SECONDS)
+                    .condition {
+                        val bucketLogRecord = serviceApi.getBucketAliveLogRecord(testCtx().orderId!!)
+                        bucketLogRecord.maxByOrNull { it.timestamp }?.timestamp ?: 0 > lastBucketTimestamp
+                    }
+                    .onFailure {
+                        log.error("The order ${testCtx().orderId} was abandoned, but no records were found")
+                        FAIL
+                    }
+
+            val recentLogRecord = serviceApi.getBucketAliveLogRecord(testCtx().orderId!!)
+                    .maxByOrNull { it.timestamp }
+
+            if (recentLogRecord!!.userInteracted) {
+                val order = serviceApi.getOrder(testCtx().orderId!!)
+                if (order.status != OrderCollecting) {
+                    log.error("User interacted with order ${testCtx().orderId}. " +
+                            "Expected status - ${OrderCollecting::class.simpleName}, but was ${order.status}")
+                    FAIL
+                }
+            } else {
+                ConditionAwaiter.awaitAtMost(15, TimeUnit.SECONDS)
+                        .condition {
+                            val order = serviceApi.getOrder(testCtx().orderId!!)
+                            order.status == OrderDiscarded
+                        }
+                        .onFailure {
+                            val order = serviceApi.getOrder(testCtx().orderId!!)
+                            log.error("User didn't interact with order ${testCtx().orderId}" +
+                                    "Expected status - ${OrderDiscarded::class.simpleName}, but was ${order.status}")
+                            FAIL
+                        }
+            }
+
+        }
+        CONTINUE
+    } catch (th: Throwable) {
+        OrderCollectingStage.log.error("Unexpected in ${this::class.simpleName}", th)
+        ERROR
+    }
+}
+
+
 class OrderFinalizingStage (private val serviceApi: ServiceApi) : TestStage {
     companion object {
         val log = LoggerFactory.getLogger(OrderFinalizingStage::class.java)
@@ -213,7 +271,7 @@ class OrderFinalizingStage (private val serviceApi: ServiceApi) : TestStage {
                 }
                 log.info("Successfully validated all items in BOOKED order ${testCtx().orderId}")
             }
-            OrderStatus.OrderCollecting -> {
+            OrderCollecting -> {
                 if (booking.failedItems.isEmpty()) {
                     log.error("Booking of order ${testCtx().orderId} failed, but booking ${booking.id}" +
                             "doesn't have failed items")

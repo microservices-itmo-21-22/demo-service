@@ -14,6 +14,7 @@ interface ServiceApi {
 
     suspend fun createOrder(userId: UUID): Order
     suspend fun getOrder(id: UUID): Order
+    suspend fun getBucketAliveLogRecord(id: UUID): List<BucketLogRecord>
     suspend fun getDeliverySlots(id: UUID): List<Int>
     suspend fun setDeliveryTime(id: UUID, time: Long)
     suspend fun payOrder(userId: UUID, orderId: UUID): Order
@@ -102,6 +103,12 @@ data class Order(
         val itemsMap: Map<Item, Amount> = emptyMap(),
         val deliveryDuration: Int? = null,
         val paymentHistory: List<PaymentLogRecord> = listOf()
+)
+
+data class BucketLogRecord(
+        val transactionId: UUID = UUID.randomUUID(),
+        val timestamp: Long,
+        val userInteracted: Boolean
 )
 
 class PaymentLogRecord(

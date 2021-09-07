@@ -41,6 +41,10 @@ class ExternalServiceSimulator(
         return orderStorage.get(id)
     }
 
+    override suspend fun getBucketAliveLogRecord(id: UUID): List<BucketLogRecord> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun getDeliverySlots(id: UUID): List<Int> {
         TODO("Not yet implemented")
     }
