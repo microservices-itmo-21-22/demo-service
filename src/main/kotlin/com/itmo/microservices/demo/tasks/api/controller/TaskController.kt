@@ -3,6 +3,7 @@ package com.itmo.microservices.demo.tasks.api.controller
 import com.itmo.microservices.demo.tasks.api.model.TaskModel
 import com.itmo.microservices.demo.tasks.api.service.TaskService
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -49,7 +50,8 @@ class TaskController(private val taskService: TaskService) {
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun addTask(@RequestBody task: TaskModel,
-                @AuthenticationPrincipal author: UserDetails) = taskService.addTask(task, author)
+                @Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
+        taskService.addTask(task, author)
 
     @PostMapping("/{taskId}/assignee/{username}")
     @Operation(
@@ -67,7 +69,7 @@ class TaskController(private val taskService: TaskService) {
     )
     fun assignTask(@PathVariable taskId: UUID,
                    @PathVariable username: String,
-                   @AuthenticationPrincipal requester: UserDetails) =
+                   @Parameter(hidden = true) @AuthenticationPrincipal requester: UserDetails) =
             taskService.assignTask(taskId, username, requester)
 
     @DeleteMapping("/{taskId}")
@@ -84,6 +86,6 @@ class TaskController(private val taskService: TaskService) {
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun deleteTaskById(@PathVariable taskId: UUID,
-                       @AuthenticationPrincipal requester: UserDetails) =
+                       @Parameter(hidden = true) @AuthenticationPrincipal requester: UserDetails) =
             taskService.deleteTaskById(taskId, requester)
 }
