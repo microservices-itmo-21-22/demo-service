@@ -2,20 +2,35 @@ spring:
   application:
     name: demo-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/demo_db
+    url: jdbc:postgresql://postgresql:5432/demo_db
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     database: postgresql
+    hibernate:
+      ddl-auto: update
 
 server:
   error:
     include-exception: false
     include-message: always
-    include-stacktrace: never
+    include-stacktrace: always
 
 security:
   secret: secret12345678
   token-lifetime: 15m
   refresh-token-lifetime: 30d
+
+logstash:
+  url: logstash:4560
+
+management:
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include : "info,health,prometheus,metrics"

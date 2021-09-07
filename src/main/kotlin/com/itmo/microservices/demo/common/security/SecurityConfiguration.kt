@@ -32,6 +32,7 @@ class SecurityConfiguration(
                 .antMatchers(HttpMethod.POST, "/users").permitAll()
                 .antMatchers(HttpMethod.POST, "/authentication").permitAll()
                 .antMatchers(HttpMethod.POST, "/authentication/refresh").hasAuthority("REFRESH")
+                .antMatchers("/actuator/**").permitAll()
                 .antMatchers("/h2-console/**").permitAll()
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
                 .anyRequest().hasAuthority("ACCESS")
