@@ -18,25 +18,27 @@ class NotificationModuleEventListener(private val notificationService: Notificat
 
     private val executor: ExecutorService = Executors.newFixedThreadPool(5)
     @InjectEventLogger
-    private var eventLogger: EventLogger? = null
+    private lateinit var eventLogger: EventLogger
 
     @Subscribe
     @AllowConcurrentEvents
     fun accept(event: UserCreatedEvent) = executor.execute {
         notificationService.processNewUser(event.user)
-        eventLogger?.info(
-            CommonNotableEvents.I_LISTENER_RECEIVED_MESSAGE,
-            event
-        )
+        if (::eventLogger.isInitialized)
+            eventLogger.info(
+                CommonNotableEvents.I_LISTENER_RECEIVED_MESSAGE,
+                event
+            )
     }
 
     @Subscribe
     @AllowConcurrentEvents
     fun accept(event: TaskAssignedEvent) = executor.execute {
         notificationService.processAssignedTask(event.task)
-        eventLogger?.info(
-            CommonNotableEvents.I_LISTENER_RECEIVED_MESSAGE,
-            event
-        )
+        if (::eventLogger.isInitialized)
+            eventLogger.info(
+                CommonNotableEvents.I_LISTENER_RECEIVED_MESSAGE,
+                event
+            )
     }
 }

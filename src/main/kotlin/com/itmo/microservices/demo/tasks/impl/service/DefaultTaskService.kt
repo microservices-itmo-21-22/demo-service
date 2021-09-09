@@ -26,7 +26,7 @@ class DefaultTaskService(private val taskRepository: TaskRepository,
                          ) : TaskService {
 
     @InjectEventLogger
-    private var eventLogger: EventLogger? = null
+    private lateinit var eventLogger: EventLogger
 
     override fun allTasks(): List<TaskModel> = taskRepository.findAll()
             .map { it.toModel() }
@@ -39,10 +39,11 @@ class DefaultTaskService(private val taskRepository: TaskRepository,
         val entity = task.toEntity().also { it.author = author.username }
         taskRepository.save(entity)
         eventBus.post(TaskCreatedEvent(entity.toModel()))
-        eventLogger?.info(
-            TaskServiceNotableEvents.I_TASK_CREATED,
-            entity
-        )
+        if (::eventLogger.isInitialized)
+            eventLogger.info(
+                TaskServiceNotableEvents.I_TASK_CREATED,
+                entity
+            )
     }
 
     override fun assignTask(taskId: UUID, username: String, requester: UserDetails) {
@@ -52,10 +53,11 @@ class DefaultTaskService(private val taskRepository: TaskRepository,
         task.assignee = username
         taskRepository.save(task)
         eventBus.post(TaskAssignedEvent(task.toModel()))
-        eventLogger?.info(
-            TaskServiceNotableEvents.I_TASK_ASSIGNED,
-            task
-        )
+        if (::eventLogger.isInitialized)
+            eventLogger.info(
+                TaskServiceNotableEvents.I_TASK_ASSIGNED,
+                task
+            )
     }
 
     override fun deleteTaskById(taskId: UUID, requester: UserDetails) {
@@ -64,9 +66,10 @@ class DefaultTaskService(private val taskRepository: TaskRepository,
             throw AccessDeniedException("Cannot change task that was not created by you")
         taskRepository.deleteById(taskId)
         eventBus.post(TaskDeletedEvent(task.toModel()))
-        eventLogger?.info(
-            TaskServiceNotableEvents.I_TASK_DELETED,
-            task
-        )
+        if (::eventLogger.isInitialized)
+            eventLogger.info(
+                TaskServiceNotableEvents.I_TASK_DELETED,
+                task
+            )
     }
 }

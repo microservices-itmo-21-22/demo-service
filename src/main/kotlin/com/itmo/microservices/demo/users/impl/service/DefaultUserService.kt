@@ -26,7 +26,7 @@ class DefaultUserService(private val userRepository: UserRepository,
                          ): UserService {
 
     @InjectEventLogger
-    private val eventLogger: EventLogger? = null
+    private lateinit var eventLogger: EventLogger
 
     override fun findUser(username: String): AppUserModel? = userRepository
             .findByIdOrNull(username)?.toModel()
@@ -34,7 +34,8 @@ class DefaultUserService(private val userRepository: UserRepository,
     override fun registerUser(request: RegistrationRequest) {
         val userEntity = userRepository.save(request.toEntity())
         eventBus.post(UserCreatedEvent(userEntity.toModel()))
-        eventLogger?.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.username)
+        if (::eventLogger.isInitialized)
+            eventLogger.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.username)
     }
 
     override fun getAccountData(requester: UserDetails): AppUserModel =
@@ -46,7 +47,7 @@ class DefaultUserService(private val userRepository: UserRepository,
             userRepository.deleteById(user.username)
         }.onSuccess {
             eventBus.post(UserDeletedEvent(user.username))
-            eventLogger?.info(UserServiceNotableEvents.I_USER_DELETED, user.username)
+            eventLogger.info(UserServiceNotableEvents.I_USER_DELETED, user.username)
         }.onFailure {
             throw NotFoundException("User ${user.username} not found", it)
         }
