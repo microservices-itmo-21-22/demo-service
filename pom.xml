@@ -2,9 +2,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.5.3</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
     <groupId>com.itmo.microservices</groupId>
     <artifactId>demo-service</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
     <name>demo-service</name>
     <description>Demo project for microservices course 21-22</description>
 
@@ -13,22 +21,19 @@
         <kotlin.version>1.5.21</kotlin.version>
         <guava.version>30.1.1-jre</guava.version>
         <jjwt.version>0.9.1</jjwt.version>
+        <common-lib.version>0.0.1-SNAPSHOT</common-lib.version>
+             
+        <buildnumber-maven-plugin.version>1.4</buildnumber-maven-plugin.version>
+        <jib-maven-plugin.version>2.8.0</jib-maven-plugin.version>
     </properties>
-
-    <dependencyManagement>
-      <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-dependencies</artifactId>
-            <version>2.5.3</version>
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>
-      </dependencies>
-    </dependencyManagement>
-
          
     <dependencies>
+        <dependency>
+            <groupId>com.itmo.microservices</groupId>
+            <artifactId>common-lib</artifactId>
+            <version>${common-lib.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-jdk8</artifactId>
@@ -49,6 +54,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -86,12 +95,50 @@
         </dependency>
 
         <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>4.9</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
 
+    <scm>
+        <connection>scm:git:https://https://github.com/${github}.git</connection>
+        <developerConnection>scm:git:https://https://github.com/${github}.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://https://github.com/${github}.git</url>
+    </scm>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <url>http://artifactory:8081/artifactory/libs-snapshot-local</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>central</id>
+            <url>https://repo1.maven.org/maven2/</url>
+        </repository>
+        <repository>
+            <id>itmo-central</id>
+            <url>http://77.234.215.138:30031/artifactory/libs-release</url>
+        </repository>
+        <repository>
+            <id>itmo-snapshots</id>
+            <url>http://77.234.215.138:30031/artifactory/libs-snapshot</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+         
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
         <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
@@ -127,7 +174,7 @@
                                 <annotationProcessorPath>
                                     <groupId>org.springframework.boot</groupId>
                                     <artifactId>spring-boot-configuration-processor</artifactId>
-                                    <version>${project.parent.version}</version>
+                                    <version>2.5.3</version>
                                 </annotationProcessorPath>
                             </annotationProcessorPaths>
                         </configuration>
@@ -137,7 +184,7 @@
                     <dependency>
                         <groupId>org.jetbrains.kotlin</groupId>
                         <artifactId>kotlin-maven-allopen</artifactId>
-                        <version>${kotlin.version}</version>
+                        <version>1.5.0</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -148,6 +195,46 @@
                     <source>11</source>
                     <target>11</target>
                 </configuration>
+            </plugin>
+                 
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>${buildnumber-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>${jib-maven-plugin.version}</version>
+                <configuration>
+                    <to>
+                        <image>${env.DOCKER_REPO_HOST_INTERNAL}/${project.artifactId}</image>
+                        <tags>${scmBranch}_${project.version}</tags>
+                    </to>
+                    <allowInsecureRegistries>true</allowInsecureRegistries>
+                    
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>build and push image</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

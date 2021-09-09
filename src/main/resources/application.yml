@@ -19,3 +19,16 @@ security:
   secret: secret12345678
   token-lifetime: 15m
   refresh-token-lifetime: 30d
+
+logstash:
+  url: http://logstash:5000
+
+management:
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include : "info,health,prometheus,metrics"
