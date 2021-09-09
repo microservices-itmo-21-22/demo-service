@@ -14,7 +14,7 @@ link TaskModule to TASK_CREATED--><path d="M259.407,335.122 C238.001,362.038 202
 link TaskModule to TASK_DELETED--><path d="M287.625,335.122 C300.392,361.702 321.388,405.415 331.778,427.045 " fill="none" id="TaskModule-to-TASK_DELETED" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="334.062,431.802,333.772,421.9574,331.8976,427.2947,326.5603,425.4204,334.062,431.802" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[db7968de9e28d85ef5bf7cbe2f037247]
 link TaskModule to TASK_ASSIGNED--><path d="M316.366,335.122 C367.956,364.113 455.815,413.485 489.398,432.357 " fill="none" id="TaskModule-to-TASK_ASSIGNED" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="493.949,434.914,488.0624,427.0179,489.5901,432.4646,484.1434,433.9922,493.949,434.914" style="stroke:#A80036;stroke-width:1.0;"/><!--MD5=[b2da34d1017414b06a13f8246e1c6d48]
 link USER_CREATED to NotificationModule--><path d="M61.3245,239.355 C59.107,271.205 54.3044,387.359 94,470 C107.766,498.659 132.54,524.973 152.615,543.2569 " fill="none" id="USER_CREATED-to-NotificationModule" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="156.563,546.8049,152.5437,537.8135,152.8445,543.4623,147.1956,543.7631,156.563,546.8049" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="133" x="69" y="378.0669">Send greeting e-mail</text><!--MD5=[baca508911cb630c648077ea5f700d33]
-link TASK_ASSIGNED to NotificationModule--><path d="M493.797,445.664 C457.639,460.059 323.42,513.4942 244.001,545.1126 " fill="none" id="TASK_ASSIGNED-to-NotificationModule" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="239.321,546.9757,249.1622,547.3645,243.9667,545.127,246.2042,539.9315,239.321,546.9757" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="70" x="354" y="513.0669">Notify user</text><!--MD5=[ed257d2c4d402bee09fccfea99e912cb]
+link TASK_ASSIGNED to NotificationModule--><path d="M493.797,445.664 C457.639,460.059 323.42,513.4942 244.001,545.1126 " fill="none" id="TASK_ASSIGNED-to-NotificationModule" style="stroke:#A80036;stroke-width:1.0;"/><polygon fill="#A80036" points="239.321,546.9757,249.1622,547.3645,243.9667,545.127,246.2042,539.9315,239.321,546.9757" style="stroke:#A80036;stroke-width:1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacing" textLength="70" x="354" y="513.0669">Notify user</text><!--MD5=[94ccd988407b1e0436aff14490dd701e]
 @startuml
 node UserModule
 node TaskModule
@@ -53,7 +53,7 @@ USER_CREATED - -> NotificationModule: Send greeting e-mail
 TASK_ASSIGNED - -> NotificationModule: Notify user
 @enduml
 
-PlantUML version 1.2021.10beta2(Unknown compile time)
+PlantUML version 1.2021.10(Mon Aug 30 13:43:48 UTC 2021)
 (GPL source distribution)
 Java Runtime: Java(TM) SE Runtime Environment
 JVM: Java HotSpot(TM) 64-Bit Server VM
