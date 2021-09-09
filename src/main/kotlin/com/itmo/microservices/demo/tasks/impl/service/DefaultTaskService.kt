@@ -39,11 +39,10 @@ class DefaultTaskService(private val taskRepository: TaskRepository,
         val entity = task.toEntity().also { it.author = author.username }
         taskRepository.save(entity)
         eventBus.post(TaskCreatedEvent(entity.toModel()))
-        if (::eventLogger.isInitialized)
-            eventLogger.info(
-                TaskServiceNotableEvents.I_TASK_CREATED,
-                entity
-            )
+        eventLogger.info(
+            TaskServiceNotableEvents.I_TASK_CREATED,
+            entity
+        )
     }
 
     override fun assignTask(taskId: UUID, username: String, requester: UserDetails) {
@@ -53,11 +52,10 @@ class DefaultTaskService(private val taskRepository: TaskRepository,
         task.assignee = username
         taskRepository.save(task)
         eventBus.post(TaskAssignedEvent(task.toModel()))
-        if (::eventLogger.isInitialized)
-            eventLogger.info(
-                TaskServiceNotableEvents.I_TASK_ASSIGNED,
-                task
-            )
+        eventLogger.info(
+            TaskServiceNotableEvents.I_TASK_ASSIGNED,
+            task
+        )
     }
 
     override fun deleteTaskById(taskId: UUID, requester: UserDetails) {
@@ -66,10 +64,9 @@ class DefaultTaskService(private val taskRepository: TaskRepository,
             throw AccessDeniedException("Cannot change task that was not created by you")
         taskRepository.deleteById(taskId)
         eventBus.post(TaskDeletedEvent(task.toModel()))
-        if (::eventLogger.isInitialized)
-            eventLogger.info(
-                TaskServiceNotableEvents.I_TASK_DELETED,
-                task
-            )
+        eventLogger.info(
+            TaskServiceNotableEvents.I_TASK_DELETED,
+            task
+        )
     }
 }

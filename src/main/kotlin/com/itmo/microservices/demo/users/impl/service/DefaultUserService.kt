@@ -34,8 +34,7 @@ class DefaultUserService(private val userRepository: UserRepository,
     override fun registerUser(request: RegistrationRequest) {
         val userEntity = userRepository.save(request.toEntity())
         eventBus.post(UserCreatedEvent(userEntity.toModel()))
-        if (::eventLogger.isInitialized)
-            eventLogger.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.username)
+        eventLogger.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.username)
     }
 
     override fun getAccountData(requester: UserDetails): AppUserModel =

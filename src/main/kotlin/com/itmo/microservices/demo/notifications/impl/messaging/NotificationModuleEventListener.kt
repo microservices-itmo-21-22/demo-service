@@ -24,21 +24,19 @@ class NotificationModuleEventListener(private val notificationService: Notificat
     @AllowConcurrentEvents
     fun accept(event: UserCreatedEvent) = executor.execute {
         notificationService.processNewUser(event.user)
-        if (::eventLogger.isInitialized)
-            eventLogger.info(
-                CommonNotableEvents.I_LISTENER_RECEIVED_MESSAGE,
-                event
-            )
+        eventLogger.info(
+            CommonNotableEvents.I_LISTENER_RECEIVED_MESSAGE,
+            event
+        )
     }
 
     @Subscribe
     @AllowConcurrentEvents
     fun accept(event: TaskAssignedEvent) = executor.execute {
         notificationService.processAssignedTask(event.task)
-        if (::eventLogger.isInitialized)
-            eventLogger.info(
-                CommonNotableEvents.I_LISTENER_RECEIVED_MESSAGE,
-                event
-            )
+        eventLogger.info(
+            CommonNotableEvents.I_LISTENER_RECEIVED_MESSAGE,
+            event
+        )
     }
 }
