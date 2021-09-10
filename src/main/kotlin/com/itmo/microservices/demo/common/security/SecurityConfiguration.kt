@@ -34,6 +34,7 @@ class SecurityConfiguration(
                 .antMatchers(HttpMethod.POST, "/authentication/refresh").hasAuthority("REFRESH")
                 .antMatchers("/actuator/**").permitAll()
                 .antMatchers("/h2-console/**").permitAll()
+                .antMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
                 .anyRequest().hasAuthority("ACCESS")
                 .and()

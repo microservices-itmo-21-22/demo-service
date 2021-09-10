@@ -23,6 +23,10 @@
 - **POST /tasks/{id}/assignee/{username}**: Assign task
 - **DELETE /tasks/{id}**: Delete task
 
+### OpenAPI
+* **GET /swagger-ui.html**: Swagger UI
+  * Paste bearer token to Authorize window to have access to secured endpoints
+
 ## Synchronous calls (through interfaces)
 
 `AuthService.authenticate` -> `UserService.getUser(username)`
