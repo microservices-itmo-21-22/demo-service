@@ -83,8 +83,43 @@ class ExternalServiceSimulator(
         return updated
     }
 
+    /**
+     * Статус заказа меняется в зависимости от результата бронирования.
+     * В каждый айтем добавляется информация о бронировании.
+     * Возвращается информация о неудачных айтемах
+     */
     override suspend fun finalizeOrder(orderId: UUID): BookingDto {
-        TODO("Not yet implemented")
+        val bookingId = UUID.randomUUID()
+        orderStorage.getAndUpdate(orderId = orderId) { order ->
+            val itemMap = order.itemsMap
+                    .mapKeysTo(mutableMapOf()) {
+                        val status = if (Random.nextInt(10) == 1) {
+                            BookingStatus.SUCCESS
+                        } else {
+                            BookingStatus.FAILED
+                        }
+                        it.key.copy(bookingLogRecord = it.key.bookingLogRecord
+                                + BookingLogRecord(bookingId = bookingId, status = status))
+                    }
+
+
+            val orderStatus = if (itemMap.keys
+                            .map { item -> item.bookingLogRecord.last { it.bookingId == bookingId }.status }
+                            .all { it == BookingStatus.SUCCESS }) {
+                OrderStatus.OrderBooked
+            } else {
+                OrderStatus.OrderCollecting
+            }
+            order.copy(status = orderStatus,
+                    itemsMap = itemMap)
+        }
+
+        val failedItems = orderStorage.get(orderId).itemsMap.keys
+                .filter { item -> item.bookingLogRecord.last { it.bookingId == bookingId }.status == BookingStatus.FAILED }
+                .map { it.id }
+                .toList()
+
+        return BookingDto(id = bookingId, failedItems = failedItems)
     }
 
     override suspend fun getItems(): List<Item> {

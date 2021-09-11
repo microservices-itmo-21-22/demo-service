@@ -30,7 +30,7 @@ class TestFlow(
             ChoosingUserAccountStage(userManagement),
             OrderCreationStage(serviceApi),
             OrderCollectingStage(serviceApi), //бросание корзины, финализирование заказа (c возвратом всех зафейленных items). Если какой-то не получилось, то ничего не бронируем доставка
-//            OrderFinalizingStage(serviceApi),
+            OrderFinalizingStage(serviceApi),
             OrderPaymentStage(serviceApi).asRetryable()
     )
 
@@ -241,11 +241,11 @@ class OrderFinalizingStage (private val serviceApi: ServiceApi) : TestStage {
         log.info("Staring booking items stage for order ${testCtx().orderId}")
         val originalOrder = serviceApi.getOrder(testCtx().orderId!!)
 
-        val booking = serviceApi.finalizeOrder(testCtx().orderId!!) //todo shine2: add return type
+        val booking = serviceApi.finalizeOrder(testCtx().orderId!!)
 
         val finalOrder = serviceApi.getOrder(testCtx().orderId!!)
 
-        for (item in originalOrder.itemsMap.keys) {
+        for (item in finalOrder.itemsMap.keys) {
             val bookingRecord = item.bookingLogRecord.lastOrNull { it.bookingId == booking.id }
             if (bookingRecord == null) {
                 log.error("Cannot find booking log record: booking id = ${booking.id}; " +
@@ -261,11 +261,11 @@ class OrderFinalizingStage (private val serviceApi: ServiceApi) : TestStage {
                     FAIL
                 }
 
-                for (item in originalOrder.itemsMap.keys) {
+                for (item in finalOrder.itemsMap.keys) {
                     val bookingRecord = item.bookingLogRecord.last { it.bookingId == booking.id }
                     if (bookingRecord.status != BookingStatus.SUCCESS) {
-                        log.error("Cannot find booking log record: booking id = ${booking.id}; " +
-                                "itemId = ${item.id}; orderId = ${testCtx().orderId}")
+                        log.error("Booking ${booking.id} of order ${testCtx().orderId} is marked as successful, " +
+                                "but item ${item.id} is marked as ${bookingRecord.status}")
                         FAIL
                     }
                 }
@@ -278,13 +278,22 @@ class OrderFinalizingStage (private val serviceApi: ServiceApi) : TestStage {
                     FAIL
                 }
 
-                val failed = originalOrder.itemsMap.keys
-                        .map { item -> item.bookingLogRecord.last { it.bookingId == booking.id } }
-                        .filter { it.status != BookingStatus.SUCCESS }
-                        .toSet() //todo elina check
+                val failed = finalOrder.itemsMap.keys
+                        .filter { item -> item.bookingLogRecord.last { it.bookingId == booking.id }.status != BookingStatus.SUCCESS }
+                        .map { it.id }
+                        .toSet()
 
+                if(!failed.containsAll(booking.failedItems) ||  !booking.failedItems.containsAll(failed)) {
+                    log.error("List of failed items doesn't match failed booking info of items ")
+                    FAIL
+                }
 
                 log.info("Successfully validated all items in BOOKED order ${testCtx().orderId}")
+            }
+            else -> {
+                log.error("Illegal transition for order ${finalOrder.id} from ${originalOrder.status} " +
+                        "to ${finalOrder.status}")
+                FAIL
             }
         }
 

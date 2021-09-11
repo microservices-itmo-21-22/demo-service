@@ -60,7 +60,8 @@ data class Item(
 
 class BookingLogRecord(
         val bookingId: UUID,
-        val amount: Amount,
+//        val timestamp: Long,
+//        val amount: Amount,
         val status: BookingStatus
 )
 
