@@ -1,5 +1,14 @@
 # Demo service
 
+## Launch notes
+* Configure settings.xml
+  * First option: settings in local maven repository (`~/.m2/settings.xml`)
+  * Second option: settings in project root
+  * Settings must contain dummy mirror to override default blocking mirror that blocks http
+
+* For local app launch, use **dev** profile. It uses in-memory database
+* For production deploy, run app with no profile
+
 ## API
 
 ### Authentication module
@@ -206,4 +215,3 @@ to define classes that can be used in other modules.
     * config
     * entity
     * repository
-    
