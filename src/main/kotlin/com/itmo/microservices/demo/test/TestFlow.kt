@@ -7,7 +7,9 @@ import com.itmo.microservices.demo.test.PaymentStatus.SUCCESS
 import com.itmo.microservices.demo.test.TestContinuationType.*
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
+import java.lang.IllegalStateException
 import java.util.*
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
@@ -22,11 +24,11 @@ class TestFlow(
         val log = LoggerFactory.getLogger(TestFlow::class.java)
     }
 
-    val executor = Executors.newFixedThreadPool(4)
+    val executor: ExecutorService = Executors.newFixedThreadPool(4)
 
-    val coroutineScope = CoroutineScope(executor.asCoroutineDispatcher())
+    private val coroutineScope = CoroutineScope(executor.asCoroutineDispatcher())
 
-    val testStages = listOf(
+    private val testStages = listOf(
         ChoosingUserAccountStage(userManagement).asErrorFree(),
         OrderCreationStage(serviceApi).asErrorFree(),
         OrderCollectingStage(serviceApi).asErrorFree(), //бросание корзины, финализирование заказа (c возвратом всех зафейленных items). Если какой-то не получилось, то ничего не бронируем доставка
@@ -108,6 +110,8 @@ interface TestStage {
     class ExceptionFreeTestStage(override val wrapped: TestStage) : TestStage, DecoratingStage {
         override suspend fun run() = try {
             wrapped.run()
+        } catch (failedException: TestStageFailedException) {
+            FAIL
         } catch (th: Throwable) {
             var decoratedStage = wrapped
             while (decoratedStage is DecoratingStage) {
@@ -117,6 +121,8 @@ interface TestStage {
             ERROR
         }
     }
+
+    class TestStageFailedException(message: String): IllegalStateException(message)
 }
 
 fun TestStage.asRetryable() = TestStage.RetryableTestStage(this)
@@ -134,7 +140,6 @@ class ChoosingUserAccountStage(private val userManagement: UserManagement) : Tes
         log.info("User for test is chosen $chosenUserId")
         return CONTINUE
     }
-
 }
 
 class OrderCreationStage(private val serviceApi: ServiceApi) : TestStage {
@@ -204,8 +209,7 @@ class OrderAbandonedStage(private val serviceApi: ServiceApi) : TestStage {
                 }
                 .onFailure {
                     log.error("The order ${testCtx().orderId} was abandoned, but no records were found")
-//                    return FAIL
-                    throw IllegalArgumentException("Exception instead of silently fail")
+                    throw TestStage.TestStageFailedException("Exception instead of silently fail")
                 }.startWaiting()
 
             val recentLogRecord = serviceApi.getBucketAliveLogRecord(testCtx().orderId!!)
@@ -232,8 +236,7 @@ class OrderAbandonedStage(private val serviceApi: ServiceApi) : TestStage {
                             "User didn't interact with order ${testCtx().orderId}" +
                                     "Expected status - ${OrderDiscarded::class.simpleName}, but was ${order.status}"
                         )
-//                        return FAIL
-                        throw IllegalArgumentException("Exception instead of silently fail")
+                        throw TestStage.TestStageFailedException("Exception instead of silently fail")
                     }
             }
 
@@ -348,8 +351,7 @@ class OrderPaymentStage(
                     }
                     .onFailure {
                         log.error("Order ${order.id} is paid but there is not withdrawal operation found for user: ${testCtx().userId}")
-//                        return FAIL
-                        throw IllegalArgumentException("Exception instead of silently fail")
+                        throw TestStage.TestStageFailedException("Exception instead of silently fail")
                     }.startWaiting()
 
                 paymentDetails.finishedAt = System.currentTimeMillis()
