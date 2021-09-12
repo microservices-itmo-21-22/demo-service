@@ -9,9 +9,9 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 
 class ExternalServiceSimulator(
-        private val orderStorage: OrderStorage,
-        private val userStorage: UserStorage,
-        private val itemStorage: ItemStorage
+    private val orderStorage: OrderStorage,
+    private val userStorage: UserStorage,
+    private val itemStorage: ItemStorage
 ) : ServiceApi {
     companion object {
         val log = LoggerFactory.getLogger(ExternalServiceSimulator::class.java)
@@ -59,9 +59,9 @@ class ExternalServiceSimulator(
         val updated = orderStorage.getAndUpdate(orderId = orderId) { order ->
             val paymentStatus = if (Random.nextBoolean()) {
                 PaymentLogRecord(
-                        System.currentTimeMillis(),
-                        PaymentStatus.FAILED,
-                        100
+                    System.currentTimeMillis(),
+                    PaymentStatus.FAILED,
+                    100
                 ) // todo sukhoa Elina change hardcoded stuff
             } else {
                 financialLog[userId]!!.add(FinancialLogRecord(FinancialOperationType.WITHDRAW, 100, orderId))
@@ -72,11 +72,11 @@ class ExternalServiceSimulator(
             }
 
             order.copy(
-                    status = if (paymentStatus.status == PaymentStatus.SUCCESS)
-                        OrderStatus.OrderPayed(paymentTime = paymentStatus.timestamp)
-                    else
-                        order.status,
-                    paymentHistory = order.paymentHistory + listOf(paymentStatus)
+                status = if (paymentStatus.status == PaymentStatus.SUCCESS)
+                    OrderStatus.OrderPayed(paymentTime = paymentStatus.timestamp)
+                else
+                    order.status,
+                paymentHistory = order.paymentHistory + listOf(paymentStatus)
             )
         }
 
@@ -85,41 +85,63 @@ class ExternalServiceSimulator(
 
     /**
      * Статус заказа меняется в зависимости от результата бронирования.
-     * В каждый айтем добавляется информация о бронировании.
      * Возвращается информация о неудачных айтемах
      */
     override suspend fun finalizeOrder(orderId: UUID): BookingDto {
-        val bookingId = UUID.randomUUID()
-        orderStorage.getAndUpdate(orderId = orderId) { order ->
-            val itemMap = order.itemsMap
-                    .mapKeysTo(mutableMapOf()) {
-                        val status = if (Random.nextInt(10) == 1) {
-                            BookingStatus.SUCCESS
-                        } else {
-                            BookingStatus.FAILED
-                        }
-                        it.key.copy(bookingLogRecord = it.key.bookingLogRecord
-                                + BookingLogRecord(bookingId = bookingId, status = status))
-                    }
-
-
-            val orderStatus = if (itemMap.keys
-                            .map { item -> item.bookingLogRecord.last { it.bookingId == bookingId }.status }
-                            .all { it == BookingStatus.SUCCESS }) {
-                OrderStatus.OrderBooked
-            } else {
-                OrderStatus.OrderCollecting
+        return warehouseServiceBookItems(orderStorage.get(orderId).itemsMap).also { bookingResult ->
+            orderStorage.getAndUpdate(orderId) { existing ->
+                val newOrderStatus = if (bookingResult.failedItems.isEmpty()) {
+                    OrderStatus.OrderBooked
+                } else {
+                    OrderStatus.OrderCollecting
+                }
+                existing.copy(status = newOrderStatus)
             }
-            order.copy(status = orderStatus,
-                    itemsMap = itemMap)
+        }
+    }
+
+    private suspend fun warehouseServiceBookItems(items: Map<Item, Amount>): BookingDto {
+        val bookingId = UUID.randomUUID()
+
+        val successfullyBooked = mutableSetOf<UUID>()
+        val failedToBook = mutableSetOf<UUID>()
+
+        for ((item, amount) in items) {
+            itemStorage.getAndUpdate(itemId = item.id) { existingItem ->
+                val bookingStatus =
+                    if (existingItem.amount - amount > 0) BookingStatus.SUCCESS else BookingStatus.FAILED
+
+                when (bookingStatus) {
+                    BookingStatus.SUCCESS -> {
+                        itemStorage.bookingRecords.add(BookingLogRecord(bookingId, item.id, bookingStatus, amount))
+                        successfullyBooked.add(item.id)
+                        existingItem.copy(amount = existingItem.amount - amount)
+                    }
+                    BookingStatus.FAILED -> {
+                        itemStorage.bookingRecords.add(BookingLogRecord(bookingId, item.id, bookingStatus, amount))
+                        failedToBook.add(item.id)
+                        existingItem
+                    }
+                }
+            }
         }
 
-        val failedItems = orderStorage.get(orderId).itemsMap.keys
-                .filter { item -> item.bookingLogRecord.last { it.bookingId == bookingId }.status == BookingStatus.FAILED }
-                .map { it.id }
-                .toList()
+        // rollback in case booking failed
+        if (failedToBook.isNotEmpty()) {
+            items
+                .filter { it.key.id in successfullyBooked }
+                .forEach { (item, refundAmount) ->
+                    itemStorage.getAndUpdate(item.id) { existing ->
+                        existing.copy(amount = existing.amount + refundAmount)
+                    }
+                }
 
-        return BookingDto(id = bookingId, failedItems = failedItems)
+        }
+
+        return if (failedToBook.isNotEmpty())
+            BookingDto(bookingId, failedItems = failedToBook.toSet())
+        else
+            BookingDto(bookingId)
     }
 
     override suspend fun getItems(): List<Item> {
@@ -130,11 +152,15 @@ class ExternalServiceSimulator(
         orderStorage.getAndUpdate(orderId = orderId) { order ->
             val item = itemStorage.get(itemId)
             order.copy(
-                    itemsMap = order.itemsMap.filterKeys { it.id != itemId }
-                            + (item.copy(amount = amount) to amount)
+                itemsMap = order.itemsMap.filterKeys { it.id != itemId }
+                        + (item.copy(amount = amount) to amount)
             )
         }
         return true
+    }
+
+    override suspend fun getBookingHistory(bookingId: UUID): List<BookingLogRecord> {
+        return itemStorage.getBookingRecordsById(bookingId)
     }
 }
 
@@ -164,14 +190,20 @@ class OrderStorage {
 
 class ItemStorage {
     val items: ConcurrentHashMap<UUID, Pair<Item, Mutex>> = listOf(
-            Item(title = "Socks", amount = Int.MAX_VALUE),
-            Item(title = "Book", amount = Int.MAX_VALUE),
-            Item(title = "Plate", amount = Int.MAX_VALUE),
-            Item(title = "Table", amount = Int.MAX_VALUE),
-            Item(title = "Chair", amount = Int.MAX_VALUE),
-            Item(title = "Watch", amount = Int.MAX_VALUE),
-            Item(title = "Bed", amount = Int.MAX_VALUE)
+        Item(title = "Socks", amount = 1),
+        Item(title = "Book", amount = Int.MAX_VALUE),
+        Item(title = "Plate", amount = Int.MAX_VALUE),
+        Item(title = "Table", amount = Int.MAX_VALUE),
+        Item(title = "Chair", amount = Int.MAX_VALUE),
+        Item(title = "Watch", amount = Int.MAX_VALUE),
+        Item(title = "Bed", amount = Int.MAX_VALUE)
     ).map { it.id to (it to Mutex()) }.toMap(ConcurrentHashMap<UUID, Pair<Item, Mutex>>())
+
+    val bookingRecords: MutableList<BookingLogRecord> = mutableListOf()
+
+    suspend fun getBookingRecordsById(bookingId: UUID): List<BookingLogRecord> {
+        return bookingRecords.filter { it.bookingId == bookingId }
+    }
 
     suspend fun create(item: Item): Item {
         val existing = items.putIfAbsent(item.id, item to Mutex())

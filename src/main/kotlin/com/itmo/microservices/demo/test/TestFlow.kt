@@ -15,8 +15,8 @@ import kotlin.coroutines.coroutineContext
 import kotlin.random.Random
 
 class TestFlow(
-        private val userManagement: UserManagement,
-        private val serviceApi: ServiceApi
+    private val userManagement: UserManagement,
+    private val serviceApi: ServiceApi
 ) {
     companion object {
         val log = LoggerFactory.getLogger(TestFlow::class.java)
@@ -27,11 +27,11 @@ class TestFlow(
     val coroutineScope = CoroutineScope(executor.asCoroutineDispatcher())
 
     val testStages = listOf(
-            ChoosingUserAccountStage(userManagement),
-            OrderCreationStage(serviceApi),
-            OrderCollectingStage(serviceApi), //бросание корзины, финализирование заказа (c возвратом всех зафейленных items). Если какой-то не получилось, то ничего не бронируем доставка
-            OrderFinalizingStage(serviceApi),
-            OrderPaymentStage(serviceApi).asRetryable()
+        ChoosingUserAccountStage(userManagement).asErrorFree(),
+        OrderCreationStage(serviceApi).asErrorFree(),
+        OrderCollectingStage(serviceApi).asErrorFree(), //бросание корзины, финализирование заказа (c возвратом всех зафейленных items). Если какой-то не получилось, то ничего не бронируем доставка
+        OrderFinalizingStage(serviceApi).asErrorFree(),
+        OrderPaymentStage(serviceApi).asRetryable().asErrorFree()
     )
 
     fun startTestingForService(params: TestParameters) = coroutineScope.launch {
@@ -62,29 +62,30 @@ class TestFlow(
 object TestCtxKey : CoroutineContext.Key<TestContext>
 
 data class TestContext(
-        val testId: UUID = UUID.randomUUID(),
-        val serviceName: String,
-        var userId: UUID? = null,
-        var orderId: UUID? = null,
-        var paymentDetails: PaymentDetails = PaymentDetails()
+    val testId: UUID = UUID.randomUUID(),
+    val serviceName: String,
+    var userId: UUID? = null,
+    var orderId: UUID? = null,
+    var paymentDetails: PaymentDetails = PaymentDetails()
 ) : CoroutineContext.Element {
     override val key: CoroutineContext.Key<TestContext>
         get() = TestCtxKey
 }
 
 data class PaymentDetails(
-        var startedAt: Long? = null,
-        var failedAt: Long? = null,
-        var finishedAt: Long? = null,
-        var attempt: Int = 0,
-        var amount: Amount? = null,
+    var startedAt: Long? = null,
+    var failedAt: Long? = null,
+    var finishedAt: Long? = null,
+    var attempt: Int = 0,
+    var amount: Amount? = null,
 )
 
 enum class TestContinuationType {
     CONTINUE,
     FAIL,
     ERROR,
-    RETRY
+    RETRY,
+    STOP
 }
 
 interface TestStage {
@@ -104,49 +105,57 @@ interface TestStage {
         }
     }
 
+    class ExceptionFreeTestStage(override val wrapped: TestStage) : TestStage, DecoratingStage {
+        override suspend fun run() = try {
+            wrapped.run()
+        } catch (th: Throwable) {
+            var decoratedStage = wrapped
+            while (decoratedStage is DecoratingStage) {
+                decoratedStage = decoratedStage.wrapped
+            }
+            ChoosingUserAccountStage.log.error("Unexpected in ${wrapped::class.simpleName}", th)
+            ERROR
+        }
+    }
 }
 
 fun TestStage.asRetryable() = TestStage.RetryableTestStage(this)
 
+fun TestStage.asErrorFree() = TestStage.ExceptionFreeTestStage(this)
+
 class ChoosingUserAccountStage(private val userManagement: UserManagement) : TestStage {
     companion object {
-        val log = LoggerFactory.getLogger(ChoosingUserAccountStage::class.java)
+        val log = CoroutineLoggingFactory.getLogger(ChoosingUserAccountStage::class.java)
     }
 
-    override suspend fun run() = try {
+    override suspend fun run(): TestContinuationType {
         val chosenUserId = userManagement.getRandomUserId(testCtx().serviceName)
         testCtx().userId = chosenUserId
         log.info("User for test is chosen $chosenUserId")
-        CONTINUE
-    } catch (th: Throwable) {
-        log.error("Unexpected in ${this::class.simpleName}", th)
-        ERROR
+        return CONTINUE
     }
 
 }
 
 class OrderCreationStage(private val serviceApi: ServiceApi) : TestStage {
     companion object {
-        val log = LoggerFactory.getLogger(OrderCreationStage::class.java)
+        val log = CoroutineLoggingFactory.getLogger(OrderCreationStage::class.java)
     }
 
-    override suspend fun run() = try {
+    override suspend fun run(): TestContinuationType {
         val order = serviceApi.createOrder(testCtx().userId!!)
         log.info("Order created: ${order.id}")
         testCtx().orderId = order.id
-        CONTINUE
-    } catch (th: Throwable) {
-        log.error("Unexpected in ${this::class.simpleName}", th)
-        ERROR
+        return CONTINUE
     }
 }
 
 class OrderCollectingStage(private val serviceApi: ServiceApi) : TestStage {
     companion object {
-        val log = LoggerFactory.getLogger(OrderCollectingStage::class.java)
+        val log = CoroutineLoggingFactory.getLogger(OrderCollectingStage::class.java)
     }
 
-    override suspend fun run() = try {
+    override suspend fun run(): TestContinuationType {
         log.info("Adding items to order ${testCtx().orderId}")
         val itemIds = mutableSetOf<UUID>()
         repeat(Random.nextInt(50)) {
@@ -158,9 +167,11 @@ class OrderCollectingStage(private val serviceApi: ServiceApi) : TestStage {
             val expectedItem = itemToAdd.copy(amount = amount)
             val resultAmount = serviceApi.getOrder(testCtx().orderId!!).itemsMap[expectedItem]
             if (resultAmount == null || resultAmount != amount) {
-                log.error("Item was not added to the order ${testCtx().orderId}. " +
-                        "Expected amount: $amount. Found: $resultAmount")
-                FAIL
+                log.error(
+                    "Item was not added to the order ${testCtx().orderId}. " +
+                            "Expected amount: $amount. Found: $resultAmount"
+                )
+                return FAIL
             }
         }
         val finalNumOfItems = serviceApi.getOrder(testCtx().orderId!!).itemsMap.size
@@ -168,151 +179,153 @@ class OrderCollectingStage(private val serviceApi: ServiceApi) : TestStage {
             log.error("Added number of items ($finalNumOfItems) doesn't match expected (${itemIds.size})")
         }
         log.info("Successfully added ${itemIds.size} items to order ${testCtx().orderId}")
-        CONTINUE
-    } catch (th: Throwable) {
-        log.error("Unexpected in ${this::class.simpleName}", th)
-        ERROR
+        return CONTINUE
     }
 
 }
 
 class OrderAbandonedStage(private val serviceApi: ServiceApi) : TestStage {
     companion object {
-        val log = LoggerFactory.getLogger(OrderAbandonedStage::class.java)
+        val log = CoroutineLoggingFactory.getLogger(OrderAbandonedStage::class.java)
     }
 
-    override suspend fun run() = try {
+    override suspend fun run(): TestContinuationType {
         val shouldBeAbandoned = Random.nextBoolean()
         if (shouldBeAbandoned) {
             val lastBucketTimestamp = serviceApi.getBucketAliveLogRecord(testCtx().orderId!!)
-                    .map { it.timestamp }
-                    .maxByOrNull { it }?: 0
+                .map { it.timestamp }
+                .maxByOrNull { it } ?: 0
             delay(120_000) //todo shine2
 
             ConditionAwaiter.awaitAtMost(30, TimeUnit.SECONDS)
-                    .condition {
-                        val bucketLogRecord = serviceApi.getBucketAliveLogRecord(testCtx().orderId!!)
-                        bucketLogRecord.maxByOrNull { it.timestamp }?.timestamp ?: 0 > lastBucketTimestamp
-                    }
-                    .onFailure {
-                        log.error("The order ${testCtx().orderId} was abandoned, but no records were found")
-                        FAIL
-                    }
+                .condition {
+                    val bucketLogRecord = serviceApi.getBucketAliveLogRecord(testCtx().orderId!!)
+                    bucketLogRecord.maxByOrNull { it.timestamp }?.timestamp ?: 0 > lastBucketTimestamp
+                }
+                .onFailure {
+                    log.error("The order ${testCtx().orderId} was abandoned, but no records were found")
+//                    return FAIL
+                    throw IllegalArgumentException("Exception instead of silently fail")
+                }.startWaiting()
 
             val recentLogRecord = serviceApi.getBucketAliveLogRecord(testCtx().orderId!!)
-                    .maxByOrNull { it.timestamp }
+                .maxByOrNull { it.timestamp }
 
             if (recentLogRecord!!.userInteracted) {
                 val order = serviceApi.getOrder(testCtx().orderId!!)
                 if (order.status != OrderCollecting) {
-                    log.error("User interacted with order ${testCtx().orderId}. " +
-                            "Expected status - ${OrderCollecting::class.simpleName}, but was ${order.status}")
-                    FAIL
+                    log.error(
+                        "User interacted with order ${testCtx().orderId}. " +
+                                "Expected status - ${OrderCollecting::class.simpleName}, but was ${order.status}"
+                    )
+                    return FAIL
                 }
             } else {
                 ConditionAwaiter.awaitAtMost(15, TimeUnit.SECONDS)
-                        .condition {
-                            val order = serviceApi.getOrder(testCtx().orderId!!)
-                            order.status == OrderDiscarded
-                        }
-                        .onFailure {
-                            val order = serviceApi.getOrder(testCtx().orderId!!)
-                            log.error("User didn't interact with order ${testCtx().orderId}" +
-                                    "Expected status - ${OrderDiscarded::class.simpleName}, but was ${order.status}")
-                            FAIL
-                        }
+                    .condition {
+                        val order = serviceApi.getOrder(testCtx().orderId!!)
+                        order.status == OrderDiscarded
+                    }
+                    .onFailure {
+                        val order = serviceApi.getOrder(testCtx().orderId!!)
+                        log.error(
+                            "User didn't interact with order ${testCtx().orderId}" +
+                                    "Expected status - ${OrderDiscarded::class.simpleName}, but was ${order.status}"
+                        )
+//                        return FAIL
+                        throw IllegalArgumentException("Exception instead of silently fail")
+                    }
             }
 
         }
-        CONTINUE
-    } catch (th: Throwable) {
-        OrderCollectingStage.log.error("Unexpected in ${this::class.simpleName}", th)
-        ERROR
+        return CONTINUE
     }
 }
 
 
-class OrderFinalizingStage (private val serviceApi: ServiceApi) : TestStage {
+class OrderFinalizingStage(private val serviceApi: ServiceApi) : TestStage {
     companion object {
-        val log = LoggerFactory.getLogger(OrderFinalizingStage::class.java)
+        val log = CoroutineLoggingFactory.getLogger(OrderFinalizingStage::class.java)
     }
 
-    override suspend fun run() = try {
-        log.info("Staring booking items stage for order ${testCtx().orderId}")
-        val originalOrder = serviceApi.getOrder(testCtx().orderId!!)
+    override suspend fun run(): TestContinuationType {
+        log.info("Starting booking items stage for order ${testCtx().orderId}")
+        val orderStateBeforeFinalizing = serviceApi.getOrder(testCtx().orderId!!)
 
-        val booking = serviceApi.finalizeOrder(testCtx().orderId!!)
+        val bookingResult = serviceApi.finalizeOrder(testCtx().orderId!!)
 
-        val finalOrder = serviceApi.getOrder(testCtx().orderId!!)
+        val orderStateAfterBooking = serviceApi.getOrder(testCtx().orderId!!)
 
-        for (item in finalOrder.itemsMap.keys) {
-            val bookingRecord = item.bookingLogRecord.lastOrNull { it.bookingId == booking.id }
-            if (bookingRecord == null) {
-                log.error("Cannot find booking log record: booking id = ${booking.id}; " +
-                        "itemId = ${item.id}; orderId = ${testCtx().orderId}")
-                FAIL
+        val bookingRecords = serviceApi.getBookingHistory(bookingResult.id)
+        for (item in orderStateAfterBooking.itemsMap.keys) {
+            if (bookingRecords.none { it.itemId == item.id }) {
+                log.error("Cannot find booking log record: booking id = ${bookingResult.id}; itemId = ${item.id}; orderId = ${testCtx().orderId}")
+                return FAIL
             }
         }
 
-        when(finalOrder.status) { //TODO Elina рассмотреть результат discard
+        when (orderStateAfterBooking.status) { //TODO Elina рассмотреть результат discard
             OrderStatus.OrderBooked -> {
-                if (booking.failedItems.isNotEmpty()) {
+                if (bookingResult.failedItems.isNotEmpty()) {
                     log.error("Order ${testCtx().orderId} is booked, but there are failed items")
-                    FAIL
+                    return FAIL
                 }
 
-                for (item in finalOrder.itemsMap.keys) {
-                    val bookingRecord = item.bookingLogRecord.last { it.bookingId == booking.id }
-                    if (bookingRecord.status != BookingStatus.SUCCESS) {
-                        log.error("Booking ${booking.id} of order ${testCtx().orderId} is marked as successful, " +
-                                "but item ${item.id} is marked as ${bookingRecord.status}")
-                        FAIL
+                for (item in orderStateAfterBooking.itemsMap.keys) {
+                    val itemRecord = bookingRecords.firstOrNull { it.itemId == item.id }
+                    if (itemRecord == null || itemRecord.status != BookingStatus.SUCCESS) {
+                        log.error(
+                            "Booking ${bookingResult.id} of order ${testCtx().orderId} is marked as successful, " +
+                                    "but item ${item.id} is marked as ${itemRecord?.status}"
+                        )
+                        return FAIL
                     }
                 }
                 log.info("Successfully validated all items in BOOKED order ${testCtx().orderId}")
             }
             OrderCollecting -> {
-                if (booking.failedItems.isEmpty()) {
-                    log.error("Booking of order ${testCtx().orderId} failed, but booking ${booking.id}" +
-                            "doesn't have failed items")
-                    FAIL
+                if (bookingResult.failedItems.isEmpty()) {
+                    log.error("Booking of order ${testCtx().orderId} failed, but booking ${bookingResult.id} doesn't have failed items")
+                    return FAIL
                 }
 
-                val failed = finalOrder.itemsMap.keys
-                        .filter { item -> item.bookingLogRecord.last { it.bookingId == booking.id }.status != BookingStatus.SUCCESS }
-                        .map { it.id }
-                        .toSet()
+                val failed = bookingRecords
+                    .filter { it.status != BookingStatus.SUCCESS }
+                    .map { it.itemId }
+                    .toSet()
 
-                if(!failed.containsAll(booking.failedItems) ||  !booking.failedItems.containsAll(failed)) {
-                    log.error("List of failed items doesn't match failed booking info of items ")
-                    FAIL
+                if (failed != bookingResult.failedItems) {
+                    log.error("List of failed items ${bookingResult.failedItems} doesn't match failed booking info of items $failed")
+                    return FAIL
                 }
 
-                log.info("Successfully validated all items in BOOKED order ${testCtx().orderId}")
+                val failedList = orderStateAfterBooking.itemsMap.filter { it.key.id in failed }
+                    .map { Triple(it.key.id, it.key.title, it.value) }
+
+                log.info("Successfully validated all items in NOT BOOKED order ${testCtx().orderId}, failed items: $failedList")
+                return STOP
             }
             else -> {
-                log.error("Illegal transition for order ${finalOrder.id} from ${originalOrder.status} " +
-                        "to ${finalOrder.status}")
-                FAIL
+                log.error(
+                    "Illegal transition for order ${orderStateAfterBooking.id} from ${orderStateBeforeFinalizing.status} " +
+                            "to ${orderStateAfterBooking.status}"
+                )
+                return FAIL
             }
         }
 
-        CONTINUE
-    } catch (th: Throwable) {
-        log.error("Unexpected in ${this::class.simpleName}", th)
-        ERROR
+        return CONTINUE
     }
-
 }
 
 class OrderPaymentStage(
-        private val serviceApi: ServiceApi
+    private val serviceApi: ServiceApi
 ) : TestStage {
     companion object {
-        val log = LoggerFactory.getLogger(OrderPaymentStage::class.java)
+        val log = CoroutineLoggingFactory.getLogger(OrderPaymentStage::class.java)
     }
 
-    override suspend fun run() = try {
+    override suspend fun run(): TestContinuationType {
         val order = serviceApi.getOrder(testCtx().orderId!!)
 
         val paymentDetails = testCtx().paymentDetails
@@ -329,46 +342,43 @@ class OrderPaymentStage(
                 // todo elina check order is paid and user is charged
 
                 ConditionAwaiter.awaitAtMost(5, TimeUnit.SECONDS)
-                        .condition {
-                            val financialRecords = serviceApi.getFinancialHistory(testCtx().userId!!, testCtx().orderId!!)
-                            financialRecords.maxByOrNull { it.timestamp }?.type == FinancialOperationType.WITHDRAW
-                        }
-                        .onFailure {
-                            log.error("Order ${order.id} is paid but there is not withdrawal operation found for user: ${testCtx().userId}")
-                            FAIL
-                        }.startWaiting()
+                    .condition {
+                        val financialRecords = serviceApi.getFinancialHistory(testCtx().userId!!, testCtx().orderId!!)
+                        financialRecords.maxByOrNull { it.timestamp }?.type == FinancialOperationType.WITHDRAW
+                    }
+                    .onFailure {
+                        log.error("Order ${order.id} is paid but there is not withdrawal operation found for user: ${testCtx().userId}")
+//                        return FAIL
+                        throw IllegalArgumentException("Exception instead of silently fail")
+                    }.startWaiting()
 
                 paymentDetails.finishedAt = System.currentTimeMillis()
                 log.info("Payment succeeded for order ${order.id}, attempt ${paymentDetails.attempt}")
-                CONTINUE
+                return CONTINUE
             }
             FAILED -> { // todo sukhoa check order status hasn't changed and user ne charged
                 if (paymentDetails.attempt < 5) {
                     log.info("Payment failed for order ${order.id}, go to retry. Attempt ${paymentDetails.attempt}")
-                    RETRY
+                    return RETRY
                 } else {
                     log.info("Payment failed for order ${order.id}, last attempt. Attempt ${paymentDetails.attempt}")
                     paymentDetails.failedAt = System.currentTimeMillis()
-                    FAIL
+                    return FAIL
                 }
             } // todo sukhoa not enough money
             else -> {
                 log.error("Illegal transition for order ${order.id} from ${order.status} to $status")
-                FAIL
+                return FAIL
             }
         }
-    } catch (th: Throwable) {
-        log.error("Unexpected in ${this::class.simpleName}", th)
-        ERROR // todo sukhoa think of retry here
     }
-
 }
 
 
 data class TestParameters(
-        val serviceName: String,
-        val numberOfUsers: Int,
-        val parallelProcessesNumber: Int
+    val serviceName: String,
+    val numberOfUsers: Int,
+    val parallelProcessesNumber: Int
 )
 
 fun main() {
@@ -380,7 +390,7 @@ fun main() {
     runBlocking {
         val job = testApi.startTestingForService(TestParameters("test-service", 1, 1))
 
-        delay(30_000)
+        delay(15_000)
         job.cancel()
         testApi.executor.shutdownNow()
     }

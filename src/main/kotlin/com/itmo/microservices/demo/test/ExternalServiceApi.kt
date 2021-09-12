@@ -20,6 +20,7 @@ interface ServiceApi {
     suspend fun payOrder(userId: UUID, orderId: UUID): Order
     suspend fun finalizeOrder(orderId: UUID): BookingDto //синхронный
     suspend fun addItem(orderId: UUID, itemId: UUID, amount: Amount): Boolean
+    suspend fun getBookingHistory(bookingId: UUID): List<BookingLogRecord>
 
     suspend fun getItems(): List<Item>
 }
@@ -42,7 +43,7 @@ data class FinancialLogRecord( // todo sukhoa think of renaming
 
 data class BookingDto(
         val id: UUID,
-        val failedItems: List<UUID>
+        val failedItems: Set<UUID> = emptySet()
 )
 
 enum class FinancialOperationType {
@@ -55,14 +56,14 @@ data class Item(
         val title: String,
         val price: Int = 100,
         val amount: Amount, // number of items allowed for booking
-        val bookingLogRecord: List<BookingLogRecord> = listOf()
 )
 
 class BookingLogRecord(
         val bookingId: UUID,
-//        val timestamp: Long,
-//        val amount: Amount,
-        val status: BookingStatus
+        val itemId: UUID,
+        val status: BookingStatus,
+        val amount: Amount,
+        val timestamp: Long = System.currentTimeMillis(),
 )
 
 sealed class OrderStatus {
