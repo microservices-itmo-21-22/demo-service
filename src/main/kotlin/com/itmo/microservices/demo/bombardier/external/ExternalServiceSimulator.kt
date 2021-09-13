@@ -1,8 +1,10 @@
-package com.itmo.microservices.demo.test
+package com.itmo.microservices.demo.bombardier.external
 
+import com.itmo.microservices.demo.bombardier.external.storage.ItemStorage
+import com.itmo.microservices.demo.bombardier.external.storage.OrderStorage
+import com.itmo.microservices.demo.bombardier.external.storage.UserStorage
+import com.itmo.microservices.demo.bombardier.flow.*
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -88,7 +90,7 @@ class ExternalServiceSimulator(
      * Возвращается информация о неудачных айтемах
      */
     override suspend fun finalizeOrder(orderId: UUID): BookingDto {
-        return warehouseServiceBookItems(orderStorage.get(orderId).itemsMap).also { bookingResult ->
+        return bookItems(orderStorage.get(orderId).itemsMap).also { bookingResult ->
             orderStorage.getAndUpdate(orderId) { existing ->
                 val newOrderStatus = if (bookingResult.failedItems.isEmpty()) {
                     OrderStatus.OrderBooked
@@ -100,7 +102,7 @@ class ExternalServiceSimulator(
         }
     }
 
-    private suspend fun warehouseServiceBookItems(items: Map<Item, Amount>): BookingDto {
+    private suspend fun bookItems(items: Map<Item, Amount>): BookingDto {
         val bookingId = UUID.randomUUID()
 
         val successfullyBooked = mutableSetOf<UUID>()
@@ -164,88 +166,3 @@ class ExternalServiceSimulator(
     }
 }
 
-class OrderStorage {
-    private val orders = ConcurrentHashMap<UUID, Pair<Order, Mutex>>()
-
-    suspend fun create(order: Order): Order {
-        val existing = orders.putIfAbsent(order.id, order to Mutex())
-        if (existing != null) {
-            throw IllegalArgumentException("Order already exists: $order")
-        }
-        return order
-    }
-
-    suspend fun getAndUpdate(orderId: UUID, updateFunction: suspend (Order) -> Order): Order {
-        val (_, mutex) = orders[orderId] ?: throw IllegalArgumentException("No such order: $orderId")
-        mutex.withLock {
-            val (order, _) = orders[orderId] ?: throw IllegalArgumentException("No such order: $orderId")
-            val updatedOrder = updateFunction(order)
-            orders[orderId] = updatedOrder to mutex
-            return updatedOrder
-        }
-    }
-
-    suspend fun get(orderId: UUID) = orders[orderId]?.first ?: throw IllegalArgumentException("No such order: $orderId")
-}
-
-class ItemStorage {
-    val items: ConcurrentHashMap<UUID, Pair<Item, Mutex>> = listOf(
-        Item(title = "Socks", amount = 1),
-        Item(title = "Book", amount = Int.MAX_VALUE),
-        Item(title = "Plate", amount = Int.MAX_VALUE),
-        Item(title = "Table", amount = Int.MAX_VALUE),
-        Item(title = "Chair", amount = Int.MAX_VALUE),
-        Item(title = "Watch", amount = Int.MAX_VALUE),
-        Item(title = "Bed", amount = Int.MAX_VALUE)
-    ).map { it.id to (it to Mutex()) }.toMap(ConcurrentHashMap<UUID, Pair<Item, Mutex>>())
-
-    val bookingRecords: MutableList<BookingLogRecord> = mutableListOf()
-
-    suspend fun getBookingRecordsById(bookingId: UUID): List<BookingLogRecord> {
-        return bookingRecords.filter { it.bookingId == bookingId }
-    }
-
-    suspend fun create(item: Item): Item {
-        val existing = items.putIfAbsent(item.id, item to Mutex())
-        if (existing != null) {
-            throw IllegalArgumentException("Item already exists: $item")
-        }
-        return item
-    }
-
-    suspend fun getAndUpdate(itemId: UUID, updateFunction: suspend (Item) -> Item): Item {
-        val (_, mutex) = items[itemId] ?: throw IllegalArgumentException("No such item: $itemId")
-        mutex.withLock {
-            val (item, _) = items[itemId] ?: throw IllegalArgumentException("No such item: $itemId")
-            val updatedItem = updateFunction(item)
-            items[itemId] = updatedItem to mutex
-            return updatedItem
-        }
-    }
-
-    suspend fun get(itemId: UUID) = items[itemId]?.first ?: throw IllegalArgumentException("No such item: $itemId")
-}
-
-class UserStorage {
-    private val users = ConcurrentHashMap<UUID, Pair<User, Mutex>>()
-
-    suspend fun create(user: User): User {
-        val existing = users.putIfAbsent(user.id, user to Mutex())
-        if (existing != null) {
-            throw IllegalArgumentException("User already exists: $user")
-        }
-        return user
-    }
-
-    suspend fun getAndUpdate(userId: UUID, updateFunction: suspend (User) -> User): User {
-        val (_, mutex) = users[userId] ?: throw IllegalArgumentException("No such user: $userId")
-        mutex.withLock {
-            val (order, _) = users[userId] ?: throw IllegalArgumentException("No such user: $userId")
-            val updatedOrder = updateFunction(order)
-            users[userId] = updatedOrder to mutex
-            return updatedOrder
-        }
-    }
-
-    suspend fun get(userId: UUID) = users[userId]?.first ?: throw IllegalArgumentException("No such user: $userId")
-}

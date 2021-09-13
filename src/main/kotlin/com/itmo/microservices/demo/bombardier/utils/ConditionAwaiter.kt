@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.test
+package com.itmo.microservices.demo.bombardier.utils
 
 import kotlinx.coroutines.delay
 import java.util.concurrent.TimeUnit

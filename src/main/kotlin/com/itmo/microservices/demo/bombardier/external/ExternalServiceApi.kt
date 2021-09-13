@@ -1,6 +1,6 @@
-package com.itmo.microservices.demo.test
+package com.itmo.microservices.demo.bombardier.flow
 
-import com.itmo.microservices.demo.test.OrderStatus.*
+import com.itmo.microservices.demo.bombardier.flow.OrderStatus.*
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass

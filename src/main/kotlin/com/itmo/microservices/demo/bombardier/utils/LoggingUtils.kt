@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.test
+package com.itmo.microservices.demo.bombardier.flow
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

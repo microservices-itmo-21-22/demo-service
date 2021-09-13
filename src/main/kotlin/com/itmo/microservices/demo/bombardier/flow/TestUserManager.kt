@@ -1,13 +1,11 @@
-package com.itmo.microservices.demo.test
+package com.itmo.microservices.demo.bombardier.flow
 
 import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicInteger
 
 class UserManagement(
-    private val serviceApi: ServiceApi,
-    private val internalAccountingService: InternalAccountingService
+    private val serviceApi: ServiceApi
 ) {
     companion object {
         val log = LoggerFactory.getLogger(UserManagement::class.java)
@@ -21,8 +19,6 @@ class UserManagement(
             kotlin.runCatching {
                 serviceApi.createUser("service-$service-user-$index-${System.currentTimeMillis()}", Int.MAX_VALUE)
             }.onSuccess { user ->
-                internalAccountingService.initUserCredits(user.id, Int.MAX_VALUE)
-
                 userIdsByService
                     .computeIfAbsent(service) { ConcurrentHashMap.newKeySet() }
                     .add(user.id)
@@ -38,26 +34,5 @@ class UserManagement(
     fun getRandomUserId(service: String): UUID {
         return userIdsByService[service]?.random()
             ?: throw IllegalStateException("There are no users for service $service")
-    }
-}
-
-class InternalAccountingService {
-    private val usersCredits = ConcurrentHashMap<UUID, AtomicInteger>()
-
-    fun initUserCredits(userId: UUID, credit: Amount) {
-        usersCredits[userId] = AtomicInteger(credit)
-    }
-
-    fun spend(userId: UUID, credit: Amount) {
-        usersCredits[userId]?.addAndGet(-credit)
-            ?: throw IllegalArgumentException("There is no credit for user $userId")
-    }
-
-    fun get(userId: UUID) {
-        usersCredits[userId]?.get() ?: throw IllegalArgumentException("There is no credit for user $userId")
-    }
-
-    fun refund(userId: UUID, credit: Amount) {
-        usersCredits[userId]?.addAndGet(credit) ?: throw IllegalArgumentException("There is no credit for user $userId")
     }
 }
