@@ -2,9 +2,23 @@
 
 ## Launch notes
 * Configure settings.xml
-  * First option: settings in local maven repository (`~/.m2/settings.xml`)
-  * Second option: settings in project root
+  * 
+    * First option: settings in local maven repository (`~/.m2/settings.xml`)
+    * Second option: settings in project root
+  * Settings can be specified using:
+    * mvn -s settings.xml
+    * IDEA: Maven settings -> User settings file
   * Settings must contain dummy mirror to override default blocking mirror that blocks http
+  ```
+  <mirrors>
+    <mirror>
+      <id>maven-default-http-blocker</id>
+      <mirrorOf>dummy</mirrorOf>
+      <name>Dummy mirror</name>
+      <url>http://0.0.0.0/</url>
+    </mirror>
+  </mirrors>
+  ```
 
 * For local app launch, use **dev** profile. It uses in-memory database
 * For production deploy, run app with no profile
