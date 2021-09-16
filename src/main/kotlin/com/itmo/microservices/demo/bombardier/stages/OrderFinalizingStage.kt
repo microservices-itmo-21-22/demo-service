@@ -14,7 +14,7 @@ class OrderFinalizingStage(private val serviceApi: ServiceApi) : TestStage {
         log.info("Starting booking items stage for order ${testCtx().orderId}")
         val orderStateBeforeFinalizing = serviceApi.getOrder(testCtx().orderId!!)
 
-        val bookingResult = serviceApi.finalizeOrder(testCtx().orderId!!)
+        val bookingResult = serviceApi.bookOrder(testCtx().orderId!!)
 
         val orderStateAfterBooking = serviceApi.getOrder(testCtx().orderId!!)
 

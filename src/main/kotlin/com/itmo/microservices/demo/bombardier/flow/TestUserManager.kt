@@ -17,7 +17,7 @@ class UserManagement(
     suspend fun createUsersPool(service: String, numberOfUsers: Int): Set<UUID> {
         repeat(numberOfUsers) { index ->
             kotlin.runCatching {
-                serviceApi.createUser("service-$service-user-$index-${System.currentTimeMillis()}", Int.MAX_VALUE)
+                serviceApi.createUser("service-$service-user-$index-${System.currentTimeMillis()}")
             }.onSuccess { user ->
                 userIdsByService
                     .computeIfAbsent(service) { ConcurrentHashMap.newKeySet() }

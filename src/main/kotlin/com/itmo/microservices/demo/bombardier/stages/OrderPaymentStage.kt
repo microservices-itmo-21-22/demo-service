@@ -21,16 +21,38 @@ class OrderPaymentStage(
 
         paymentDetails.startedAt = System.currentTimeMillis()
 
-        val paidOrder = serviceApi.payOrder(testCtx().userId!!, testCtx().orderId!!)
+        val paymentSubmissionDto = serviceApi.payOrder(testCtx().userId!!, testCtx().orderId!!) // todo sukhoa add payment details to test ctx
 
-        when (val status = paidOrder.paymentHistory.maxByOrNull { it.timestamp }!!.status) {
+        ConditionAwaiter.awaitAtMost(6, TimeUnit.SECONDS)
+            .condition {
+                serviceApi.getOrder(testCtx().orderId!!).paymentHistory
+                    .any {it.transactionId == paymentSubmissionDto.transactionId}
+            }
+            .onFailure {
+                log.error("Payment is started for order: ${order.id} but hasn't finished withing 5 sec")
+                throw TestStage.TestStageFailedException("Exception instead of silently fail")
+            }.startWaiting()
+
+        val paymentLogRecord = serviceApi.getOrder(testCtx().orderId!!).paymentHistory
+            .find { it.transactionId == paymentSubmissionDto.transactionId }!!
+
+        when (val status = paymentLogRecord.status) {
             PaymentStatus.SUCCESS -> {
-                // todo elina check order is paid and user is charged
-
                 ConditionAwaiter.awaitAtMost(5, TimeUnit.SECONDS)
                     .condition {
-                        val financialRecords = serviceApi.getFinancialHistory(testCtx().userId!!, testCtx().orderId!!)
-                        financialRecords.maxByOrNull { it.timestamp }?.type == FinancialOperationType.WITHDRAW
+                        serviceApi.getOrder(testCtx().orderId!!).status is OrderStatus.OrderPayed
+                    }
+                    .onFailure {
+                        log.error("There is payment record for order: ${order.id} for order status is different")
+                        throw TestStage.TestStageFailedException("Exception instead of silently fail")
+                    }.startWaiting()
+
+                ConditionAwaiter.awaitAtMost(2, TimeUnit.SECONDS)
+                    .condition {
+                        val userChargedRecord = serviceApi.userFinancialHistory(testCtx().userId!!, testCtx().orderId!!)
+                            .find { it.paymentTransactionId == paymentSubmissionDto.transactionId }
+
+                        userChargedRecord?.type == FinancialOperationType.WITHDRAW
                     }
                     .onFailure {
                         log.error("Order ${order.id} is paid but there is not withdrawal operation found for user: ${testCtx().userId}")

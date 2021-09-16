@@ -94,7 +94,7 @@ fun main() {
     runBlocking {
         val job = testApi.startTestingForService(TestParameters("test-service", 1, 1))
 
-        delay(15_000)
+        delay(30_000)
         job.cancel()
         testApi.executor.shutdownNow()
     }

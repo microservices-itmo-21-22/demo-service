@@ -4,7 +4,10 @@ import com.itmo.microservices.demo.bombardier.external.storage.ItemStorage
 import com.itmo.microservices.demo.bombardier.external.storage.OrderStorage
 import com.itmo.microservices.demo.bombardier.external.storage.UserStorage
 import com.itmo.microservices.demo.bombardier.flow.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -19,15 +22,15 @@ class ExternalServiceSimulator(
         val log = LoggerFactory.getLogger(ExternalServiceSimulator::class.java)
     }
 
-    private val financialLog = ConcurrentHashMap<UUID, MutableList<FinancialLogRecord>>()
+    private val financialLog = ConcurrentHashMap<UUID, MutableList<UserAccountFinancialLogRecord>>()
 
-    override suspend fun createUser(name: String, accountAmount: Int): User {
-        return userStorage.create(User(name = name, accountAmount = accountAmount)).also {
+    override suspend fun createUser(name: String): User {
+        return userStorage.create(User(name = name)).also {
             financialLog[it.id] = mutableListOf()
         }
     }
 
-    override suspend fun getFinancialHistory(userId: UUID, orderId: UUID): List<FinancialLogRecord> {
+    override suspend fun userFinancialHistory(userId: UUID, orderId: UUID): List<UserAccountFinancialLogRecord> {
         return financialLog[userId] ?: emptyList()
     }
 
@@ -39,57 +42,69 @@ class ExternalServiceSimulator(
         return orderStorage.create(Order())
     }
 
-    override suspend fun getOrder(id: UUID): Order {
-        return orderStorage.get(id)
+    override suspend fun getOrder(orderId: UUID): Order {
+        return orderStorage.get(orderId)
     }
 
-    override suspend fun getBucketAliveLogRecord(id: UUID): List<BucketLogRecord> {
+    override suspend fun abandonedCardHistory(orderId: UUID): List<AbandonedCardLogRecord> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getDeliverySlots(id: UUID): List<Int> {
+    override suspend fun getDeliverySlots(orderId: UUID): List<Int> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun setDeliveryTime(id: UUID, time: Long) {
+    override suspend fun setDeliveryTime(orderId: UUID, time: Long) {
         TODO("Not yet implemented")
     }
 
-    override suspend fun payOrder(userId: UUID, orderId: UUID): Order {
-        delay(Random.nextLong(3_000))
+    override suspend fun payOrder(userId: UUID, orderId: UUID): PaymentSubmissionDto {
+        delay(Random.nextLong(1_000))
 
-        val updated = orderStorage.getAndUpdate(orderId = orderId) { order ->
+        val submissionTime = System.currentTimeMillis()
+        val transactionId = UUID.randomUUID()
+
+        // async payment processing
+        CoroutineScope(Dispatchers.Default).launch {
+            delay(Random.nextLong(7_000))
             val paymentStatus = if (Random.nextBoolean()) {
                 PaymentLogRecord(
                     System.currentTimeMillis(),
                     PaymentStatus.FAILED,
-                    100
+                    100,
+                    transactionId = transactionId
                 ) // todo sukhoa Elina change hardcoded stuff
             } else {
-                financialLog[userId]!!.add(FinancialLogRecord(FinancialOperationType.WITHDRAW, 100, orderId))
-                userStorage.getAndUpdate(userId) { user ->
-                    user.copy(accountAmount = user.accountAmount - 100)
-                }
-                PaymentLogRecord(System.currentTimeMillis(), PaymentStatus.SUCCESS, 100)
+                financialLog[userId]!!.add(
+                    UserAccountFinancialLogRecord(
+                        FinancialOperationType.WITHDRAW,
+                        100,
+                        orderId,
+                        transactionId
+                    )
+                )
+                PaymentLogRecord(System.currentTimeMillis(), PaymentStatus.SUCCESS, 100, transactionId = transactionId)
             }
 
-            order.copy(
-                status = if (paymentStatus.status == PaymentStatus.SUCCESS)
-                    OrderStatus.OrderPayed(paymentTime = paymentStatus.timestamp)
-                else
-                    order.status,
-                paymentHistory = order.paymentHistory + listOf(paymentStatus)
-            )
+            orderStorage.getAndUpdate(orderId = orderId) { order ->
+                order.copy(
+                    status = if (paymentStatus.status == PaymentStatus.SUCCESS)
+                        OrderStatus.OrderPayed(paymentTime = paymentStatus.timestamp)
+                    else
+                        order.status,
+                    paymentHistory = order.paymentHistory + listOf(paymentStatus)
+                )
+            }
         }
 
-        return updated
+        return PaymentSubmissionDto(submissionTime, transactionId)
     }
 
     /**
      * Статус заказа меняется в зависимости от результата бронирования.
      * Возвращается информация о неудачных айтемах
      */
-    override suspend fun finalizeOrder(orderId: UUID): BookingDto {
+    override suspend fun bookOrder(orderId: UUID): BookingDto {
         return bookItems(orderStorage.get(orderId).itemsMap).also { bookingResult ->
             orderStorage.getAndUpdate(orderId) { existing ->
                 val newOrderStatus = if (bookingResult.failedItems.isEmpty()) {
@@ -102,7 +117,7 @@ class ExternalServiceSimulator(
         }
     }
 
-    private suspend fun bookItems(items: Map<Item, Amount>): BookingDto {
+    private suspend fun bookItems(items: Map<OrderItem, Amount>): BookingDto {
         val bookingId = UUID.randomUUID()
 
         val successfullyBooked = mutableSetOf<UUID>()
@@ -146,16 +161,16 @@ class ExternalServiceSimulator(
             BookingDto(bookingId)
     }
 
-    override suspend fun getItems(): List<Item> {
+    override suspend fun getAvailableItems(): List<CatalogItem> {
         return itemStorage.items.values.map { it.first }.toList()
     }
 
-    override suspend fun addItem(orderId: UUID, itemId: UUID, amount: Amount): Boolean {
+    override suspend fun putItemToOrder(orderId: UUID, itemId: UUID, amount: Amount): Boolean {
         orderStorage.getAndUpdate(orderId = orderId) { order ->
             val item = itemStorage.get(itemId)
             order.copy(
                 itemsMap = order.itemsMap.filterKeys { it.id != itemId }
-                        + (item.copy(amount = amount) to amount)
+                        + (OrderItem(id = item.id, title = item.title, price = item.price) to amount)
             )
         }
         return true
@@ -163,6 +178,10 @@ class ExternalServiceSimulator(
 
     override suspend fun getBookingHistory(bookingId: UUID): List<BookingLogRecord> {
         return itemStorage.getBookingRecordsById(bookingId)
+    }
+
+    override suspend fun deliveryLog(orderId: Order): DeliveryInfoRecord {
+        TODO("Not yet implemented")
     }
 }
 

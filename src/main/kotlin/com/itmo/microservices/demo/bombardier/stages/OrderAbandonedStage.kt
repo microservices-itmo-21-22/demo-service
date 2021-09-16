@@ -16,14 +16,14 @@ class OrderAbandonedStage(private val serviceApi: ServiceApi) : TestStage {
     override suspend fun run(): TestStage.TestContinuationType {
         val shouldBeAbandoned = Random.nextBoolean()
         if (shouldBeAbandoned) {
-            val lastBucketTimestamp = serviceApi.getBucketAliveLogRecord(testCtx().orderId!!)
+            val lastBucketTimestamp = serviceApi.abandonedCardHistory(testCtx().orderId!!)
                 .map { it.timestamp }
                 .maxByOrNull { it } ?: 0
             delay(120_000) //todo shine2
 
             ConditionAwaiter.awaitAtMost(30, TimeUnit.SECONDS)
                 .condition {
-                    val bucketLogRecord = serviceApi.getBucketAliveLogRecord(testCtx().orderId!!)
+                    val bucketLogRecord = serviceApi.abandonedCardHistory(testCtx().orderId!!)
                     bucketLogRecord.maxByOrNull { it.timestamp }?.timestamp ?: 0 > lastBucketTimestamp
                 }
                 .onFailure {
@@ -31,7 +31,7 @@ class OrderAbandonedStage(private val serviceApi: ServiceApi) : TestStage {
                     throw TestStage.TestStageFailedException("Exception instead of silently fail")
                 }.startWaiting()
 
-            val recentLogRecord = serviceApi.getBucketAliveLogRecord(testCtx().orderId!!)
+            val recentLogRecord = serviceApi.abandonedCardHistory(testCtx().orderId!!)
                 .maxByOrNull { it.timestamp }
 
             if (recentLogRecord!!.userInteracted) {
