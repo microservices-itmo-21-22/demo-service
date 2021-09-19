@@ -12,17 +12,19 @@ interface ServiceApi {
     suspend fun userFinancialHistory(userId: UUID, orderId: UUID): List<UserAccountFinancialLogRecord>
 
     suspend fun createOrder(userId: UUID): Order
+    //suspend fun getOrders(userId: UUID): List<Order>
     suspend fun getOrder(orderId: UUID): Order
 
-    //suspend fun getOrders(userId: UUID): List<Order>
-    suspend fun abandonedCardHistory(orderId: UUID): List<AbandonedCardLogRecord>
-    suspend fun getDeliverySlots(orderId: UUID): List<Int>
+    suspend fun getAvailableItems(): List<CatalogItem>
+
+    suspend fun putItemToOrder(orderId: UUID, itemId: UUID, amount: Amount): Boolean // todo sukhoa consider using add instead of put
+    suspend fun bookOrder(orderId: UUID): BookingDto //синхронный
+    suspend fun getDeliverySlots(orderId: UUID): List<Int> // todo sukhoa in future we should get the Dto with slots. Slot has it's lifetime and should be active within it.
     suspend fun setDeliveryTime(orderId: UUID, time: Long)
     suspend fun payOrder(userId: UUID, orderId: UUID): PaymentSubmissionDto
-    suspend fun bookOrder(orderId: UUID): BookingDto //синхронный
-    suspend fun putItemToOrder(orderId: UUID, itemId: UUID, amount: Amount): Boolean // todo sukhoa consider using add instead of put
 
-    suspend fun getAvailableItems(): List<CatalogItem>
+    suspend fun abandonedCardHistory(orderId: UUID): List<AbandonedCardLogRecord>
+
     suspend fun getBookingHistory(bookingId: UUID): List<BookingLogRecord>
     //suspend fun getBookingHistory(orderId: UUID): List<BookingLogRecord>
 
@@ -59,7 +61,7 @@ data class User(
 data class UserAccountFinancialLogRecord( // todo think of refund via TP system
     val type: FinancialOperationType,
     val amount: Amount,
-    val orderId: UUID? = null,
+    val orderId: UUID,
     val paymentTransactionId: UUID,
     val timestamp: Long = System.currentTimeMillis()
 )
