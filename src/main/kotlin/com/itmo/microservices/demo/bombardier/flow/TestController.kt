@@ -9,17 +9,21 @@ import com.itmo.microservices.demo.bombardier.stages.TestStage.TestContinuationT
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 
-class TestFlow(
+class TestController(
     private val userManagement: UserManagement,
     private val serviceApi: ServiceApi
 ) {
     companion object {
-        val log = LoggerFactory.getLogger(TestFlow::class.java)
+        val log = LoggerFactory.getLogger(TestController::class.java)
     }
+
+    val runningTests = ConcurrentHashMap<String, TestingFlow>()
 
     val executor: ExecutorService = Executors.newFixedThreadPool(4)
 
@@ -28,20 +32,50 @@ class TestFlow(
     private val testStages = listOf(
         ChoosingUserAccountStage(userManagement).asErrorFree(),
         OrderCreationStage(serviceApi).asErrorFree(),
-        OrderCollectingStage(serviceApi).asErrorFree(), //бросание корзины, финализирование заказа (c возвратом всех зафейленных items). Если какой-то не получилось, то ничего не бронируем доставка
+        OrderCollectingStage(serviceApi).asErrorFree(),
+//        OrderAbandonedStage(serviceApi).asErrorFree(),
         OrderFinalizingStage(serviceApi).asErrorFree(),
-        OrderPaymentStage(serviceApi).asRetryable().asErrorFree()
+//        OrderSettingDeliverySlotsStage(serviceApi).asErrorFree(),
+//        OrderChangeItemsAfterFinalizationStage(serviceApi),
+        OrderPaymentStage(serviceApi).asRetryable().asErrorFree(),
+//        OrderDeliveryStage(serviceApi).asErrorFree(),
     )
 
-    fun startTestingForService(params: TestParameters) = coroutineScope.launch {
-        userManagement.createUsersPool(params.serviceName, params.numberOfUsers)
-        repeat(params.parallelProcessesNumber) {
-            log.info("Launch coroutine for ${params.serviceName}")
-            launchNewTestFlow(params.serviceName)
+    fun startTestingForService(params: TestParameters) {
+        if (runningTests.contains(params.serviceName)) {
+            throw IllegalArgumentException("There is no such feature launch several flows for the service in parallel :(")
         }
+
+        val testingFlowCoroutine = coroutineScope.launch {
+            userManagement.createUsersPool(params.serviceName, params.numberOfUsers)
+            repeat(params.parallelProcessesNumber) {
+                log.info("Launch coroutine for ${params.serviceName}")
+                launchNewTestFlow( params.serviceName)
+            }
+        }
+
+        runningTests[params.serviceName] = TestingFlow(params, testingFlowCoroutine)
     }
 
+    fun getTestingFlowForService(serviceName: String): TestingFlow {
+        return runningTests[serviceName] ?: throw IllegalArgumentException("There is no running test for $serviceName")
+    }
+
+    class TestingFlow(
+        val testParams: TestParameters,
+        val testFlowCoroutine: Job,
+        val testsPerformed: AtomicInteger = AtomicInteger(1)
+    )
+
     private fun launchNewTestFlow(serviceName: String) {
+        val testingFlow = runningTests[serviceName] ?: throw IllegalStateException("No running test found for :$serviceName")
+
+        if (testingFlow.testParams.numberOfTests != null && testingFlow.testsPerformed.get() > testingFlow.testParams.numberOfTests) {
+            log.info("Wrapping up test flow. Number of tests exceeded")
+            return
+        }
+        val testNum = testingFlow.testsPerformed.getAndIncrement() // data race :(
+
         coroutineScope.launch(SupervisorJob() + TestContext(serviceName = serviceName)) {
             testStages.forEach { stage ->
                 when (stage.run()) {
@@ -82,20 +116,22 @@ data class PaymentDetails(
 data class TestParameters(
     val serviceName: String,
     val numberOfUsers: Int,
-    val parallelProcessesNumber: Int
+    val parallelProcessesNumber: Int,
+    val numberOfTests: Int? = null
 )
 
 fun main() {
     val externalServiceMock = ExternalServiceSimulator(OrderStorage(), UserStorage(), ItemStorage())
     val userManagement = UserManagement(externalServiceMock)
 
-    val testApi = TestFlow(userManagement, externalServiceMock)
+    val testApi = TestController(userManagement, externalServiceMock)
 
     runBlocking {
-        val job = testApi.startTestingForService(TestParameters("test-service", 1, 1))
-
+        testApi.startTestingForService(TestParameters("test-service", 1, 1, 5))
         delay(30_000)
-        job.cancel()
+
+        testApi.getTestingFlowForService("test-service").testFlowCoroutine.join()
+
         testApi.executor.shutdownNow()
     }
 }
