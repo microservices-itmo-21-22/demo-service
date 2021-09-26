@@ -13,7 +13,7 @@
     <groupId>com.itmo.microservices</groupId>
     <artifactId>p09</artifactId>
     <version>0.1.1-SNAPSHOT</version>
-    <name>demo-service</name>
+    <name>p09</name>
     <description>Demo project for microservices course 21-22</description>
 
     <properties>
