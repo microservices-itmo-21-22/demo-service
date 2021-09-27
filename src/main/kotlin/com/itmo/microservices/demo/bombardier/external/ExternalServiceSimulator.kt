@@ -50,12 +50,18 @@ class ExternalServiceSimulator(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getDeliverySlots(orderId: UUID): List<Int> {
-        TODO("Not yet implemented")
+    override suspend fun getDeliverySlots(orderId: UUID): List<Long> {
+        return mutableListOf<Long>().also {
+            for (i in 0..Random.nextInt(100)) {
+                it.add(Random.nextLong(Long.MAX_VALUE))
+            }
+        }
     }
 
     override suspend fun setDeliveryTime(orderId: UUID, time: Long) {
-        TODO("Not yet implemented")
+        orderStorage.getAndUpdate(orderId) { order ->
+            order.copy(deliveryDuration = time)
+        }
     }
 
     override suspend fun payOrder(userId: UUID, orderId: UUID): PaymentSubmissionDto {
@@ -184,4 +190,3 @@ class ExternalServiceSimulator(
         TODO("Not yet implemented")
     }
 }
-

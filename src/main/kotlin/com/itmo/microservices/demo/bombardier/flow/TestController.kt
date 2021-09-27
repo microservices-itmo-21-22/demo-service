@@ -35,7 +35,7 @@ class TestController(
         OrderCollectingStage(serviceApi).asErrorFree(),
 //        OrderAbandonedStage(serviceApi).asErrorFree(),
         OrderFinalizingStage(serviceApi).asErrorFree(),
-//        OrderSettingDeliverySlotsStage(serviceApi).asErrorFree(),
+        OrderSettingDeliverySlotsStage(serviceApi).asErrorFree(),
 //        OrderChangeItemsAfterFinalizationStage(serviceApi),
         OrderPaymentStage(serviceApi).asRetryable().asErrorFree(),
 //        OrderDeliveryStage(serviceApi).asErrorFree(),
@@ -50,7 +50,7 @@ class TestController(
             userManagement.createUsersPool(params.serviceName, params.numberOfUsers)
             repeat(params.parallelProcessesNumber) {
                 log.info("Launch coroutine for ${params.serviceName}")
-                launchNewTestFlow( params.serviceName)
+                launchNewTestFlow(params.serviceName)
             }
         }
 
@@ -68,7 +68,8 @@ class TestController(
     )
 
     private fun launchNewTestFlow(serviceName: String) {
-        val testingFlow = runningTests[serviceName] ?: throw IllegalStateException("No running test found for :$serviceName")
+        val testingFlow =
+            runningTests[serviceName] ?: throw IllegalStateException("No running test found for :$serviceName")
 
         if (testingFlow.testParams.numberOfTests != null && testingFlow.testsPerformed.get() > testingFlow.testParams.numberOfTests) {
             log.info("Wrapping up test flow. Number of tests exceeded")

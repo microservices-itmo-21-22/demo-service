@@ -12,14 +12,20 @@ interface ServiceApi {
     suspend fun userFinancialHistory(userId: UUID, orderId: UUID): List<UserAccountFinancialLogRecord>
 
     suspend fun createOrder(userId: UUID): Order
+
     //suspend fun getOrders(userId: UUID): List<Order>
     suspend fun getOrder(orderId: UUID): Order
 
     suspend fun getAvailableItems(): List<CatalogItem>
 
-    suspend fun putItemToOrder(orderId: UUID, itemId: UUID, amount: Amount): Boolean // todo sukhoa consider using add instead of put
+    suspend fun putItemToOrder(
+        orderId: UUID,
+        itemId: UUID,
+        amount: Amount
+    ): Boolean // todo sukhoa consider using add instead of put
+
     suspend fun bookOrder(orderId: UUID): BookingDto //синхронный
-    suspend fun getDeliverySlots(orderId: UUID): List<Int> // todo sukhoa in future we should get the Dto with slots. Slot has it's lifetime and should be active within it.
+    suspend fun getDeliverySlots(orderId: UUID): List<Long> // todo sukhoa in future we should get the Dto with slots. Slot has it's lifetime and should be active within it.
     suspend fun setDeliveryTime(orderId: UUID, time: Long)
     suspend fun payOrder(userId: UUID, orderId: UUID): PaymentSubmissionDto
 
@@ -138,7 +144,7 @@ data class Order(
     val timeCreated: Long = System.currentTimeMillis(),
     val status: OrderStatus = OrderCollecting,
     val itemsMap: Map<OrderItem, Amount> = emptyMap(),
-    val deliveryDuration: Int? = null,
+    val deliveryDuration: Long? = null,
     val paymentHistory: List<PaymentLogRecord> = listOf()
 )
 
@@ -165,5 +171,3 @@ enum class BookingStatus {
     FAILED,
     SUCCESS
 }
-
-
