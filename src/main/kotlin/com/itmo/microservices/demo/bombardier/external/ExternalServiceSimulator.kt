@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.max
 import kotlin.random.Random
 
 class ExternalServiceSimulator(
@@ -177,10 +178,33 @@ class ExternalServiceSimulator(
             val item = itemStorage.get(itemId)
             order.copy(
                 itemsMap = order.itemsMap.filterKeys { it.id != itemId }
-                        + (OrderItem(id = item.id, title = item.title, price = item.price) to amount)
+                        + (OrderItem(id = item.id, title = item.title, price = item.price) to amount),
+                status = if (order.status == OrderStatus.OrderBooked) OrderStatus.OrderCollecting else order.status
             )
         }
         return true
+    }
+
+    override suspend fun deleteItemFromOrder(orderId: UUID, itemId: UUID, amount: Amount): Boolean {
+        orderStorage.getAndUpdate(orderId = orderId) { order ->
+            val theNewMap = newItemsMapAfterDeletion(itemId, amount, order.itemsMap)
+            order.copy(
+                itemsMap = theNewMap.first,
+                status = if (theNewMap.second && order.status == OrderStatus.OrderBooked) OrderStatus.OrderCollecting else order.status
+            )
+        }
+        return true
+    }
+
+    // true means that the map has been modified
+    private fun newItemsMapAfterDeletion(itemId: UUID, amount: Amount, map: Map<OrderItem, Amount>): Pair<Map<OrderItem, Amount>, Boolean> {
+        val theItem = map.toList().find { it.first.id == itemId } ?: return Pair(map, false)
+        val newTheItem = Pair(theItem.first, max(theItem.second, 0) as Amount)
+        val filteredMap = map.filterKeys { it.id != itemId } + newTheItem
+        if (newTheItem.second == 0) {
+            return Pair(filteredMap, true)
+        }
+        return Pair(filteredMap + newTheItem, true)
     }
 
     override suspend fun getBookingHistory(bookingId: UUID): List<BookingLogRecord> {
