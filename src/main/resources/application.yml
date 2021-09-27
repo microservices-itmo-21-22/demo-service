@@ -1,15 +1,15 @@
 spring:
   application:
     name: demo-service
-  datasource:
-    url: jdbc:postgresql://postgresql:5432/demo_db
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    database: postgresql
-    hibernate:
-      ddl-auto: update
+#  datasource:
+#    url: jdbc:postgresql://postgresql:5432/demo_db
+#    username: ${DB_USERNAME}
+#    password: ${DB_PASSWORD}
+#    driver-class-name: org.postgresql.Driver
+#  jpa:
+#    database: postgresql
+#    hibernate:
+#      ddl-auto: update
 
 server:
   error:
