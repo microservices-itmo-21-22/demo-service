@@ -6,6 +6,7 @@ import com.itmo.microservices.demo.bombardier.flow.OrderStatus
 import com.itmo.microservices.demo.bombardier.flow.ServiceApi
 import com.itmo.microservices.demo.bombardier.utils.ConditionAwaiter
 import java.util.concurrent.TimeUnit
+import kotlin.random.Random
 
 class OrderChangeItemsAfterFinalizationStage(private val serviceApi: ServiceApi) : TestStage {
     companion object {
@@ -13,7 +14,13 @@ class OrderChangeItemsAfterFinalizationStage(private val serviceApi: ServiceApi)
     }
 
     override suspend fun run(): TestStage.TestContinuationType {
-        OrderFinalizingStage.log.info("Starting change items after booked stage for order ${testCtx().orderId}")
+        val shouldRunStage = Random.nextBoolean()
+        if (!shouldRunStage) {
+            log.info("OrderChangeItemsAfterFinalizationStage will not be executed")
+            return TestStage.TestContinuationType.CONTINUE
+        }
+
+        log.info("Starting change items after booked stage for order ${testCtx().orderId}")
 
         val itemToAdd = serviceApi.getAvailableItems().random()
 
