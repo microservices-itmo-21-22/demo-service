@@ -50,7 +50,7 @@ class TestController(
             userManagement.createUsersPool(params.serviceName, params.numberOfUsers)
             repeat(params.parallelProcessesNumber) {
                 log.info("Launch coroutine for ${params.serviceName}")
-                launchNewTestFlow(params.serviceName)
+                launchNewTestFlow( params.serviceName)
             }
         }
 
@@ -68,8 +68,7 @@ class TestController(
     )
 
     private fun launchNewTestFlow(serviceName: String) {
-        val testingFlow =
-            runningTests[serviceName] ?: throw IllegalStateException("No running test found for :$serviceName")
+        val testingFlow = runningTests[serviceName] ?: throw IllegalStateException("No running test found for :$serviceName")
 
         if (testingFlow.testParams.numberOfTests != null && testingFlow.testsPerformed.get() > testingFlow.testParams.numberOfTests) {
             log.info("Wrapping up test flow. Number of tests exceeded")
