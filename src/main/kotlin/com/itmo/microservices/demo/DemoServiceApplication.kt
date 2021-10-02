@@ -24,11 +24,5 @@ fun main(args: Array<String>) {
     val testApi = TestController(userManagement, externalServiceMock)
 
     runBlocking {
-        testApi.startTestingForService(TestParameters("test-service", 1, 1, 5))
-        delay(30_000)
-
-        testApi.getTestingFlowForService("test-service").testFlowCoroutine.join()
-
-        testApi.executor.shutdownNow()
     }
 }

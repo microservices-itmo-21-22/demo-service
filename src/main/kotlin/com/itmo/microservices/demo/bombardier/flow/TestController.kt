@@ -46,15 +46,18 @@ class TestController(
             throw IllegalArgumentException("There is no such feature launch several flows for the service in parallel :(")
         }
 
-        val testingFlowCoroutine = coroutineScope.launch {
+        val testingFlowCoroutine = SupervisorJob()
+
+        runBlocking {
             userManagement.createUsersPool(params.serviceName, params.numberOfUsers)
-            repeat(params.parallelProcessesNumber) {
-                log.info("Launch coroutine for ${params.serviceName}")
-                launchNewTestFlow( params.serviceName)
-            }
         }
 
         runningTests[params.serviceName] = TestingFlow(params, testingFlowCoroutine)
+
+        repeat(params.parallelProcessesNumber) {
+            log.info("Launch coroutine for ${params.serviceName}")
+            launchNewTestFlow( params.serviceName)
+        }
     }
 
     fun getTestingFlowForService(serviceName: String): TestingFlow {
@@ -63,7 +66,7 @@ class TestController(
 
     class TestingFlow(
         val testParams: TestParameters,
-        val testFlowCoroutine: Job,
+        val testFlowCoroutine: CompletableJob,
         val testsPerformed: AtomicInteger = AtomicInteger(1)
     )
 
@@ -76,7 +79,9 @@ class TestController(
         }
         val testNum = testingFlow.testsPerformed.getAndIncrement() // data race :(
 
-        coroutineScope.launch(SupervisorJob() + TestContext(serviceName = serviceName)) {
+        log.info("Starting $testNum test for service $serviceName, parent job is ${testingFlow.testFlowCoroutine}")
+
+        coroutineScope.launch(testingFlow.testFlowCoroutine + TestContext(serviceName = serviceName)) {
             testStages.forEach { stage ->
                 when (stage.run()) {
                     CONTINUE -> Unit
