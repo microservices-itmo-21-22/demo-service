@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
+import java.time.Duration
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
@@ -50,12 +51,18 @@ class ExternalServiceSimulator(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getDeliverySlots(orderId: UUID): List<Int> {
-        TODO("Not yet implemented")
+    override suspend fun getDeliverySlots(orderId: UUID): List<Duration> {
+        return mutableListOf<Duration>().also {
+            for (i in 0..Random.nextInt(100)) {
+                it.add(Duration.ofSeconds(Random.nextLong(20)))
+            }
+        }
     }
 
-    override suspend fun setDeliveryTime(orderId: UUID, time: Long) {
-        TODO("Not yet implemented")
+    override suspend fun setDeliveryTime(orderId: UUID, time: Duration) {
+        orderStorage.getAndUpdate(orderId) { order ->
+            order.copy(deliveryDuration = time)
+        }
     }
 
     override suspend fun payOrder(userId: UUID, orderId: UUID): PaymentSubmissionDto {
@@ -184,4 +191,3 @@ class ExternalServiceSimulator(
         TODO("Not yet implemented")
     }
 }
-

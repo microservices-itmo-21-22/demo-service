@@ -35,7 +35,7 @@ class TestController(
         OrderCollectingStage(serviceApi).asErrorFree(),
 //        OrderAbandonedStage(serviceApi).asErrorFree(),
         OrderFinalizingStage(serviceApi).asErrorFree(),
-//        OrderSettingDeliverySlotsStage(serviceApi).asErrorFree(),
+        OrderSettingDeliverySlotsStage(serviceApi).asErrorFree(),
 //        OrderChangeItemsAfterFinalizationStage(serviceApi),
         OrderPaymentStage(serviceApi).asRetryable().asErrorFree(),
 //        OrderDeliveryStage(serviceApi).asErrorFree(),
