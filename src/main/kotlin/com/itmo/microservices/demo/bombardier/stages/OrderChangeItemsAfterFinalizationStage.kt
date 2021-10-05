@@ -16,13 +16,13 @@ class OrderChangeItemsAfterFinalizationStage(private val serviceApi: ServiceApi)
     override suspend fun run(): TestStage.TestContinuationType {
         val shouldRunStage = Random.nextBoolean()
         if (!shouldRunStage) {
-            log.info("OrderChangeItemsAfterFinalizationStage will not be executed")
+            log.info("OrderChangeItemsAfterFinalizationStage will not be executed for order ${testCtx().orderId}")
             return TestStage.TestContinuationType.CONTINUE
         }
 
         log.info("Starting change items after booked stage for order ${testCtx().orderId}")
 
-        repeat(Random.nextInt(1, 50)) {
+        repeat(Random.nextInt(1, 10)) {
             val itemToAdd = serviceApi.getAvailableItems().random()
 
             val amount: Amount = Random.nextInt(1, 13)
@@ -36,18 +36,6 @@ class OrderChangeItemsAfterFinalizationStage(private val serviceApi: ServiceApi)
                 }
                 .onFailure {
                     log.error("Did not find item ${itemToAdd.id} with $amount items in order ${testCtx().orderId} or order not in state collecting")
-                    throw TestStage.TestStageFailedException("Exception instead of silently fail")
-                }.startWaiting()
-
-            serviceApi.bookOrder(testCtx().orderId!!)
-
-            ConditionAwaiter.awaitAtMost(3, TimeUnit.SECONDS)
-                .condition {
-                    val theOrder = serviceApi.getOrder(testCtx().orderId!!)
-                    theOrder.status == OrderStatus.OrderBooked
-                }
-                .onFailure {
-                    log.error("Order ${testCtx().orderId} is not booked")
                     throw TestStage.TestStageFailedException("Exception instead of silently fail")
                 }.startWaiting()
         }
