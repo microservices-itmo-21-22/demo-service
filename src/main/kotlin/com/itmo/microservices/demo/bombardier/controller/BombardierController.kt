@@ -7,11 +7,12 @@ import com.itmo.microservices.demo.bombardier.external.storage.UserStorage
 import com.itmo.microservices.demo.bombardier.flow.TestController
 import com.itmo.microservices.demo.bombardier.flow.TestParameters
 import com.itmo.microservices.demo.bombardier.flow.UserManagement
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.responses.ApiResponse
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/test")
@@ -34,6 +35,33 @@ class BombardierController {
 
             logger.info("Finished waiting for test job completion.")
 //            testApi.executor.shutdownNow()
+        }
+    }
+
+    @PostMapping("/stop/{serviceName}")
+    @Operation(
+        summary = "Stop test by service name",
+        responses = [
+            ApiResponse(description = "OK", responseCode = "200"),
+            ApiResponse(description = "There is no running test with current serviceName", responseCode = "400", content = [Content()])
+        ]
+    )
+    fun stopTest(@PathVariable serviceName: String) {
+        runBlocking {
+            testApi.stopTestByServiceName(serviceName)
+        }
+    }
+
+    @PostMapping("/stopAll")
+    @Operation(
+        summary = "Stop all tests",
+        responses = [
+            ApiResponse(description = "OK", responseCode = "200")
+        ]
+    )
+    fun stopAllTests() {
+        runBlocking {
+            testApi.stopAllTests()
         }
     }
 }
