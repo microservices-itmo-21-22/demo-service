@@ -8,11 +8,18 @@ import com.itmo.microservices.demo.bombardier.external.storage.UserStorage
 import com.itmo.microservices.demo.bombardier.flow.TestController
 import com.itmo.microservices.demo.bombardier.flow.TestParameters
 import com.itmo.microservices.demo.bombardier.flow.UserManagement
+import com.itmo.microservices.demo.bombardier.views.RunningTestsResponse
+import com.itmo.microservices.demo.bombardier.views.toExtended
+import com.itmo.microservices.demo.common.exception.NotFoundException
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -37,6 +44,31 @@ class BombardierController {
             logger.info("Finished waiting for test job completion.")
 //            testApi.executor.shutdownNow()
         }
+    }
+
+    @GetMapping("running/{id}", produces = ["application/json"])
+    fun listRunningTestsPerService(@PathVariable id: String): RunningTestsResponse {
+        val currentServiceTestFlow = try {
+            testApi.getTestingFlowForService(id)
+        }
+        catch (t: IllegalArgumentException) {
+            throw NotFoundException(t.message!!)
+        }
+        val testParamsExt = currentServiceTestFlow.testParams.toExtended(
+            currentServiceTestFlow.testsStarted.get(),
+            currentServiceTestFlow.testsFinished.get()
+        )
+        return RunningTestsResponse(listOf(testParamsExt))
+    }
+
+    @GetMapping("running/index", produces = ["application/json"])
+    fun listAllRunningTests(): RunningTestsResponse {
+        val currentTests = testApi.runningTests
+            .map { it.value.testParams.toExtended(
+                it.value.testsStarted.get(),
+                it.value.testsFinished.get())
+            }
+        return RunningTestsResponse(currentTests)
     }
 
     @PostMapping("/run")
