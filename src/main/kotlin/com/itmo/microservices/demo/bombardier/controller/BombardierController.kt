@@ -14,6 +14,8 @@ import com.itmo.microservices.demo.common.exception.NotFoundException
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse
+import com.itmo.microservices.demo.bombardier.dto.RunningTestsResponse
+import com.itmo.microservices.demo.bombardier.dto.toExtended
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping

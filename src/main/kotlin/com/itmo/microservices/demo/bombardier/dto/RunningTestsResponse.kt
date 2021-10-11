@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.bombardier.views
+package com.itmo.microservices.demo.bombardier.dto
 
 import com.itmo.microservices.demo.bombardier.flow.TestParameters
 
