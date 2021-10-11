@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.max
 import kotlin.random.Random
 
 class ExternalServiceSimulator(
@@ -177,7 +178,8 @@ class ExternalServiceSimulator(
             val item = itemStorage.get(itemId)
             order.copy(
                 itemsMap = order.itemsMap.filterKeys { it.id != itemId }
-                        + (OrderItem(id = item.id, title = item.title, price = item.price) to amount)
+                        + (OrderItem(id = item.id, title = item.title, price = item.price) to amount),
+                status = if (order.status == OrderStatus.OrderBooked) OrderStatus.OrderCollecting else order.status
             )
         }
         return true
