@@ -1,5 +1,6 @@
 package com.itmo.microservices.demo.bombardier.flow
 
+import com.itmo.microservices.demo.bombardier.exceptions.IllegalTestingFlowNameException
 import com.itmo.microservices.demo.bombardier.exception.BadRequestException
 import com.itmo.microservices.demo.bombardier.external.ExternalServiceSimulator
 import com.itmo.microservices.demo.bombardier.external.storage.ItemStorage
@@ -62,7 +63,7 @@ class TestController(
     }
 
     fun getTestingFlowForService(serviceName: String): TestingFlow {
-        return runningTests[serviceName] ?: throw IllegalArgumentException("There is no running test for $serviceName")
+        return runningTests[serviceName] ?: throw IllegalTestingFlowNameException("There is no running test for $serviceName")
     }
 
     suspend fun stopTestByServiceName(serviceName: String) {

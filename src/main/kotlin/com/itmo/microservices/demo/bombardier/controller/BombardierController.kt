@@ -48,12 +48,8 @@ class BombardierController {
 
     @GetMapping("running/{id}", produces = ["application/json"])
     fun listRunningTestsPerService(@PathVariable id: String): RunningTestsResponse {
-        val currentServiceTestFlow = try {
-            testApi.getTestingFlowForService(id)
-        }
-        catch (t: IllegalArgumentException) {
-            throw NotFoundException(t.message!!)
-        }
+        val currentServiceTestFlow = testApi.getTestingFlowForService(id)
+
         val testParamsExt = currentServiceTestFlow.testParams.toExtended(
             currentServiceTestFlow.testsStarted.get(),
             currentServiceTestFlow.testsFinished.get()
