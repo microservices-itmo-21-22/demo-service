@@ -11,7 +11,7 @@
     </parent>
 
     <groupId>com.itmo.microservices</groupId>
-    <artifactId>demo-service</artifactId>
+    <artifactId>service-304</artifactId>
     <version>0.1.1-SNAPSHOT</version>
     <name>demo-service</name>
     <description>Demo project for microservices course 21-22</description>
