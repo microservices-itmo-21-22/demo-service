@@ -21,9 +21,14 @@ class OrderDeliveryStage(
             return TestStage.TestContinuationType.FAIL
         }
 
+        if (orderBeforeDelivery.deliveryDuration == null) {
+            log.error("Incorrect order ${orderBeforeDelivery.id}, deliveryDuration is null")
+            return TestStage.TestContinuationType.FAIL
+        }
+
         serviceApi.simulateDelivery(testCtx().orderId!!)
 
-        ConditionAwaiter.awaitAtMost(orderBeforeDelivery.deliveryDuration!!.toSeconds() + 3, TimeUnit.SECONDS)
+        ConditionAwaiter.awaitAtMost(orderBeforeDelivery.deliveryDuration.toSeconds() + 5, TimeUnit.SECONDS)
             .condition {
                 val updatedOrder = serviceApi.getOrder(testCtx().orderId!!)
                 updatedOrder.status is OrderStatus.OrderDelivered ||

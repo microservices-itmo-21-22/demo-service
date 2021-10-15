@@ -148,23 +148,25 @@ class ExternalServiceSimulator(
             orderStorage.getAndUpdate(orderId) {
                 it.copy(status = OrderStatus.OrderRefund)
             }
-            val userId = orderToUser[orderId]!!
             order.paymentHistory.last().transactionId
-            val currentLog = userFinancialHistory(userId, orderId)
-            financialLog[userId]!!.add(
-                UserAccountFinancialLogRecord(
-                    type = FinancialOperationType.REFUND,
-                    amount = currentLog.sumOf {
-                        if (it.type == FinancialOperationType.WITHDRAW) {
-                            it.amount
-                        } else {
-                            -it.amount
-                        }
-                    },
-                    orderId = orderId,
-                    paymentTransactionId = UUID.randomUUID()
+            if (Random.nextInt(100) < 70) {
+                val userId = orderToUser[orderId]!!
+                val currentLog = userFinancialHistory(userId, orderId)
+                financialLog[userId]!!.add(
+                    UserAccountFinancialLogRecord(
+                        type = FinancialOperationType.REFUND,
+                        amount = currentLog.sumOf {
+                            if (it.type == FinancialOperationType.WITHDRAW) {
+                                it.amount
+                            } else {
+                                -it.amount
+                            }
+                        },
+                        orderId = orderId,
+                        paymentTransactionId = UUID.randomUUID()
+                    )
                 )
-            )
+            }
         }
 
         orderToUser.remove(orderId)
