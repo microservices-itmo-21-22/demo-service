@@ -30,12 +30,14 @@ interface ServiceApi {
     suspend fun setDeliveryTime(orderId: UUID, time: Duration)
     suspend fun payOrder(userId: UUID, orderId: UUID): PaymentSubmissionDto
 
+    suspend fun simulateDelivery(orderId: UUID)
+
     suspend fun abandonedCardHistory(orderId: UUID): List<AbandonedCardLogRecord>
 
     suspend fun getBookingHistory(bookingId: UUID): List<BookingLogRecord>
     //suspend fun getBookingHistory(orderId: UUID): List<BookingLogRecord>
 
-    suspend fun deliveryLog(orderId: Order): DeliveryInfoRecord
+    suspend fun deliveryLog(orderId: UUID): DeliveryInfoRecord
 }
 
 class DeliveryInfoRecord(
@@ -74,7 +76,7 @@ data class UserAccountFinancialLogRecord( // todo think of refund via TP system
 )
 
 enum class FinancialOperationType {
-    DEPOSIT,
+    REFUND,
     WITHDRAW
 }
 
@@ -109,9 +111,10 @@ sealed class OrderStatus {
     object OrderCollecting : OrderStatus()
     object OrderDiscarded : OrderStatus()
     object OrderBooked : OrderStatus()
+    object OrderRefund: OrderStatus()
     class OrderPayed(val paymentTime: Long) : OrderStatus()
     class OrderInDelivery(val deliveryStartTime: Long) : OrderStatus()
-    class OrderDelivered(val deliveryStartTime: Long, deliveryFinishTime: Long) : OrderStatus()
+    class OrderDelivered(val deliveryStartTime: Long, val deliveryFinishTime: Long) : OrderStatus()
     class OrderFailed(reason: String, previousStatus: OrderStatus) : OrderStatus()
 }
 

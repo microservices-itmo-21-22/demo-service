@@ -25,6 +25,8 @@ class ExternalServiceSimulator(
     }
 
     private val financialLog = ConcurrentHashMap<UUID, MutableList<UserAccountFinancialLogRecord>>()
+    private val deliveryLog = ConcurrentHashMap<UUID, DeliveryInfoRecord>()
+    private val orderToUser = ConcurrentHashMap<UUID, UUID>()
 
     override suspend fun createUser(name: String): User {
         return userStorage.create(User(name = name)).also {
@@ -33,7 +35,7 @@ class ExternalServiceSimulator(
     }
 
     override suspend fun userFinancialHistory(userId: UUID, orderId: UUID): List<UserAccountFinancialLogRecord> {
-        return financialLog[userId] ?: emptyList()
+        return financialLog[userId]?.filter { it.orderId == orderId } ?: emptyList()
     }
 
     override suspend fun getUser(id: UUID): User {
@@ -67,6 +69,7 @@ class ExternalServiceSimulator(
     }
 
     override suspend fun payOrder(userId: UUID, orderId: UUID): PaymentSubmissionDto {
+        orderToUser[orderId] = userId
         delay(Random.nextLong(1_000))
 
         val submissionTime = System.currentTimeMillis()
@@ -106,6 +109,67 @@ class ExternalServiceSimulator(
         }
 
         return PaymentSubmissionDto(submissionTime, transactionId)
+    }
+
+    override suspend fun simulateDelivery(orderId: UUID) {
+        orderStorage.getAndUpdate(orderId) { order ->
+            order.copy(status = OrderStatus.OrderInDelivery(System.currentTimeMillis()))
+        }
+        val orderBeforeDelivery = getOrder(orderId)
+        CoroutineScope(Dispatchers.Default).launch {
+            delay(Random.nextLong(orderBeforeDelivery.deliveryDuration!!.toMillis() + 1_000))
+            chooseDeliveryResult(orderId)
+        }
+    }
+
+    private suspend fun chooseDeliveryResult(orderId: UUID) {
+        val order = getOrder(orderId)
+        val expectedDeliveryTime = Duration.ofSeconds(order.deliveryDuration!!.toMillis())
+            .plus(Duration.ofMillis(order.paymentHistory.last().timestamp))
+        if (System.currentTimeMillis() < expectedDeliveryTime.toMillis()) {
+            orderStorage.getAndUpdate(orderId) {
+                val deliveryStart = (it.status as OrderStatus.OrderInDelivery).deliveryStartTime
+                it.copy(
+                    status = OrderStatus.OrderDelivered(
+                        deliveryStart,
+                        System.currentTimeMillis()
+                    )
+                )
+            }
+            deliveryLog[orderId] = DeliveryInfoRecord(
+                outcome = DeliverySubmissionOutcome.SUCCESS,
+                preparedTime = 0,
+                attempts = 1,
+                submittedTime = (orderStorage.get(orderId).status as OrderStatus.OrderDelivered).deliveryFinishTime,
+                submissionStartedTime = (orderStorage.get(orderId).status as OrderStatus.OrderDelivered).deliveryStartTime,
+                transactionId = UUID.randomUUID()
+            )
+        } else {
+            orderStorage.getAndUpdate(orderId) {
+                it.copy(status = OrderStatus.OrderRefund)
+            }
+            order.paymentHistory.last().transactionId
+            if (Random.nextInt(100) < 70) {
+                val userId = orderToUser[orderId]!!
+                val currentLog = userFinancialHistory(userId, orderId)
+                financialLog[userId]!!.add(
+                    UserAccountFinancialLogRecord(
+                        type = FinancialOperationType.REFUND,
+                        amount = currentLog.sumOf {
+                            if (it.type == FinancialOperationType.WITHDRAW) {
+                                it.amount
+                            } else {
+                                -it.amount
+                            }
+                        },
+                        orderId = orderId,
+                        paymentTransactionId = UUID.randomUUID()
+                    )
+                )
+            }
+        }
+
+        orderToUser.remove(orderId)
     }
 
     /**
@@ -189,7 +253,7 @@ class ExternalServiceSimulator(
         return itemStorage.getBookingRecordsById(bookingId)
     }
 
-    override suspend fun deliveryLog(orderId: Order): DeliveryInfoRecord {
-        TODO("Not yet implemented")
+    override suspend fun deliveryLog(orderId: UUID): DeliveryInfoRecord {
+        return deliveryLog[orderId]!!
     }
 }

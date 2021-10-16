@@ -38,7 +38,7 @@ class TestController(
         OrderSettingDeliverySlotsStage(serviceApi).asErrorFree(),
         OrderChangeItemsAfterFinalizationStage(serviceApi),
         OrderPaymentStage(serviceApi).asRetryable().asErrorFree(),
-//        OrderDeliveryStage(serviceApi).asErrorFree(),
+        OrderDeliveryStage(serviceApi).asErrorFree(),
     )
 
     fun startTestingForService(params: TestParameters) {
