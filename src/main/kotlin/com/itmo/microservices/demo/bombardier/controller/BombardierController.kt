@@ -16,6 +16,8 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import com.itmo.microservices.demo.bombardier.dto.RunningTestsResponse
 import com.itmo.microservices.demo.bombardier.dto.toExtended
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.responses.ApiResponse
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping
@@ -49,6 +51,13 @@ class BombardierController {
     }
 
     @GetMapping("running/{id}", produces = ["application/json"])
+    @Operation(
+        summary = "View info about running tests on service",
+        responses = [
+            ApiResponse(description = "OK", responseCode = "200"),
+            ApiResponse(description = "Test with name {id} was not found", responseCode = "404")
+        ]
+    )
     fun listRunningTestsPerService(@PathVariable id: String): RunningTestsResponse {
         val currentServiceTestFlow = testApi.getTestingFlowForService(id)
 
@@ -60,6 +69,12 @@ class BombardierController {
     }
 
     @GetMapping("running/index", produces = ["application/json"])
+    @Operation(
+        summary = "View info about all services and their running tests",
+        responses = [
+            ApiResponse(description = "OK", responseCode = "200"),
+        ]
+    )
     fun listAllRunningTests(): RunningTestsResponse {
         val currentTests = testApi.runningTests
             .map { it.value.testParams.toExtended(
