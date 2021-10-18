@@ -57,6 +57,7 @@ class DefaultUserService(private val userRepository: UserRepository,
             name = this.name,
             surname = this.surname,
             email = this.email,
-            password = passwordEncoder.encode(this.password)
+            password = passwordEncoder.encode(this.password),
+
         )
 }
