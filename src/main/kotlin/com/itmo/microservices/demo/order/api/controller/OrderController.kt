@@ -1,8 +1,6 @@
 package com.itmo.microservices.demo.order.api.controller
 
-import com.itmo.microservices.demo.items.api.model.CatalogItem
 import com.itmo.microservices.demo.order.api.model.OrderDto
-import com.itmo.microservices.demo.tasks.api.service.TaskService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -14,9 +12,9 @@ import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
-@RequestMapping("/orders/{order_id}")
+@RequestMapping("/orders")
 class OrderController(private val orderService: OrderService) {
-    @GetMapping
+    @GetMapping("/{order_id}")
     @Operation(
         summary = "Get order",
         responses = [
@@ -26,10 +24,8 @@ class OrderController(private val orderService: OrderService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun order(
-        @PathVariable orderID: UUID,
+    fun getOrder(
+        @PathVariable order_id: UUID,
         @Parameter(hidden = true) @AuthenticationPrincipal requester: UserDetails
-    ): OrderDto {
-        return orderService.getOrder(orderID)
-    }
+    ): OrderDto = orderService.getOrder(order_id);
 }
