@@ -1,4 +1,9 @@
 package com.itmo.microservices.demo.items.api.model
 
-class OrderItem {
-}
+import java.util.*
+
+data class OrderItem (
+    val id: UUID,
+    val title: String,
+    val price: Int
+)
