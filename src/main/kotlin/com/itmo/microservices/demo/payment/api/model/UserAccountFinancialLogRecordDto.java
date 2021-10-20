@@ -12,6 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserAccountFinancialLogRecordDto {
+    private UUID userId;
     private FinancialOperationType type;
     private Integer amount;
     private UUID orderId;

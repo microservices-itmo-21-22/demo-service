@@ -10,7 +10,9 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaymentSubmissionDto {
+public class PaymentLogRecordDto {
     private LocalDateTime timestamp;
-    private UUID transactionID;
+    private PaymentStatus status;
+    private Integer amount;
+    private UUID transactionId;
 }
