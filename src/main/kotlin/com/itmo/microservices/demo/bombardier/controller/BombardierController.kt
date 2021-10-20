@@ -51,14 +51,42 @@ class BombardierController {
         ]
     )
     fun runTest(@RequestBody request: RunTestRequest) {
-            testApi.startTestingForService(
-                TestParameters(
-                    request.serviceName,
-                    request.usersCount,
-                    request.parallelProcCount,
-                    request.testCount
-                )
+        testApi.startTestingForService(
+            TestParameters(
+                request.serviceName,
+                request.usersCount,
+                request.parallelProcCount,
+                request.testCount
             )
-           // testApi.getTestingFlowForService(request.serviceName).testFlowCoroutine.complete()
+        )
+        // testApi.getTestingFlowForService(request.serviceName).testFlowCoroutine.complete()
+    }
+
+
+    @PostMapping("/stop/{serviceName}")
+    @Operation(
+        summary = "Stop test by service name",
+        responses = [
+            ApiResponse(description = "OK", responseCode = "200"),
+            ApiResponse(description = "There is no running test with current serviceName", responseCode = "400", content = [Content()])
+        ]
+    )
+    fun stopTest(@PathVariable serviceName: String) {
+        runBlocking {
+            testApi.stopTestByServiceName(serviceName)
+        }
+    }
+
+    @PostMapping("/stopAll")
+    @Operation(
+        summary = "Stop all tests",
+        responses = [
+            ApiResponse(description = "OK", responseCode = "200")
+        ]
+    )
+    fun stopAllTests() {
+        runBlocking {
+            testApi.stopAllTests()
+        }
     }
 }
