@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.auth.impl.config
+package com.itmo.microservices.demo.users.impl.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component

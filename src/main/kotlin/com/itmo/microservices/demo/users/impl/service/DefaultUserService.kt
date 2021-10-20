@@ -3,17 +3,21 @@ package com.itmo.microservices.demo.users.impl.service
 import com.google.common.eventbus.EventBus
 import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
+import com.itmo.microservices.demo.common.exception.AccessDeniedException
 import com.itmo.microservices.demo.common.exception.NotFoundException
 import com.itmo.microservices.demo.users.api.messaging.UserCreatedEvent
 import com.itmo.microservices.demo.users.api.messaging.UserDeletedEvent
 import com.itmo.microservices.demo.users.api.service.UserService
 import com.itmo.microservices.demo.users.impl.entity.AppUser
 import com.itmo.microservices.demo.users.api.model.AppUserModel
+import com.itmo.microservices.demo.users.api.model.AuthenticationRequest
+import com.itmo.microservices.demo.users.api.model.AuthenticationResult
 import com.itmo.microservices.demo.users.api.model.RegistrationRequest
 import com.itmo.microservices.demo.users.impl.logging.UserServiceNotableEvents
 import com.itmo.microservices.demo.users.impl.repository.UserRepository
 import com.itmo.microservices.demo.users.impl.util.toModel
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -22,7 +26,8 @@ import org.springframework.stereotype.Service
 @Service
 class DefaultUserService(private val userRepository: UserRepository,
                          private val passwordEncoder: PasswordEncoder,
-                         private val eventBus: EventBus
+                         private val eventBus: EventBus,
+                         private val tokenManager: JwtTokenManager
                          ): UserService {
 
     @InjectEventLogger
@@ -59,4 +64,23 @@ class DefaultUserService(private val userRepository: UserRepository,
             email = this.email,
             password = passwordEncoder.encode(this.password)
         )
+
+    override fun authenticate(request: AuthenticationRequest): AuthenticationResult {
+        val user = findUser(request.username)
+            ?: throw NotFoundException("User with username ${request.username} not found")
+
+        if (!passwordEncoder.matches(request.password, user.password))
+            throw AccessDeniedException("Invalid password")
+
+        val accessToken = tokenManager.generateToken(user.userDetails())
+        val refreshToken = tokenManager.generateRefreshToken(user.userDetails())
+        return AuthenticationResult(accessToken, refreshToken)
+    }
+
+    override fun refresh(authentication: Authentication): AuthenticationResult {
+        val refreshToken = authentication.credentials as String
+        val principal = authentication.principal as UserDetails
+        val accessToken = tokenManager.generateToken(principal)
+        return AuthenticationResult(accessToken, refreshToken)
+    }
 }

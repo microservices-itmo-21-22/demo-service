@@ -1,6 +1,6 @@
-package com.itmo.microservices.demo.auth.impl.service
+package com.itmo.microservices.demo.users.impl.service
 
-import com.itmo.microservices.demo.auth.impl.config.SecurityProperties
+import com.itmo.microservices.demo.users.impl.config.SecurityProperties
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
