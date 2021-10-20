@@ -3,9 +3,12 @@ package com.itmo.microservices.demo.orders.api.controller
 import com.itmo.microservices.demo.orders.api.model.OrderModel
 import com.itmo.microservices.demo.orders.api.service.OrderService
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
@@ -13,7 +16,7 @@ import java.util.*
 @RequestMapping("/user")
 class OrderController(private val orderService: OrderService) {
 
-    @GetMapping("/{userId}/orders")
+    @GetMapping("/{userName}/orders")
     @Operation(
             summary = "Get all orders",
             responses = [
@@ -22,7 +25,7 @@ class OrderController(private val orderService: OrderService) {
             ],
             security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getOrders(@PathVariable userId : UUID) : List<OrderModel> = orderService.getOrdersByUserId(userId)
+    fun getOrders(@PathVariable userName : String) : List<OrderModel> = orderService.getOrdersByUserId(userName)
 
     @GetMapping("/orders/{orderId}")
     @Operation(
@@ -34,5 +37,29 @@ class OrderController(private val orderService: OrderService) {
             security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun getOrder(@PathVariable orderId : UUID) : OrderModel = orderService.getOrder(orderId)
+
+    @PostMapping("/orders")
+    @Operation(
+            summary = "Creates new order",
+            responses = [
+                ApiResponse(description = "OK", responseCode = "200"),
+                ApiResponse(description = "Bad request", responseCode = "400", content = [Content()]),
+                ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()])
+            ],
+            security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    fun createOrder(@RequestBody order : OrderModel,
+                    @Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails) = orderService.addOrder(order, user.username)
+
+    @DeleteMapping("order/{orderId}")
+    @Operation(
+            summary = "Creates new order",
+            responses = [
+                ApiResponse(description = "OK", responseCode = "200"),
+                ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()])
+            ],
+            security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    fun deleteOrder(@PathVariable orderId : UUID) = orderService.deleteOrder(orderId)
 
 }
