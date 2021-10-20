@@ -2,11 +2,11 @@ package com.itmo.microservices.demo.bombardier.external.storage
 
 import com.itmo.microservices.demo.bombardier.flow.BookingLogRecord
 import com.itmo.microservices.demo.bombardier.flow.CatalogItem
-import com.itmo.microservices.demo.bombardier.flow.OrderItem
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
 
 class ItemStorage {
     val items: ConcurrentHashMap<UUID, Pair<CatalogItem, Mutex>> = listOf(
@@ -19,7 +19,7 @@ class ItemStorage {
         CatalogItem(title = "Bed", amount = Int.MAX_VALUE)
     ).map { it.id to (it to Mutex()) }.toMap(ConcurrentHashMap<UUID, Pair<CatalogItem, Mutex>>())
 
-    val bookingRecords: MutableList<BookingLogRecord> = mutableListOf() // todo sukhoa should be moved to separate class
+    val bookingRecords = ConcurrentLinkedQueue<BookingLogRecord>() // todo sukhoa should be moved to separate class
 
     suspend fun getBookingRecordsById(bookingId: UUID): List<BookingLogRecord> {
         return bookingRecords.filter { it.bookingId == bookingId }

@@ -6,6 +6,7 @@ import com.itmo.microservices.demo.bombardier.external.storage.OrderStorage
 import com.itmo.microservices.demo.bombardier.external.storage.UserStorage
 import com.itmo.microservices.demo.bombardier.stages.*
 import com.itmo.microservices.demo.bombardier.stages.TestStage.TestContinuationType.CONTINUE
+import com.itmo.microservices.demo.common.exception.BadRequestException
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -42,17 +43,16 @@ class TestController(
     )
 
     fun startTestingForService(params: TestParameters) {
-        if (runningTests.contains(params.serviceName)) {
-            throw IllegalArgumentException("There is no such feature launch several flows for the service in parallel :(")
-        }
-
         val testingFlowCoroutine = SupervisorJob()
+
+        val v = runningTests.putIfAbsent(params.serviceName, TestingFlow(params, testingFlowCoroutine))
+        if (v != null) {
+            throw BadRequestException("There is no such feature launch several flows for the service in parallel :(")
+        }
 
         runBlocking {
             userManagement.createUsersPool(params.serviceName, params.numberOfUsers)
         }
-
-        runningTests[params.serviceName] = TestingFlow(params, testingFlowCoroutine)
 
         repeat(params.parallelProcessesNumber) {
             log.info("Launch coroutine for ${params.serviceName}")
@@ -67,17 +67,24 @@ class TestController(
     class TestingFlow(
         val testParams: TestParameters,
         val testFlowCoroutine: CompletableJob,
-        val testsPerformed: AtomicInteger = AtomicInteger(1)
+        val testsStarted: AtomicInteger = AtomicInteger(1),
+        val testsFinished: AtomicInteger = AtomicInteger(0)
     )
 
     private fun launchNewTestFlow(serviceName: String) {
-        val testingFlow = runningTests[serviceName] ?: throw IllegalStateException("No running test found for :$serviceName")
+        val testingFlow = runningTests[serviceName] ?: return
 
-        if (testingFlow.testParams.numberOfTests != null && testingFlow.testsPerformed.get() > testingFlow.testParams.numberOfTests) {
+        if (testingFlow.testParams.numberOfTests != null && testingFlow.testsFinished.get() >= testingFlow.testParams.numberOfTests) {
             log.info("Wrapping up test flow. Number of tests exceeded")
+            runningTests.remove(serviceName)
             return
         }
-        val testNum = testingFlow.testsPerformed.getAndIncrement() // data race :(
+
+        val testNum = testingFlow.testsStarted.getAndIncrement() // data race :(
+        if (testingFlow.testParams.numberOfTests != null && testNum > testingFlow.testParams.numberOfTests) {
+            log.info("All tests Started. No new tests")
+            return
+        }
 
         log.info("Starting $testNum test for service $serviceName, parent job is ${testingFlow.testFlowCoroutine}")
 
@@ -92,6 +99,7 @@ class TestController(
             if (th != null) {
                 log.error("Unexpected fail in test", th)
             }
+            log.info("Test ${testingFlow.testsFinished.incrementAndGet()} finished")
             launchNewTestFlow(serviceName)
         }
     }
