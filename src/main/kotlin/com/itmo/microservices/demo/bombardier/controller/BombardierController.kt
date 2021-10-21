@@ -8,16 +8,11 @@ import com.itmo.microservices.demo.bombardier.external.storage.UserStorage
 import com.itmo.microservices.demo.bombardier.flow.TestController
 import com.itmo.microservices.demo.bombardier.flow.TestParameters
 import com.itmo.microservices.demo.bombardier.flow.UserManagement
-import com.itmo.microservices.demo.bombardier.views.RunningTestsResponse
-import com.itmo.microservices.demo.bombardier.views.toExtended
-import com.itmo.microservices.demo.common.exception.NotFoundException
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import com.itmo.microservices.demo.bombardier.dto.RunningTestsResponse
 import com.itmo.microservices.demo.bombardier.dto.toExtended
-import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.responses.ApiResponse
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping
