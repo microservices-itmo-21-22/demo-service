@@ -1,5 +1,6 @@
 package com.itmo.microservices.demo.bombardier.flow
 
+import com.itmo.microservices.demo.bombardier.exceptions.IllegalTestingFlowNameException
 import com.itmo.microservices.demo.bombardier.exception.BadRequestException
 import com.itmo.microservices.demo.bombardier.external.ExternalServiceSimulator
 import com.itmo.microservices.demo.bombardier.external.storage.ItemStorage
@@ -7,7 +8,6 @@ import com.itmo.microservices.demo.bombardier.external.storage.OrderStorage
 import com.itmo.microservices.demo.bombardier.external.storage.UserStorage
 import com.itmo.microservices.demo.bombardier.stages.*
 import com.itmo.microservices.demo.bombardier.stages.TestStage.TestContinuationType.CONTINUE
-import com.itmo.microservices.demo.common.exception.BadRequestException
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -62,12 +62,11 @@ class TestController(
     }
 
     fun getTestingFlowForService(serviceName: String): TestingFlow {
-        return runningTests[serviceName] ?: throw IllegalArgumentException("There is no running test for $serviceName")
+        return runningTests[serviceName] ?: throw IllegalTestingFlowNameException("There is no running test for $serviceName")
     }
 
     suspend fun stopTestByServiceName(serviceName: String) {
-        runningTests[serviceName]?.testFlowCoroutine?.cancelAndJoin()
-            ?: throw BadRequestException("There is no running tests with serviceName = $serviceName")
+        getTestingFlowForService(serviceName).testFlowCoroutine.cancelAndJoin()
         runningTests.remove(serviceName)
     }
 

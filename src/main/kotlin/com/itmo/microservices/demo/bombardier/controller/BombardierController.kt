@@ -11,8 +11,14 @@ import com.itmo.microservices.demo.bombardier.flow.UserManagement
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse
+import com.itmo.microservices.demo.bombardier.dto.RunningTestsResponse
+import com.itmo.microservices.demo.bombardier.dto.toExtended
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -37,6 +43,40 @@ class BombardierController {
             logger.info("Finished waiting for test job completion.")
 //            testApi.executor.shutdownNow()
         }
+    }
+
+    @GetMapping("running/{id}", produces = ["application/json"])
+    @Operation(
+        summary = "View info about running tests on service",
+        responses = [
+            ApiResponse(description = "OK", responseCode = "200"),
+            ApiResponse(description = "Test with name {id} was not found", responseCode = "404")
+        ]
+    )
+    fun listRunningTestsPerService(@PathVariable id: String): RunningTestsResponse {
+        val currentServiceTestFlow = testApi.getTestingFlowForService(id)
+
+        val testParamsExt = currentServiceTestFlow.testParams.toExtended(
+            currentServiceTestFlow.testsStarted.get(),
+            currentServiceTestFlow.testsFinished.get()
+        )
+        return RunningTestsResponse(listOf(testParamsExt))
+    }
+
+    @GetMapping("running/index", produces = ["application/json"])
+    @Operation(
+        summary = "View info about all services and their running tests",
+        responses = [
+            ApiResponse(description = "OK", responseCode = "200"),
+        ]
+    )
+    fun listAllRunningTests(): RunningTestsResponse {
+        val currentTests = testApi.runningTests
+            .map { it.value.testParams.toExtended(
+                it.value.testsStarted.get(),
+                it.value.testsFinished.get())
+            }
+        return RunningTestsResponse(currentTests)
     }
 
     @PostMapping("/run")
