@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.tasks.impl.service
+package com.itmo.microservices.demo.categories.impl.service
 
 import com.google.common.eventbus.EventBus
 import com.itmo.microservices.commonlib.annotations.InjectEventLogger
