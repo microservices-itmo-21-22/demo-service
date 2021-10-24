@@ -1,7 +1,5 @@
 package com.itmo.microservices.demo.order.impl.entity
 
-import com.itmo.microservices.demo.products.impl.entity.Product
-import com.itmo.microservices.demo.users.impl.entity.AppUser
 import java.util.*
 import javax.persistence.*
 
@@ -12,15 +10,15 @@ class Busket {
     @GeneratedValue
     var id: UUID? = null
     @OneToMany
-    var products: List<Product>? = null
+    var products: List<OrderProduct>? = null
     @ManyToOne
-    var user: AppUser? = null
+    var user: OrderAppUser? = null
     @OneToOne
-    var order: Order? = null
+    var order: OrderEntity? = null
 
     constructor()
 
-    constructor(products: List<Product>?, user: AppUser?, order: Order?) {
+    constructor(products: List<OrderProduct>?, user: OrderAppUser?) {
         this.products = products
         this.user = user
         this.order = order

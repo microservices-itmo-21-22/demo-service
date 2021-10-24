@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.users.api.model
+package com.itmo.microservices.demo.order.api.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.itmo.microservices.demo.order.impl.entity.Busket
@@ -11,7 +11,8 @@ data class AppUserModel(
         val surname: String,
         val email: String,
         @JsonIgnore
-        val password: String) {
+        val password: String,
+        val buskets: List<Busket>?) {
 
-        fun userDetails(): UserDetails = User(username, password, emptyList())
+    fun userDetails(): UserDetails = User(username, password, emptyList())
 }

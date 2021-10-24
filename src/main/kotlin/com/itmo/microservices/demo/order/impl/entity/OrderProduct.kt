@@ -1,13 +1,13 @@
-package com.itmo.microservices.demo.products.impl.entity;
+package com.itmo.microservices.demo.order.impl.entity
 
-import com.itmo.microservices.demo.products.api.model.ProductType
+import com.itmo.microservices.demo.order.api.model.ProductType
 import java.util.*
-import javax.persistence.Entity;
+import javax.persistence.Entity
 import javax.persistence.GeneratedValue
-import javax.persistence.Id;
+import javax.persistence.Id
 
 @Entity
-public class Product {
+public class OrderProduct {
 
     @Id
     @GeneratedValue

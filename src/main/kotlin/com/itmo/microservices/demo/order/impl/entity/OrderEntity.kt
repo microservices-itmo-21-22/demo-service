@@ -1,12 +1,10 @@
 package com.itmo.microservices.demo.order.impl.entity
 
-import com.itmo.microservices.demo.order.impl.entity.Busket
-import com.itmo.microservices.demo.users.impl.entity.AppUser
 import java.util.*
 import javax.persistence.*
 
 @Entity
-class Order {
+class OrderEntity {
 
     @Id
     @GeneratedValue

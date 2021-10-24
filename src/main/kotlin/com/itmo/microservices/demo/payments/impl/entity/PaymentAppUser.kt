@@ -1,10 +1,10 @@
-package com.itmo.microservices.demo.users.impl.entity
+package com.itmo.microservices.demo.payments.impl.entity
 
 import javax.persistence.Entity
 import javax.persistence.Id
 
 @Entity
-class AppUser {
+class PaymentAppUser {
 
     @Id
     var username: String? = null

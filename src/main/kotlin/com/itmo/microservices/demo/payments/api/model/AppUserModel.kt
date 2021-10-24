@@ -1,7 +1,7 @@
-package com.itmo.microservices.demo.users.api.model
+package com.itmo.microservices.demo.payments.api.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.itmo.microservices.demo.order.impl.entity.Busket
+import com.itmo.microservices.demo.payments.impl.entity.Payment
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 
@@ -11,7 +11,8 @@ data class AppUserModel(
         val surname: String,
         val email: String,
         @JsonIgnore
-        val password: String) {
+        val password: String,
+        val payments: List<Payment>?) {
 
-        fun userDetails(): UserDetails = User(username, password, emptyList())
+    fun userDetails(): UserDetails = User(username, password, emptyList())
 }
