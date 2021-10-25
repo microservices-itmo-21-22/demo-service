@@ -6,7 +6,7 @@ import com.itmo.microservices.demo.payments.impl.entity.PaymentAppUser
 import org.springframework.security.core.userdetails.UserDetails
 
 interface PaymentService {
-    fun getUserTransactionsInfo(username: String): List<PaymentModel>
+    fun getUserTransactionsInfo(userDetails: UserDetails): List<PaymentModel>
     fun refund(username: String): Boolean
     fun pay(payment: PaymentModel, userDetails: UserDetails)
 }

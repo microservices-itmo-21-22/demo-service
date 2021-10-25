@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface PaymentRepository: JpaRepository<Payment, String>{
-    fun findAllByUser_Username(username: String): List<Payment>?
+    fun findAllByUsername(username: String): List<Payment>?
 }

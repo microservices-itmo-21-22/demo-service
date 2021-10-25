@@ -19,7 +19,7 @@ import java.util.*
 @RequestMapping("/payment")
 class PaymentController(private val paymentService: PaymentService) {
 
-    @GetMapping("/{username}")
+    @GetMapping
     @Operation(
         summary = "Get all transactions of user by username",
         responses = [
@@ -28,7 +28,7 @@ class PaymentController(private val paymentService: PaymentService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getUserTransactionsInfo(@PathVariable username: String): List<PaymentModel> = paymentService.getUserTransactionsInfo(username)
+    fun getUserTransactionsInfo(@Parameter(hidden = true) @AuthenticationPrincipal userDetails: UserDetails): List<PaymentModel> = paymentService.getUserTransactionsInfo(userDetails)
 
     @PostMapping
     @Operation(

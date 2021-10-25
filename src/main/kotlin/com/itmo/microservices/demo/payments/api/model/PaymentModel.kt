@@ -6,6 +6,6 @@ import java.util.*
 data class PaymentModel (
     val id: UUID?,
     val date: Date?,
-    val status: Int?,
-    val user: PaymentAppUser?
+    val status: Int? = 0,
+    val username: String?
 )

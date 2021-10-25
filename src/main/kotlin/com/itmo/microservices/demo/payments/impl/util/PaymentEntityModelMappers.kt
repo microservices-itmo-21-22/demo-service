@@ -8,14 +8,14 @@ import com.itmo.microservices.demo.users.impl.entity.AppUser
 fun PaymentModel.toEntity(): Payment = Payment(
     date = this.date,
     status = this.status,
-    user = this.user
+    username = this.username
 )
 
 fun Payment.toModel(): PaymentModel = PaymentModel(
     id = this.id,
     date = this.date,
     status = this.status,
-    user = this.user
+    username = this.username
 )
 
 fun AppUser.toPaymentAppUser(): PaymentAppUser = PaymentAppUser(
