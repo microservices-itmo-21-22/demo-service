@@ -30,6 +30,24 @@ class PaymentController(private val paymentService: PaymentService) {
     )
     fun getUserTransactionsInfo(@Parameter(hidden = true) @AuthenticationPrincipal userDetails: UserDetails): List<PaymentModel> = paymentService.getUserTransactionsInfo(userDetails)
 
+    @PostMapping("/{paymentId}")
+    @Operation(
+        summary = "Assign task",
+        responses = [
+            ApiResponse(description = "OK", responseCode = "200"),
+            ApiResponse(
+                description = "Unauthorized",
+                responseCode = "403",
+                content = [Content()]
+            ),
+            ApiResponse(description = "Payment not found", responseCode = "404", content = [Content()])
+        ],
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    fun refund(@PathVariable paymentId: UUID,
+                   @Parameter(hidden = true) @AuthenticationPrincipal userDetails: UserDetails) =
+        paymentService.refund(paymentId, userDetails)
+
     @PostMapping
     @Operation(
         summary = "Pay",
