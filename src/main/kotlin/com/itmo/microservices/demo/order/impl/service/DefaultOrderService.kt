@@ -2,12 +2,16 @@ package com.itmo.microservices.demo.order.impl.service
 
 import com.itmo.microservices.demo.order.api.model.OrderDto
 import com.itmo.microservices.demo.order.api.service.OrderService
+import com.itmo.microservices.demo.order.impl.repository.OrderRepository
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.webjars.NotFoundException
 import java.util.*
 
 @Service
-class DefaultOrderService : OrderService {
+class DefaultOrderService(private val orderRepository: OrderRepository) : OrderService {
     override fun getOrder(order_id: UUID): OrderDto {
-        TODO("Not yet implemented")
+        return orderRepository.findByIdOrNull(order_id)
+            ?: throw NotFoundException("Order with Order ID $order_id not found").toModel()
     }
 }
