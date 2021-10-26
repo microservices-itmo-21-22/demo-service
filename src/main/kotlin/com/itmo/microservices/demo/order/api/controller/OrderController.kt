@@ -1,6 +1,7 @@
 package com.itmo.microservices.demo.order.api.controller
 
 import com.itmo.microservices.demo.order.api.model.OrderDto
+import com.itmo.microservices.demo.order.api.service.OrderService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
