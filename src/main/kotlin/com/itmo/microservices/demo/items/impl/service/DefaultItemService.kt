@@ -8,8 +8,8 @@ import com.itmo.microservices.demo.common.exception.NotFoundException
 import com.itmo.microservices.demo.items.api.model.CatalogItem
 import com.itmo.microservices.demo.items.api.service.ItemService
 import com.itmo.microservices.demo.items.impl.repository.ItemRepository
-import com.itmo.microservices.demo.tasks.impl.util.toModel
-import com.itmo.microservices.demo.tasks.impl.util.toEntity
+import com.itmo.microservices.demo.items.impl.util.toModel
+import com.itmo.microservices.demo.items.impl.util.toEntity
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.*
