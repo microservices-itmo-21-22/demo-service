@@ -3,8 +3,10 @@ package com.itmo.microservices.demo.bombardier.external
 import com.shopify.promises.Promise
 import com.shopify.promises.then
 import okhttp3.*
+import okhttp3.internal.Util.EMPTY_REQUEST
 import org.springframework.boot.configurationprocessor.json.JSONObject
 import org.springframework.boot.json.GsonJsonParser
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import java.io.IOException
 import java.lang.IllegalStateException
@@ -73,7 +75,8 @@ class ExternalServiceApiCommunicator(private val baseUrl: URL) {
     private fun reauthenticate(token: ExternalServiceToken): Promise<ExternalServiceToken, IOException> {
         return execute {
             url("/authentication")
-            post(RequestBody.create(JSON, body.toString()))
+            header(HttpHeaders.AUTHORIZATION, token.refreshToken)
+            post(EMPTY_REQUEST)
 
         }.then {
             val resp = GsonJsonParser().parseMap(it.message())
@@ -110,9 +113,12 @@ class ExternalServiceApiCommunicator(private val baseUrl: URL) {
     }
 
     fun executeWithAuth(credentials: ExternalServiceToken, builderContext: Request.Builder.() -> Unit): Promise<Response, IOException> {
-        // todo check if auth is alive
+        if (credentials.isTokenExpired()) {
+            reauthenticate(credentials)
+        }
+
         return execute {
-            // todo pass token here
+            header(HttpHeaders.AUTHORIZATION, credentials.refreshToken)
             builderContext(this)
         }
     }

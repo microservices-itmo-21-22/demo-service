@@ -13,6 +13,8 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import com.itmo.microservices.demo.bombardier.dto.RunningTestsResponse
 import com.itmo.microservices.demo.bombardier.dto.toExtended
+import com.itmo.microservices.demo.bombardier.external.ExternalServiceApiCommunicator
+import com.shopify.promises.onResolve
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.*
+import java.net.URL
 
 @RestController
 @RequestMapping("/test")
@@ -127,6 +130,16 @@ class BombardierController {
     fun stopAllTests() {
         runBlocking {
             testApi.stopAllTests()
+        }
+    }
+
+    @GetMapping("/testApi")
+    fun testApi() {
+        val communicator = ExternalServiceApiCommunicator(URL("http://localhost:8080/"))
+        communicator.authenticate("user", "123").onResolve {
+            communicator.executeWithAuth(it) { url(URL("/users/me")) }.onResolve {
+                logger.info(it.body().toString())
+            }
         }
     }
 }
