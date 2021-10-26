@@ -24,5 +24,4 @@ class OrderEntity {
         return "Order(date=$date, busket=$busket)"
     }
 
-
 }

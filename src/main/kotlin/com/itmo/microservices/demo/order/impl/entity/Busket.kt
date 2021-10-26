@@ -18,7 +18,7 @@ class Busket {
 
     constructor()
 
-    constructor(products: List<OrderProduct>?, user: OrderAppUser?) {
+    constructor(products: List<OrderProduct>?, user: OrderAppUser?, order: OrderEntity?) {
         this.products = products
         this.user = user
         this.order = order
@@ -27,6 +27,5 @@ class Busket {
     override fun toString(): String {
         return "Busket(products=$products, user=$user, order=$order)"
     }
-
 
 }
