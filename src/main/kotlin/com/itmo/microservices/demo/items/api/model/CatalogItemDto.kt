@@ -2,8 +2,10 @@ package com.itmo.microservices.demo.items.api.model
 
 import java.util.*
 
-data class OrderItem (
+data class CatalogItemDto(
     val id: UUID,
     val title: String,
-    val price: Int
+    val description: String,
+    val price: Int = 100,
+    val amount: Int
 )

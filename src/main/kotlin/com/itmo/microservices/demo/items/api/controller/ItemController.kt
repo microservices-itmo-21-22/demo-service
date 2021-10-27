@@ -1,6 +1,6 @@
 package com.itmo.microservices.demo.items.api.controller
 
-import com.itmo.microservices.demo.items.api.model.CatalogItem
+import com.itmo.microservices.demo.items.api.model.CatalogItemDto
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -26,7 +26,7 @@ class ItemController{
     fun allItems(
         @RequestParam available: Boolean,
         @Parameter(hidden = true) @AuthenticationPrincipal requester: UserDetails
-    ): List<CatalogItem> {
+    ): List<CatalogItemDto> {
         return listOf()
     }
 
