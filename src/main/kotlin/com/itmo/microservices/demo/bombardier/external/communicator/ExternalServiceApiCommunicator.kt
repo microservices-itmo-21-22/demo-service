@@ -20,7 +20,7 @@ open class ExternalServiceApiCommunicator(private val baseUrl: URL) {
 
     private val client = OkHttpClient()
 
-    fun authenticate(username: String, password: String) = execute("/authentication") {
+    open fun authenticate(username: String, password: String) = execute("/authentication") {
         val body = JSONObject().apply {
             put("username", username)
             put("password", password)
@@ -31,7 +31,7 @@ open class ExternalServiceApiCommunicator(private val baseUrl: URL) {
         Promise.ofSuccess(Json.decodeFromString<TokenResponse>(it.body()!!.string()).toExternalServiceToken(baseUrl))
     }
 
-    private fun reauthenticate(token: ExternalServiceToken) = execute("/authentication/refresh") {
+    protected fun reauthenticate(token: ExternalServiceToken) = execute("/authentication/refresh") {
         assert(!token.isRefreshTokenExpired())
         header(HttpHeaders.AUTHORIZATION, "Bearer ${token.refreshToken}")
     }.then {

@@ -7,7 +7,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.Request
 import java.net.URL
 
-class ExtendedExternalServiceApiCommunicator(baseUrl: URL) : ExternalServiceApiCommunicator(baseUrl) {
+open class ExtendedExternalServiceApiCommunicator(baseUrl: URL) : ExternalServiceApiCommunicator(baseUrl) {
     inline fun <reified T> executeWithDeserialize(url: String) = executeWithDeserialize<T>(url) {}
     inline fun <reified T> executeWithAuthAndDeserialize(url: String, credentials: ExternalServiceToken)
         = executeWithAuthAndDeserialize<T>(url, credentials) {}
