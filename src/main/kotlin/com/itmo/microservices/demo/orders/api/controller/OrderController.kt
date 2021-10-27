@@ -1,6 +1,7 @@
 package com.itmo.microservices.demo.orders.api.controller
 
 import com.itmo.microservices.demo.orders.api.model.OrderModel
+import com.itmo.microservices.demo.orders.api.model.PaymentModel
 import com.itmo.microservices.demo.orders.api.service.OrderService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -60,6 +61,20 @@ class OrderController(private val orderService: OrderService) {
             ],
             security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun deleteOrder(@PathVariable orderId : UUID) = orderService.deleteOrder(orderId)
+    fun deleteOrder(@PathVariable orderId : UUID,
+                    @Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails) = orderService.deleteOrder(orderId, user.username)
+
+    @PostMapping("/order/{orderId}/pay")
+    @Operation(
+            summary = "Assign payment entity to order",
+            responses = [
+                ApiResponse(description = "OK", responseCode = "200"),
+                ApiResponse(description = "Bad request", responseCode = "400", content = [Content()]),
+                ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()])
+            ],
+            security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    fun assignPayment(@PathVariable orderId : UUID,
+                      @RequestBody payment : PaymentModel) = orderService.assignPayment(orderId, payment)
 
 }

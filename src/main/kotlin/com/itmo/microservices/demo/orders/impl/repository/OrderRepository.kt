@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface OrderRepository : JpaRepository<Order, UUID>, JpaSpecificationExecutor<Order> {
+interface OrderRepository : JpaRepository<Order, UUID> {
 }
