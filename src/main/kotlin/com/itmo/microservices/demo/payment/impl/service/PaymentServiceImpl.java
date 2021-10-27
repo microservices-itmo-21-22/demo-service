@@ -8,8 +8,8 @@ import com.itmo.microservices.demo.payment.api.service.PaymentService;
 import com.itmo.microservices.demo.payment.impl.model.UserAccountFinancialLogRecord;
 import com.itmo.microservices.demo.payment.impl.repository.UserAccountFinancialLogRecordRepository;
 import com.itmo.microservices.demo.payment.impl.utils.UserAccountFinancialLogRecordUtils;
+import com.itmo.microservices.demo.users.api.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -24,37 +24,30 @@ import java.util.stream.Collectors;
 public class PaymentServiceImpl implements PaymentService {
 
     private final UserAccountFinancialLogRecordRepository userAccountFinancialLogRecordRepository;
-
-    @PostConstruct
-    public void init() {
-
-    }
+    private final UserService userService;
 
     @Override
-    public List<UserAccountFinancialLogRecordDto> getFinlog(UUID userId) {
-        userAccountFinancialLogRecordRepository.save(
-                UserAccountFinancialLogRecord.builder()
-                        .paymentTransactionId(UUID.randomUUID())
-                        .amount(1)
-                        .type(FinancialOperationType.REFUND)
-                        .orderId(UUID.randomUUID())
-                        .timestamp(LocalDateTime.now())
-                        .userId(userId)
-                        .build()
-        );
+    public List<UserAccountFinancialLogRecordDto> getFinlog(String username, UUID orderId) {
+        var user = userService.getUser(username);
+
+        if (user == null) {
+            throw new RuntimeException(); //TODO:: implement related exception
+        }
 
         userAccountFinancialLogRecordRepository.save(
                 UserAccountFinancialLogRecord.builder()
                         .paymentTransactionId(UUID.randomUUID())
                         .amount(1)
                         .type(FinancialOperationType.REFUND)
-                        .orderId(UUID.randomUUID())
+                        .orderId(orderId != null ? orderId : UUID.randomUUID())
                         .timestamp(LocalDateTime.now())
-                        .userId(userId)
+                        .userId(user.getId())
                         .build()
         ); // temporary just to test
 
-        var list = userAccountFinancialLogRecordRepository.findAllByUserId(userId);
+        var list = orderId != null ?
+                userAccountFinancialLogRecordRepository.findAllByUserIdAndOrderId(user.getId(), orderId) :
+                userAccountFinancialLogRecordRepository.findAllByUserId(user.getId()); //TODO:: criteria API? @Query?
         return list
                 .stream()
                 .map(UserAccountFinancialLogRecordUtils::entityToDto)

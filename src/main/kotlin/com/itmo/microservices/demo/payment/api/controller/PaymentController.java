@@ -20,9 +20,10 @@ public class PaymentController {
 
     @GetMapping("/finlog")
     List<UserAccountFinancialLogRecordDto> getFinlog(
-            @RequestParam(value = "user_id", required = false) UUID userId
+            @AuthenticationPrincipal UserDetails user,
+            @RequestParam(value = "order_id", required = false) UUID orderId
     ) {
-        return paymentService.getFinlog(userId);
+        return paymentService.getFinlog(user.getUsername(), orderId);
     }
 
     @PostMapping
