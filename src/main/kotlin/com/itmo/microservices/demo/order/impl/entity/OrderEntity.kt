@@ -35,6 +35,8 @@ class OrderEntity {
         this.userId = userId
         this.timeCreated = timeCreated
         this.status = status
+        this.itemsMap = itemsMap
         this.deliveryDuration = deliveryDuration
+        this.paymentHistory = paymentHistory
     }
 }
