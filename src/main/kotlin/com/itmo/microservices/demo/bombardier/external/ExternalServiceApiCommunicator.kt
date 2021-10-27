@@ -2,10 +2,12 @@ package com.itmo.microservices.demo.bombardier.external
 
 import com.shopify.promises.Promise
 import com.shopify.promises.then
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import okhttp3.*
 import okhttp3.internal.Util.EMPTY_REQUEST
 import org.springframework.boot.configurationprocessor.json.JSONObject
-import org.springframework.boot.json.GsonJsonParser
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import java.io.IOException
@@ -14,10 +16,15 @@ import java.net.URL
 import java.time.Duration
 import java.time.LocalDateTime
 
-class InvalidExternalServiceResponse(val code: Int, val response: Response, msg: String) : IOException(msg)
-class TokenHasExpiredException() : IllegalStateException()
+// responses
+@Serializable
+data class TokenResponse(val accessToken: String?, val refreshToken: String)
+fun TokenResponse.toExternalServiceToken(service: URL) = ExternalServiceToken(service, accessToken!!, refreshToken)
 
-class ExternalServiceToken(accessToken: String, refreshToken: String) {
+class InvalidExternalServiceResponse(val code: Int, val response: Response, msg: String) : IOException(msg)
+class TokenHasExpiredException : IllegalStateException()
+
+class ExternalServiceToken(val service: URL, accessToken: String, refreshToken: String) {
     private val tokenLifetime: Duration = Duration.ofMinutes(15)
     private val refreshTokenLifetime: Duration = Duration.ofDays(30)
 
@@ -46,8 +53,12 @@ class ExternalServiceToken(accessToken: String, refreshToken: String) {
             _refreshToken = value
         }
 
-    fun isTokenExpired() = tokenCreatedAt + tokenLifetime > LocalDateTime.now()
-    fun isRefreshTokenExpired() = refreshTokenCreatedAt + refreshTokenLifetime > LocalDateTime.now()
+    fun isTokenExpired() = tokenCreatedAt + tokenLifetime <= LocalDateTime.now()
+    fun isRefreshTokenExpired() = refreshTokenCreatedAt + refreshTokenLifetime <= LocalDateTime.now()
+
+    override fun toString(): String {
+        return "[$service: access $_accessToken (alive ${!isTokenExpired()}), refresh $_refreshToken (alive ${!isRefreshTokenExpired()})]"
+    }
 }
 
 class ExternalServiceApiCommunicator(private val baseUrl: URL) {
@@ -55,20 +66,17 @@ class ExternalServiceApiCommunicator(private val baseUrl: URL) {
     private val client = OkHttpClient()
 
     fun authenticate(username: String, password: String): Promise<ExternalServiceToken, IOException> {
-        val body = JSONObject()
-        body.put("username", username)
-        body.put("password", password)
+        val body = JSONObject().apply {
+            put("username", username)
+            put("password", password)
+        }
 
         return execute {
             url("/authentication")
             post(RequestBody.create(JSON, body.toString()))
 
         }.then {
-            val resp = GsonJsonParser().parseMap(it.message())
-            val accessToken = resp["accessToken"] as String
-            val refreshToken = resp["refreshToken"] as String
-
-            Promise.ofSuccess(ExternalServiceToken(accessToken, refreshToken))
+            Promise.ofSuccess(Json.decodeFromString<TokenResponse>(it.message()).toExternalServiceToken(baseUrl))
         }
     }
 
@@ -79,11 +87,7 @@ class ExternalServiceApiCommunicator(private val baseUrl: URL) {
             post(EMPTY_REQUEST)
 
         }.then {
-            val resp = GsonJsonParser().parseMap(it.message())
-            val accessToken = resp["accessToken"] as String
-            val refreshToken = resp["refreshToken"] as String
-
-            Promise.ofSuccess(ExternalServiceToken(accessToken, refreshToken))
+            Promise.ofSuccess(Json.decodeFromString<TokenResponse>(it.message()).toExternalServiceToken(baseUrl))
         }
     }
 
@@ -98,15 +102,15 @@ class ExternalServiceApiCommunicator(private val baseUrl: URL) {
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    if (response.code() != HttpStatus.OK.value()) {
-                        reject(InvalidExternalServiceResponse(response.code(),
-                            response,
-                            "External service returned non-OK code: ${response.code()}"
-                            )
-                        )
+                    if (response.code() == HttpStatus.OK.value()) {
+                        resolve(response)
                         return
                     }
-                    resolve(response)
+                    reject(InvalidExternalServiceResponse(response.code(),
+                        response,
+                        "External service returned non-OK code: ${response.code()}"
+                    )
+                    )
                 }
             })
         }
@@ -126,6 +130,15 @@ class ExternalServiceApiCommunicator(private val baseUrl: URL) {
     private class RequestBuilderWithBaseUrl(private val baseUrl: URL) : Request.Builder() {
         override fun url(url: URL): Request.Builder {
             return super.url(URL(baseUrl, url.toString()))
+        }
+
+        override fun url(url: String): Request.Builder {
+            return super.url(URL(baseUrl, url))
+        }
+
+        // todo: Other methods call this method. It's better to override this one, but I don't know how..
+        override fun url(url: HttpUrl): Request.Builder {
+            return super.url(url)
         }
     }
 }

@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import com.itmo.microservices.demo.bombardier.dto.RunningTestsResponse
 import com.itmo.microservices.demo.bombardier.dto.toExtended
 import com.itmo.microservices.demo.bombardier.external.ExternalServiceApiCommunicator
-import com.shopify.promises.onResolve
+import com.shopify.promises.Promise
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping
@@ -136,9 +136,10 @@ class BombardierController {
     @GetMapping("/testApi")
     fun testApi() {
         val communicator = ExternalServiceApiCommunicator(URL("http://localhost:8080/"))
-        communicator.authenticate("user", "123").onResolve {
-            communicator.executeWithAuth(it) { url(URL("/users/me")) }.onResolve {
-                logger.info(it.body().toString())
+        communicator.authenticate("user1", "user1").whenComplete {
+            when (it) {
+                is Promise.Result.Success -> println(it.toString())
+                is Promise.Result.Error -> println("shit")
             }
         }
     }
