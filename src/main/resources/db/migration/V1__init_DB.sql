@@ -1,10 +1,10 @@
-CREATE TABLE IF NOT EXISTS stosk
+CREATE TABLE IF NOT EXISTS stock
 (
     id              SERIAL PRIMARY KEY,
     name            VARCHAR(255),
     price           decimal(10, 2),
     total_count     VARCHAR(255),
-    reserved_count  VARCHAR(255),
+    reserved_count  VARCHAR(255),https://github.com/JaleChaki/demo-service-1/blob/3044-1/src/main/resources/db/migration/V1__init_DB.sql
     category        VARCHAR(255)
 );
 
