@@ -2,7 +2,7 @@ package com.itmo.microservices.demo.order.impl.service
 
 import com.itmo.microservices.demo.order.api.model.OrderDto
 import com.itmo.microservices.demo.order.api.service.OrderService
-import com.itmo.microservices.demo.order.impl.entities.Order
+import com.itmo.microservices.demo.order.impl.entities.OrderEntity
 import com.itmo.microservices.demo.order.impl.repository.OrderItemRepository
 import com.itmo.microservices.demo.order.impl.util.toModel
 import com.itmo.microservices.demo.tasks.impl.repository.OrderRepository
@@ -21,8 +21,8 @@ class DefaultOrderService(
 
     override fun createOrder(user: UserDetails): OrderDto {
         //create base order
-        val order = Order()
+        val orderEntity = OrderEntity()
         //save base order, convert it to dto and return it
-        return orderRepository.save(order).toModel(orderItemRepository)
+        return orderRepository.save(orderEntity).toModel(orderItemRepository)
     }
 }

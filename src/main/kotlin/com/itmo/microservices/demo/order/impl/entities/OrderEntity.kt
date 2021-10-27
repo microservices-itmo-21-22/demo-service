@@ -9,7 +9,7 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "orders")
-class Order {
+class OrderEntity {
     @Id
     @Type(type = "uuid-char")
     @GeneratedValue(generator = "UUID")
@@ -18,10 +18,14 @@ class Order {
         strategy = "org.hibernate.id.UUIDGenerator"
     )
     var id: UUID? = null
+
     @Type(type = "uuid-char")
     var userId: UUID? = null
+
     var timeCreated: Long = 0
+
     var status: OrderStatus = OrderStatus.COLLECTING
+
     var deliveryDuration: Int? = 0
 
     @OneToMany
