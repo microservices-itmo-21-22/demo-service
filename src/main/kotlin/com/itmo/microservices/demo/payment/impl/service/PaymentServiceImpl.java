@@ -1,19 +1,20 @@
 package com.itmo.microservices.demo.payment.impl.service;
 
 
+import com.itmo.microservices.demo.payment.PaymentServiceConstants;
 import com.itmo.microservices.demo.payment.api.model.FinancialOperationType;
 import com.itmo.microservices.demo.payment.api.model.PaymentSubmissionDto;
 import com.itmo.microservices.demo.payment.api.model.UserAccountFinancialLogRecordDto;
 import com.itmo.microservices.demo.payment.api.service.PaymentService;
 import com.itmo.microservices.demo.payment.impl.model.UserAccountFinancialLogRecord;
 import com.itmo.microservices.demo.payment.impl.repository.UserAccountFinancialLogRecordRepository;
-import com.itmo.microservices.demo.payment.impl.utils.UserAccountFinancialLogRecordUtils;
+import com.itmo.microservices.demo.payment.utils.UserAccountFinancialLogRecordUtils;
+import com.itmo.microservices.demo.users.api.exception.UserNotFoundException;
 import com.itmo.microservices.demo.users.api.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -27,11 +28,12 @@ public class PaymentServiceImpl implements PaymentService {
     private final UserService userService;
 
     @Override
-    public List<UserAccountFinancialLogRecordDto> getFinlog(String username, UUID orderId) {
+    public List<UserAccountFinancialLogRecordDto> getFinlog(String username, UUID orderId) throws UserNotFoundException {
         var user = userService.getUser(username);
 
         if (user == null) {
-            throw new RuntimeException(); //TODO:: implement related exception
+            throw new UserNotFoundException(String.format("%s user with username: '%s' not found",
+                    PaymentServiceConstants.PAYMENT_LOG_MARKER, username));
         }
 
         userAccountFinancialLogRecordRepository.save(

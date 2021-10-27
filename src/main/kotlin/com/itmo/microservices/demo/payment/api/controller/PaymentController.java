@@ -1,8 +1,10 @@
 package com.itmo.microservices.demo.payment.api.controller;
 
+import com.itmo.microservices.demo.common.exception.NotFoundException;
 import com.itmo.microservices.demo.payment.api.model.PaymentSubmissionDto;
 import com.itmo.microservices.demo.payment.api.model.UserAccountFinancialLogRecordDto;
 import com.itmo.microservices.demo.payment.api.service.PaymentService;
+import com.itmo.microservices.demo.users.api.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,7 +25,11 @@ public class PaymentController {
             @AuthenticationPrincipal UserDetails user,
             @RequestParam(value = "order_id", required = false) UUID orderId
     ) {
-        return paymentService.getFinlog(user.getUsername(), orderId);
+        try {
+            return paymentService.getFinlog(user.getUsername(), orderId);
+        } catch (UserNotFoundException e) {
+            throw new NotFoundException(e);
+        }
     }
 
     @PostMapping

@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.payment.impl.utils;
+package com.itmo.microservices.demo.payment.utils;
 
 import com.itmo.microservices.demo.payment.api.model.UserAccountFinancialLogRecordDto;
 import com.itmo.microservices.demo.payment.impl.model.UserAccountFinancialLogRecord;
