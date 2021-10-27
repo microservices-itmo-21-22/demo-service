@@ -46,9 +46,8 @@ public class GetAllCatalogItemsTest {
         );
 
         itemRepository = mock(ItemRepository.class);
-
-        itemRepository.save(catalogItemEntity1);
-        itemRepository.save(catalogItemEntity2);
+        when(itemRepository.findAll())
+                .thenReturn(List.of(catalogItemEntity1, catalogItemEntity2));
 
         var eventBus = mock(EventBus.class);
 
@@ -57,7 +56,6 @@ public class GetAllCatalogItemsTest {
 
     @Test
     public void GetItems() {
-        List<CatalogItem> lst = itemService.getCatalogItems();
         assertEquals(2, itemService.getCatalogItems().stream().count());
     }
 }
