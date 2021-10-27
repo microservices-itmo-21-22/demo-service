@@ -53,8 +53,6 @@ public class GetAllCatalogItemsTest {
         var eventBus = mock(EventBus.class);
 
         itemService = new DefaultItemService(itemRepository,  eventBus);
-
-        List<CatalogItemEntity> lst1 = itemRepository.findAll();
     }
 
     @Test
