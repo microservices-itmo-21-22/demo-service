@@ -8,4 +8,5 @@ import java.util.*
 interface OrderService {
     fun getOrder(order_id: UUID) : OrderDto
     fun createOrder(user: UserDetails) : OrderDto
+    fun submitOrder(user: UserDetails, order_id: UUID): OrderDto
 }

@@ -15,7 +15,7 @@ class OrderItem {
     var price: Int? = null
     var amount: Int? = null
     @ManyToOne
-    var order: Order? = null
+    var orderEntity: OrderEntity? = null
 
     constructor()
 
@@ -24,12 +24,12 @@ class OrderItem {
         title: String?,
         price: Int?,
         amount: Int?,
-        order: Order?
+        orderEntity: OrderEntity?
     ) {
         this.id = id
         this.title = title
         this.price = price
         this.amount = amount
-        this.order = order
+        this.orderEntity = orderEntity
     }
 }
