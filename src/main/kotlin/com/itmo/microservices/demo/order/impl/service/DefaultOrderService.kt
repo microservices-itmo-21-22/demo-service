@@ -18,7 +18,7 @@ class DefaultOrderService(
     ): OrderService {
 
     override fun getOrder(order_id: UUID): OrderDto {
-        TODO("Not yet implemented")
+        return this.orderRepository.getById(order_id).toModel(orderItemRepository)
     }
 
     override fun createOrder(user: UserDetails): OrderDto {
