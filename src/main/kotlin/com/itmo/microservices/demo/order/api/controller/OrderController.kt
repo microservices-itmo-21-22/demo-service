@@ -28,5 +28,17 @@ class OrderController(private val orderService: OrderService) {
     fun getOrder(
         @PathVariable order_id: UUID,
         @Parameter(hidden = true) @AuthenticationPrincipal requester: UserDetails
-    ): OrderDto = orderService.getOrder(order_id);
+    ): OrderDto = orderService.getOrder(order_id)
+
+    @PostMapping
+    @Operation(
+        summary = "Create new order",
+        responses = [
+            ApiResponse(description = "OK", responseCode = "200"),
+            ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()]),
+            ApiResponse(description = "Bad request", responseCode = "400", content = [Content()])
+        ],
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    fun createOrder(@AuthenticationPrincipal user : UserDetails) : OrderDto = orderService.createOrder(user)
 }
