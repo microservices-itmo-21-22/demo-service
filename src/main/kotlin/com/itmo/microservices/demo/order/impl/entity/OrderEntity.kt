@@ -2,9 +2,11 @@ package com.itmo.microservices.demo.order.impl.entity
 
 import com.itmo.microservices.demo.items.api.model.OrderItem
 import com.itmo.microservices.demo.items.impl.entity.OrderItemEntity
+import com.itmo.microservices.demo.items.impl.util.toEntity
 import com.itmo.microservices.demo.order.api.model.OrderStatus
 import com.itmo.microservices.demo.payment.api.model.PaymentLogRecordDto
 import com.itmo.microservices.demo.payment.impl.entity.PaymentLogRecordEntity
+import com.itmo.microservices.demo.payment.impl.util.toEntity
 import java.util.*
 import javax.persistence.*
 
@@ -35,8 +37,8 @@ class OrderEntity {
         this.userId = userId
         this.timeCreated = timeCreated
         this.status = status
-        this.itemsMap = itemsMap
+        this.itemsMap = itemsMap.mapKeys { it.key.toEntity() }
         this.deliveryDuration = deliveryDuration
-        this.paymentHistory = paymentHistory
+        this.paymentHistory = paymentHistory.map { it.toEntity() }
     }
 }

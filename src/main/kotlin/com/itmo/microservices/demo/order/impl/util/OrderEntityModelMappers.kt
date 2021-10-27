@@ -1,6 +1,7 @@
+import com.itmo.microservices.demo.items.impl.util.toModel
 import com.itmo.microservices.demo.order.api.model.OrderDto
 import com.itmo.microservices.demo.order.impl.entity.OrderEntity
-import com.itmo.microservices.demo.tasks.api.model.TaskModel
+import com.itmo.microservices.demo.payment.impl.util.toModel
 
 fun OrderDto.toEntity(): OrderEntity = OrderEntity(
     id = this.id,
@@ -17,7 +18,7 @@ fun OrderEntity.toModel(): OrderDto = OrderDto(
     userId = this.userId,
     timeCreated = this.timeCreated,
     status = this.status,
-    itemsMap = this.itemsMap,
+    itemsMap = this.itemsMap.mapKeys { it.key.toModel() },
     deliveryDuration = this.deliveryDuration,
-    paymentHistory = this.paymentHistory
+    paymentHistory = this.paymentHistory.map { it.toModel() }
 )
