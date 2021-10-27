@@ -6,11 +6,12 @@ import com.itmo.microservices.demo.order.api.model.OrderItemDto
 import com.itmo.microservices.demo.order.impl.entities.OrderEntity
 import com.itmo.microservices.demo.order.impl.entities.OrderItemEntity
 import com.itmo.microservices.demo.order.impl.repository.OrderItemRepository
+import java.time.ZoneOffset
 
 fun OrderEntity.toModel(orderItemRepository: OrderItemRepository): OrderDto = OrderDto(
     id = this.id,
     userId = this.userId,
-    timeCreated = this.timeCreated,
+    timeCreated = this.timeCreated.toEpochSecond(ZoneOffset.UTC),
     status = this.status,
     deliveryDuration = this.deliveryDuration,
     itemsMap = this.listToMap(orderItemRepository),

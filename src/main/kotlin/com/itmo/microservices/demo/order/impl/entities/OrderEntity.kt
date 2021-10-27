@@ -23,7 +23,7 @@ class OrderEntity {
     @Type(type = "uuid-char")
     var userId: UUID? = null
 
-    var timeCreated: Long = 0
+    var timeCreated: LocalDateTime = LocalDateTime.now()
 
     var status: OrderStatus = OrderStatus.COLLECTING
 
@@ -40,7 +40,7 @@ class OrderEntity {
     constructor(
         id: UUID?,
         userId: UUID?,
-        timeCreated: Long,
+        timeCreated: LocalDateTime,
         status: OrderStatus,
         itemsMap: List<OrderItemEntity>?,
         deliveryDuration: Int?,
