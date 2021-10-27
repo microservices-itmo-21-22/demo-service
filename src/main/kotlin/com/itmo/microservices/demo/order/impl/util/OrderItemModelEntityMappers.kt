@@ -1,10 +1,10 @@
 package com.itmo.microservices.demo.items.impl.util
 
 import com.itmo.microservices.demo.order.api.model.OrderItemDto
-import com.itmo.microservices.demo.order.impl.entities.OrderItem
+import com.itmo.microservices.demo.order.impl.entities.OrderItemEntity
 import com.itmo.microservices.demo.order.impl.entities.OrderEntity
 
-fun OrderItemDto.toEntity(amountFromOrderDto: Int?, orderFromOrderEntityDto: OrderEntity?): OrderItem = OrderItem(
+fun OrderItemDto.toEntity(amountFromOrderDto: Int?, orderFromOrderEntityDto: OrderEntity?): OrderItemEntity = OrderItemEntity(
     id = this.id,
     title = this.title,
     price = this.price,
@@ -12,7 +12,7 @@ fun OrderItemDto.toEntity(amountFromOrderDto: Int?, orderFromOrderEntityDto: Ord
     orderEntity = orderFromOrderEntityDto
 )
 
-fun OrderItem.toModel(): OrderItemDto = OrderItemDto(
+fun OrderItemEntity.toModel(): OrderItemDto = OrderItemDto(
     id = this.id,
     title = this.title,
     price = this.price

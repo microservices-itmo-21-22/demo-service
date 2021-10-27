@@ -4,6 +4,7 @@ import com.itmo.microservices.demo.order.api.model.OrderStatus
 import com.itmo.microservices.demo.payment.impl.entities.UserAccountFinancialLogRecord
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Type
+import java.time.LocalDateTime
 import java.util.*
 import javax.persistence.*
 
@@ -22,14 +23,14 @@ class OrderEntity {
     @Type(type = "uuid-char")
     var userId: UUID? = null
 
-    var timeCreated: Long = 0
+    var timeCreated: LocalDateTime = LocalDateTime.now()
 
     var status: OrderStatus = OrderStatus.COLLECTING
 
     var deliveryDuration: Int? = 0
 
     @OneToMany
-    var itemsMap: List<OrderItem>? = null
+    var itemsMap: List<OrderItemEntity>? = null
 
     @OneToMany
     var paymentHistory: List<UserAccountFinancialLogRecord>? = null
@@ -39,9 +40,9 @@ class OrderEntity {
     constructor(
         id: UUID?,
         userId: UUID?,
-        timeCreated: Long,
+        timeCreated: LocalDateTime,
         status: OrderStatus,
-        itemsMap: List<OrderItem>?,
+        itemsMap: List<OrderItemEntity>?,
         deliveryDuration: Int?,
         paymentHistory: List<UserAccountFinancialLogRecord>?
     ) {

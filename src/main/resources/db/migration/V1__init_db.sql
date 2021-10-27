@@ -12,7 +12,23 @@ create table if not exists users (
 -- order service
 
 create table if not exists orders (
-    id uuid primary key
+    id uuid primary key,
+    userId uuid references users not null,
+    timeCreated date not null,
+    status order_status not null,
+    deliveryDuration integer not null,
+    itemsMap uuid[] references order_items not null,
+    paymentHistory payment_log
+);
+
+create type order_status as enum ('COLLECTING', 'DISCARD', 'BOOKED', 'PAID', 'SHIPPING', 'REFUND', 'COMPLETED');
+
+create table if not exists order_items (
+    id uuid primary key,
+    title text not null,
+    price text not null,
+    amount integer not null,
+    orderEntity uuid references orders
 );
 
 -- item service

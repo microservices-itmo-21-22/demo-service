@@ -5,14 +5,16 @@ import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
 import javax.persistence.ManyToOne
+import javax.persistence.Table
 
 @Entity
-class OrderItem {
+@Table(name = "order_items")
+class OrderItemEntity {
     @Id
     @GeneratedValue
     var id: UUID? = null
     var title: String? = null
-    var price: Int? = null
+    var price: String? = null
     var amount: Int? = null
     @ManyToOne
     var orderEntity: OrderEntity? = null
@@ -22,7 +24,7 @@ class OrderItem {
     constructor(
         id: UUID?,
         title: String?,
-        price: Int?,
+        price: String?,
         amount: Int?,
         orderEntity: OrderEntity?
     ) {
