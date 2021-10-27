@@ -11,7 +11,7 @@
     </parent>
 
     <groupId>com.itmo.microservices</groupId>
-    <artifactId>demo-service</artifactId>
+    <artifactId>service-304</artifactId>
     <version>0.1.1-SNAPSHOT</version>
     <name>demo-service</name>
     <description>Demo project for microservices course 21-22</description>
@@ -33,7 +33,6 @@
             <artifactId>common-lib</artifactId>
             <version>${common-lib.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-jdk8</artifactId>
@@ -92,7 +91,10 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
@@ -217,7 +219,6 @@
                     <target>11</target>
                 </configuration>
             </plugin>
-                 
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
