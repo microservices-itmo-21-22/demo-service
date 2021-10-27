@@ -7,12 +7,12 @@ import javax.persistence.Id
 import javax.persistence.ManyToOne
 
 @Entity
-class OrderItem {
+class OrderItemEntity {
     @Id
     @GeneratedValue
     var id: UUID? = null
     var title: String? = null
-    var price: Int? = null
+    var price: String? = null
     var amount: Int? = null
     @ManyToOne
     var orderEntity: OrderEntity? = null
@@ -22,7 +22,7 @@ class OrderItem {
     constructor(
         id: UUID?,
         title: String?,
-        price: Int?,
+        price: String?,
         amount: Int?,
         orderEntity: OrderEntity?
     ) {
