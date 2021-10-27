@@ -11,8 +11,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaymentLogRecordDto {
+    private UUID transactionId;
     private LocalDateTime timestamp;
     private PaymentStatus status;
     private Integer amount;
-    private UUID transactionId;
 }
