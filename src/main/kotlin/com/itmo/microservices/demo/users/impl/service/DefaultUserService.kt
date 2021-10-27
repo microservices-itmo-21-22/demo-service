@@ -16,7 +16,6 @@ import com.itmo.microservices.demo.users.api.model.RegistrationRequest
 import com.itmo.microservices.demo.users.impl.logging.UserServiceNotableEvents
 import com.itmo.microservices.demo.users.impl.repository.UserRepository
 import com.itmo.microservices.demo.users.impl.util.toModel
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -34,7 +33,7 @@ class DefaultUserService(private val userRepository: UserRepository,
     private lateinit var eventLogger: EventLogger
 
     override fun findUser(username: String): AppUserModel? = userRepository
-            .findByIdOrNull(username)?.toModel()
+            .findByUsername(username)?.toModel()
 
     override fun registerUser(request: RegistrationRequest) {
         val userEntity = userRepository.save(request.toEntity())
@@ -43,7 +42,7 @@ class DefaultUserService(private val userRepository: UserRepository,
     }
 
     override fun getAccountData(requester: UserDetails): AppUserModel =
-            userRepository.findByIdOrNull(requester.username)?.toModel() ?:
+            userRepository.findByUsername(requester.username)?.toModel() ?:
             throw NotFoundException("User ${requester.username} not found")
 
     override fun deleteUser(user: UserDetails) {
