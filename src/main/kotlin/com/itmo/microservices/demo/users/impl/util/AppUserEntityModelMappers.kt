@@ -1,14 +1,12 @@
 package com.itmo.microservices.demo.users.impl.util
 
-import com.itmo.microservices.demo.users.api.model.AppUserModel
-import com.itmo.microservices.demo.users.impl.entity.AppUser
+import com.itmo.microservices.demo.users.api.model.UserModel
+import com.itmo.microservices.demo.users.impl.entity.User
 
-fun AppUser.toModel(): AppUserModel = kotlin.runCatching {
-    AppUserModel(
-        username = this.username!!,
+fun User.toModel(): UserModel = kotlin.runCatching {
+    UserModel(
         name = this.name!!,
-        surname = this.surname!!,
-        email = this.email!!,
-        password = this.password!!
+        password = this.password!!,
+        status = this.status!!
     )
 }.getOrElse { exception -> throw IllegalStateException("Some of user fields are null", exception) }
