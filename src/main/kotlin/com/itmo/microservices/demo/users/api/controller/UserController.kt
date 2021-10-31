@@ -3,14 +3,14 @@ package com.itmo.microservices.demo.users.api.controller
 import com.itmo.microservices.demo.users.api.model.*
 import com.itmo.microservices.demo.users.api.service.IUserService
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
+
 
 @RestController
 @RequestMapping("/users")
@@ -37,9 +37,8 @@ class UserController(private val userService: IUserService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getUserById(@PathVariable(value = "id") id: Int): UserResponseDto {
-        return userService.getUserById(id)
-    }
+    fun getUserById(@PathVariable(value = "id") id: Int) = userService.getUserById(id)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "user not found")
 
     @PostMapping("/auth")
     @Operation(
@@ -63,8 +62,7 @@ class UserController(private val userService: IUserService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun refreshToken(authentication: Authentication): AuthenticationResult =
-        userService.refreshToken(authentication)
+    fun refreshToken(authentication: Authentication) = userService.refreshToken(authentication)
 
     private fun UserRequestDto.toModel() = UserModel(this.name, this.password, Status.OFFLINE)
 }

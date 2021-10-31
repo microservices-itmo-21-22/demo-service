@@ -8,7 +8,7 @@ import org.springframework.security.core.Authentication
 
 interface IUserService {
     fun addUser(userModel: UserModel): UserResponseDto
-    fun getUserById(id: Int): UserResponseDto
+    fun getUserById(id: Int): UserResponseDto?
     fun authUser(request: AuthenticationRequest): AuthenticationResult
     fun refreshToken(authentication: Authentication): AuthenticationResult
 }
