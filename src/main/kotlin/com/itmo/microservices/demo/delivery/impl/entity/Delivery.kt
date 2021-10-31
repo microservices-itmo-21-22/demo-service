@@ -9,6 +9,7 @@ import javax.persistence.Id
 class Delivery {
     @Id
     var id: UUID? = null
+    var user: String? = null
     var type: DeliveryType? = null
     var warehouse: Int? = null
     var deliveryDuration: Int? = null
@@ -17,8 +18,9 @@ class Delivery {
 
     constructor()
 
-    constructor(id: UUID?, type: DeliveryType?, warehouse: Int?, deliveryDuration: Int?, address: String?, courierCompany: String?) {
+    constructor(id: UUID?, user: String?, type: DeliveryType?, warehouse: Int?, deliveryDuration: Int?, address: String?, courierCompany: String?) {
         this.id = id
+        this.user = user
         this.type = type
         this.warehouse = warehouse
         this.deliveryDuration = deliveryDuration
@@ -27,6 +29,6 @@ class Delivery {
     }
 
     override fun toString(): String =
-        "Task(id=$id, type=$type, warehouse=$warehouse, deliveryDuration=$deliveryDuration, address=$address, courierCompany=$courierCompany)"
+        "Task(id=$id, user=$user, type=$type, warehouse=$warehouse, deliveryDuration=$deliveryDuration, address=$address, courierCompany=$courierCompany)"
 
 }

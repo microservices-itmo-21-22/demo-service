@@ -6,6 +6,7 @@ import java.util.*
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class DeliveryModel(
     var id: UUID,
+    var user: String?,
     var type: DeliveryType?,
     var warehouse: Int?,
     var deliveryDuration: Int?,

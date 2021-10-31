@@ -7,6 +7,7 @@ import java.util.*
 
 interface DeliveryService {
     fun getDeliveryInfo(deliveryId: UUID): DeliveryModel?
-    fun doDelivery(request: DeliveryModel)
+    fun doDelivery(request: DeliveryModel, user: UserDetails)
+    fun allDeliveries(): List<DeliveryModel>
     fun deleteDelivery(deliveryId: UUID)
 }

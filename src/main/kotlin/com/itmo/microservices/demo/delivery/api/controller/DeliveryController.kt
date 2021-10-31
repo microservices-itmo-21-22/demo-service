@@ -2,10 +2,14 @@ package com.itmo.microservices.demo.delivery.api.controller
 
 import com.itmo.microservices.demo.delivery.api.model.DeliveryModel
 import com.itmo.microservices.demo.delivery.api.service.DeliveryService
+import com.itmo.microservices.demo.tasks.api.model.TaskModel
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
@@ -23,7 +27,8 @@ class DeliveryController(private val deliveryService: DeliveryService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun doDelivery(@RequestBody request: DeliveryModel) = deliveryService.doDelivery(request)
+    fun doDelivery(@RequestBody request: DeliveryModel,
+                   @Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails) = deliveryService.doDelivery(request, user)
 
     @GetMapping("/{deliveryId}")
     @Operation(
@@ -37,6 +42,17 @@ class DeliveryController(private val deliveryService: DeliveryService) {
     )
     fun getDeliveryInfo(@PathVariable deliveryId: UUID): DeliveryModel? =
         deliveryService.getDeliveryInfo(deliveryId)
+
+    @GetMapping("/all")
+    @Operation(
+        summary = "Get all user deliveries",
+        responses = [
+            ApiResponse(description = "OK", responseCode = "200"),
+            ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()])
+        ],
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    fun allDeliveries(): List<DeliveryModel> = deliveryService.allDeliveries()
 
     @DeleteMapping("/{deliveryId}")
     @Operation(

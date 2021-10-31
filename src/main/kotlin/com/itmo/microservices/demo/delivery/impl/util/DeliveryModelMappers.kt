@@ -6,6 +6,7 @@ import com.itmo.microservices.demo.delivery.impl.entity.Delivery
 fun Delivery.toModel(): DeliveryModel = kotlin.runCatching {
     DeliveryModel(
         id = this.id!!,
+        user = this.user,
         type = this.type!!,
         warehouse = this.warehouse!!,
         deliveryDuration = this.deliveryDuration!!,

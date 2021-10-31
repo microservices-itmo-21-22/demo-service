@@ -13,6 +13,7 @@ import com.itmo.microservices.demo.delivery.impl.logging.DeliveryServiceNotableE
 import com.itmo.microservices.demo.delivery.impl.repository.DeliveryRepository
 import com.itmo.microservices.demo.delivery.impl.util.toModel
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -23,14 +24,18 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
 
-    override fun getDeliveryInfo(deliveryId: UUID): DeliveryModel? = deliveryRepository.findByIdOrNull(deliveryId)?.toModel() ?:
-    throw NotFoundException("Delivery with id : $deliveryId not found")
-
-    override fun doDelivery(request: DeliveryModel) {
-        val deliveryEntity = deliveryRepository.save(request.toEntity())
+    override fun doDelivery(request: DeliveryModel, user: UserDetails) {
+        val deliveryEntity = request.toEntity().also { it.user = user.username }
+        deliveryRepository.save(deliveryEntity)
         eventBus.post(DeliveryCreatedEvent(deliveryEntity.toModel()))
         eventLogger.info(DeliveryServiceNotableEvents.I_DELIVERY_CREATED, deliveryEntity.id)
     }
+
+    override fun getDeliveryInfo(deliveryId: UUID): DeliveryModel? = deliveryRepository.findByIdOrNull(deliveryId)?.toModel() ?:
+    throw NotFoundException("Delivery with id : $deliveryId not found")
+
+    override fun allDeliveries(): List<DeliveryModel> = deliveryRepository.findAll()
+        .map { it.toModel() }
 
     override fun deleteDelivery(deliveryId: UUID) {
         runCatching {
@@ -45,6 +50,7 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
 
     fun DeliveryModel.toEntity(): Delivery =
         Delivery(id = this.id,
+            user = this.user,
             type = this.type,
             warehouse = this.warehouse,
             deliveryDuration = this.deliveryDuration,
