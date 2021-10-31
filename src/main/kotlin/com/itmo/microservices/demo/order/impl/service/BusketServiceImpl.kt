@@ -6,13 +6,12 @@ import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.common.exception.NotFoundException
 import com.itmo.microservices.demo.order.api.model.BusketModel
 import com.itmo.microservices.demo.order.api.model.ProductType
-import com.itmo.microservices.demo.order.api.service.BusketsService
+import com.itmo.microservices.demo.order.api.service.BusketService
 import com.itmo.microservices.demo.order.impl.entity.Busket
 import com.itmo.microservices.demo.order.impl.entity.OrderProduct
 import com.itmo.microservices.demo.order.impl.repository.BusketRepository
 import com.itmo.microservices.demo.order.impl.repository.OrderProductRepository
 import com.itmo.microservices.demo.order.impl.util.toModel
-import org.hibernate.criterion.Order
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
@@ -20,10 +19,10 @@ import java.util.*
 
 @Service
 @Suppress("UnstableApiUsage")
-class BusketsServiceImpl(private val productRepository: OrderProductRepository,
-                         private val busketRepository: BusketRepository,
-                         private val eventBus: EventBus
-) : BusketsService {
+class BusketServiceImpl(private val productRepository: OrderProductRepository,
+                        private val busketRepository: BusketRepository,
+                        private val eventBus: EventBus
+) : BusketService {
 
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
