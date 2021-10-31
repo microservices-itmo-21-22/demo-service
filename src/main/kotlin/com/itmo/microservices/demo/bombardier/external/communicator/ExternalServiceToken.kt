@@ -2,14 +2,15 @@ package com.itmo.microservices.demo.bombardier.external.communicator
 
 import java.net.URL
 import java.time.Duration
+import java.time.Instant
 import java.time.LocalDateTime
 
 class ExternalServiceToken(val service: URL, accessToken: String, refreshToken: String) {
-    private val tokenLifetime: Duration = Duration.ofMinutes(15)
-    private val refreshTokenLifetime: Duration = Duration.ofDays(30)
+    private val tokenLifetimeSec = 15 * 60
+    private val refreshTokenLifetimeSec = 30 * 24 * 60 * 60
 
-    private var tokenCreatedAt = LocalDateTime.now()
-    private var refreshTokenCreatedAt = LocalDateTime.now()
+    private var tokenCreatedAt = Instant.now().epochSecond
+    private var refreshTokenCreatedAt = tokenCreatedAt
 
     private var _accessToken = accessToken
     var accessToken: String
@@ -18,7 +19,7 @@ class ExternalServiceToken(val service: URL, accessToken: String, refreshToken: 
             return _accessToken
         }
         set(value) {
-            tokenCreatedAt = LocalDateTime.now()
+            tokenCreatedAt = Instant.now().epochSecond
             _accessToken = value
         }
 
@@ -29,12 +30,12 @@ class ExternalServiceToken(val service: URL, accessToken: String, refreshToken: 
             return _refreshToken
         }
         set(value) {
-            refreshTokenCreatedAt = LocalDateTime.now()
+            refreshTokenCreatedAt = Instant.now().epochSecond
             _refreshToken = value
         }
 
-    fun isTokenExpired() = tokenCreatedAt + tokenLifetime <= LocalDateTime.now()
-    fun isRefreshTokenExpired() = refreshTokenCreatedAt + refreshTokenLifetime <= LocalDateTime.now()
+    fun isTokenExpired() = tokenCreatedAt + tokenLifetimeSec <= Instant.now().epochSecond
+    fun isRefreshTokenExpired() = refreshTokenCreatedAt + refreshTokenLifetimeSec <= Instant.now().epochSecond
 
     override fun toString(): String {
         return "[$service: access $_accessToken (alive ${!isTokenExpired()}), refresh $_refreshToken (alive ${!isRefreshTokenExpired()})]"
