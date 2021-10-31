@@ -1,9 +1,5 @@
 package com.itmo.microservices.demo.bombardier.external.communicator
 
-import com.shopify.promises.Promise
-import com.shopify.promises.then
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import okhttp3.*
 import org.springframework.boot.configurationprocessor.json.JSONObject
 import org.springframework.http.HttpHeaders
@@ -11,75 +7,82 @@ import org.springframework.http.HttpStatus
 import java.io.IOException
 import java.lang.IllegalStateException
 import java.net.URL
+import java.util.concurrent.ExecutorService
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
-open class ExternalServiceApiCommunicator(private val baseUrl: URL) {
+open class ExternalServiceApiCommunicator(private val baseUrl: URL, private val executor: ExecutorService) {
     companion object {
         private val JSON = MediaType.parse("application/json; charset=utf-8")
         fun JSONObject.toRequestBody() = RequestBody.create(JSON, this.toString())
     }
 
-    private val client = OkHttpClient()
+    private val client = OkHttpClient.Builder().run {
+        dispatcher(Dispatcher(executor))
+        build()
+    }
 
-    open fun authenticate(username: String, password: String) = execute("/authentication") {
+    open suspend fun authenticate(username: String, password: String) = execute("/authentication") {
         val body = JSONObject().apply {
             put("username", username)
             put("password", password)
         }
         post(body.toRequestBody())
 
-    }.then {
-        Promise.ofSuccess(Json.decodeFromString<TokenResponse>(it.body()!!.string()).toExternalServiceToken(baseUrl))
+    }.run {
+        mapper.readValue(body()!!.string(), TokenResponse::class.java).toExternalServiceToken(baseUrl)
     }
 
-    protected fun reauthenticate(token: ExternalServiceToken) = execute("/authentication/refresh") {
+    protected suspend fun reauthenticate(token: ExternalServiceToken) = execute("/authentication/refresh") {
         assert(!token.isRefreshTokenExpired())
         header(HttpHeaders.AUTHORIZATION, "Bearer ${token.refreshToken}")
-    }.then {
-        Promise.ofSuccess(Json.decodeFromString<TokenResponse>(it.body()!!.string()).toExternalServiceToken(baseUrl))
+    }.run {
+        mapper.readValue(body()!!.string(), TokenResponse::class.java).toExternalServiceToken(baseUrl)
     }
 
-    fun execute(url: String) = execute(url) {}
+    suspend fun execute(url: String) = execute(url) {}
 
-    fun execute(url: String, builderContext: Request.Builder.() -> Unit): Promise<Response, IOException> {
+    suspend fun execute(url: String, builderContext: Request.Builder.() -> Unit): Response {
         val requestBuilder = RequestBuilderWithBaseUrl(baseUrl).apply {
             _url(url)
             builderContext(this)
         }
 
-        return Promise {
+        return suspendCoroutine {
             client.newCall(requestBuilder.build()).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    reject(e)
+                    it.resumeWithException(e)
                 }
 
                 override fun onResponse(call: Call, response: Response) {
                     if (response.code() == HttpStatus.OK.value()) {
-                        resolve(response)
+                        it.resume(response)
                         return
                     }
-                    reject(
-                        InvalidExternalServiceResponseException(
-                            response.code(),
-                            response,
-                            "External service returned non-OK code: ${response.code()}"
-                        )
-                    )
+                    it.resumeWithException(InvalidExternalServiceResponseException(
+                        response.code(),
+                        response,
+                        "External service returned non-OK code: ${response.code()}"
+                    ))
                 }
             })
         }
     }
 
-    fun executeWithAuth(url: String, credentials: ExternalServiceToken) = executeWithAuth(url, credentials) {}
+    suspend fun executeWithAuth(url: String, credentials: ExternalServiceToken) = executeWithAuth(url, credentials) {}
 
-    fun executeWithAuth(url: String, credentials: ExternalServiceToken, builderContext: Request.Builder.() -> Unit) =
-        execute(url) {
-            if (credentials.isTokenExpired()) {
-                reauthenticate(credentials)
-            }
+    suspend fun executeWithAuth(url: String, credentials: ExternalServiceToken, builderContext: Request.Builder.() -> Unit): Response {
+        if (credentials.isTokenExpired()) {
+            reauthenticate(credentials)
+        }
 
+        return execute(url) {
             header(HttpHeaders.AUTHORIZATION, "Bearer ${credentials.accessToken}")
             builderContext(this)
         }
+    }
+
 
 
     private class RequestBuilderWithBaseUrl(private val baseUrl: URL) : Request.Builder() {

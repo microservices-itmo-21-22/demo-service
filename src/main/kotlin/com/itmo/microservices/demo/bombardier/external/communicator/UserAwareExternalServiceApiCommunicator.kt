@@ -1,40 +1,33 @@
 package com.itmo.microservices.demo.bombardier.external.communicator
 
-import com.shopify.promises.Promise
-import com.shopify.promises.completeOn
-import com.shopify.promises.then
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
-import java.io.IOException
 import java.net.URL
 import java.util.concurrent.ExecutorService
 
-class UserAwareExternalServiceApiCommunicator(baseUrl: URL) : ExtendedExternalServiceApiCommunicator(baseUrl) {
+class UserAwareExternalServiceApiCommunicator(baseUrl: URL, ex: ExecutorService) : ExtendedExternalServiceApiCommunicator(baseUrl, ex) {
     private val usersMap = mutableMapOf<String, ExternalServiceToken>()
 
-    override fun authenticate(username: String, password: String): Promise<ExternalServiceToken, IOException> {
-        usersMap[username]?.let {
-            return Promise.ofSuccess(it)
+    override suspend fun authenticate(username: String, password: String): ExternalServiceToken {
+        val availableToken = usersMap[username]
+        if (availableToken != null && !availableToken.isTokenExpired()) {
+            return availableToken
         }
 
-        return super.authenticate(username, password).then {
-            usersMap[username] = it
-            Promise.ofSuccess(it)
-        }
+        val auth = super.authenticate(username, password)
+        usersMap[username] = auth
+        return auth
     }
 
     fun getUserSession(username: String) = usersMap[username]
 
-    fun runSessionRefresher(executor: ExecutorService) = CoroutineScope(executor.asCoroutineDispatcher()).launch {
+    suspend fun runSessionRefresher(executor: ExecutorService) = CoroutineScope(executor.asCoroutineDispatcher()).launch {
         while (true) {
             for ((username, token) in usersMap) {
                 if (token.isTokenExpired()) {
-                    reauthenticate(token).completeOn(executor).whenComplete { result ->
-                        (result as? Promise.Result.Success)?.let {
-                            usersMap[username] = it.value
-                        }
-                    }
+                    val newToken = reauthenticate(token)
+                    usersMap[username] = newToken
                 }
             }
         }
