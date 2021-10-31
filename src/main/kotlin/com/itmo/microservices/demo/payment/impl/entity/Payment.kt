@@ -11,4 +11,12 @@ class Payment {
 
     var status: PaymentStatus? = null
     var orderId: Int? = null
+
+    constructor()
+
+    constructor(id: Int?, status: PaymentStatus?, orderId: Int?) {
+        this.id = id
+        this.status = status
+        this.orderId = orderId
+    }
 }
