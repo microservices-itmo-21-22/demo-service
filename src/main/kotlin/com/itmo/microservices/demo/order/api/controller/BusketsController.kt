@@ -67,7 +67,7 @@ class BusketsController(private val busketService: BusketsService) {
     fun deleteBusketById(@PathVariable busketId: UUID) =
         busketService.deleteBusketById(busketId)
 
-    @PostMapping("/{busketId}/add/{productId}")
+    @PostMapping("/{busketId}/{productId}")
     @Operation(
         summary = "Add product to busket",
         responses = [
@@ -85,7 +85,7 @@ class BusketsController(private val busketService: BusketsService) {
                    @PathVariable productId: UUID) =
         busketService.addProductToBusket(busketId, productId)
 
-    @DeleteMapping("/{busketId}/delete/{productId}")
+    @DeleteMapping("/{busketId}/{productId}")
     @Operation(
         summary = "Delete product from busket",
         responses = [
