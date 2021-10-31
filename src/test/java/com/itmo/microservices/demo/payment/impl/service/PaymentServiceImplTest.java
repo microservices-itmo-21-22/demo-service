@@ -2,9 +2,11 @@ package com.itmo.microservices.demo.payment.impl.service;
 
 import com.itmo.microservices.demo.payment.api.model.FinancialOperationType;
 import com.itmo.microservices.demo.payment.api.model.PaymentSubmissionDto;
+import com.itmo.microservices.demo.payment.api.model.UserAccountFinancialLogRecordDto;
 import com.itmo.microservices.demo.payment.impl.model.UserAccountFinancialLogRecord;
 import com.itmo.microservices.demo.payment.impl.repository.UserAccountFinancialLogRecordRepository;
 import com.itmo.microservices.demo.payment.impl.service.PaymentServiceImpl;
+import com.itmo.microservices.demo.payment.utils.UserAccountFinancialLogRecordUtils;
 import com.itmo.microservices.demo.users.api.exception.UserNotFoundException;
 import com.itmo.microservices.demo.users.api.service.UserService;
 import com.itmo.microservices.demo.users.impl.entity.AppUser;
@@ -35,9 +37,6 @@ public class PaymentServiceImplTest {
     private UserAccountFinancialLogRecordRepository repository;
 
     @Mock
-    UserRepository userRepository;
-
-    @Mock
     private UserService userService;
 
     @Mock
@@ -45,7 +44,8 @@ public class PaymentServiceImplTest {
 
     private final UUID id = UUID.randomUUID();
 
-    private final List<UserAccountFinancialLogRecord> list = new ArrayList<UserAccountFinancialLogRecord>();
+    private final List<UserAccountFinancialLogRecord> entityList = new ArrayList<>();
+    private final List<UserAccountFinancialLogRecordDto> dtoList = new ArrayList<>();
 
     private final AppUser user = new AppUser(
             "username",
@@ -66,18 +66,17 @@ public class PaymentServiceImplTest {
                 .timestamp(LocalDateTime.now())
                 .userId(user.getId())
                 .build();
-        list.add(entity);
+        entityList.add(entity);
+        dtoList.add(UserAccountFinancialLogRecordUtils.entityToDto(entity));
+
         when(repository.save(entity)).thenReturn(entity);
-        when(repository.findAllByUserIdAndOrderId(user.getId(), id)).thenReturn(list);
+        when(repository.findAllByUserIdAndOrderId(user.getId(), id)).thenReturn(entityList);
         when(userDetails.getUsername()).thenReturn("username");
     }
 
     @Test
     public void getFinlogTest() throws UserNotFoundException {
-        Assert.assertEquals(list.get(0).getPaymentTransactionId(), paymentService.getFinlog("username", id).get(0).getPaymentTransactionId());
-        Assert.assertEquals(list.get(0).getOrderId(), paymentService.getFinlog("username", id).get(0).getOrderId());
-        Assert.assertEquals(list.get(0).getAmount(), paymentService.getFinlog("username", id).get(0).getAmount());
-        Assert.assertEquals(list.get(0).getTimestamp(), paymentService.getFinlog("username", id).get(0).getTimestamp());
+        Assert.assertEquals(dtoList, paymentService.getFinlog("username", id));
     }
 
     @Test
