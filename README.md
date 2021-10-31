@@ -38,14 +38,6 @@
 - **GET /users/me**: Get information about current user
 - **DELETE /users/me**: Delete current user
 
-### Task module
-
-- **POST /tasks**: Create task
-- **GET /tasks**: Get all tasks
-- **GET /tasks/{id}**: Get task
-- **POST /tasks/{id}/assignee/{username}**: Assign task
-- **DELETE /tasks/{id}**: Delete task
-
 ### OpenAPI
 * **GET /swagger-ui.html**: Swagger UI
   * Paste bearer token to Authorize window to have access to secured endpoints
