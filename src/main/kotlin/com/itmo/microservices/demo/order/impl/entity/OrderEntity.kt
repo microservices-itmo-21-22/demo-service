@@ -15,9 +15,8 @@ class OrderEntity {
 
     constructor()
 
-    constructor(date: Date?, busket: Busket?) {
+    constructor(date: Date?) {
         this.date = date
-        this.busket = busket
     }
 
     override fun toString(): String {

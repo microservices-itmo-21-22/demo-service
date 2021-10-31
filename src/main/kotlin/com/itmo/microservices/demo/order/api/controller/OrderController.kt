@@ -1,12 +1,7 @@
 package com.itmo.microservices.demo.order.api.controller
 
-import com.itmo.microservices.demo.order.api.dto.OrderDTO
 import com.itmo.microservices.demo.order.api.model.OrderModel
 import com.itmo.microservices.demo.order.api.service.OrderService
-import com.itmo.microservices.demo.order.impl.entity.OrderEntity
-import com.itmo.microservices.demo.users.api.model.AppUserModel
-import com.itmo.microservices.demo.users.api.model.RegistrationRequest
-import com.itmo.microservices.demo.users.api.service.UserService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -30,35 +25,47 @@ class OrderController(private var orderService: OrderService) {
             ],
             security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getOrders(): List<OrderEntity> {
-        return orderService.getOrders()
+    fun getOrders(): List<OrderModel> {
+        return orderService.allOrders()
     }
 
-    @PostMapping("/2")
+    @GetMapping("/{orderId}")
     @Operation(
-            summary = "Create new order 2",
+            summary = "Get order by id",
+            responses = [
+                ApiResponse(description = "OK", responseCode = "200"),
+                ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()]),
+                ApiResponse(description = "Not found", responseCode = "404", content = [Content()])
+            ],
+            security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    fun getOrderById(@PathVariable orderId: UUID) = orderService.getOrderById(orderId)
+
+    @PostMapping("/create")
+    @Operation(
+            summary = "Create order",
             responses = [
                 ApiResponse(description = "OK", responseCode = "200"),
                 ApiResponse(description = "Bad request", responseCode = "400", content = [Content()])
             ],
             security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun createOrder2() {
-        val model = OrderModel(id = UUID.randomUUID(), date = null, busket = null)
-//        orderService.createOrder(model)
+    fun createOrder(@RequestBody order: OrderModel,
+                    @Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) {
+        orderService.createOrder(order, author)
     }
 
-    @PostMapping("/3")
+    @DeleteMapping("/{orderId}")
     @Operation(
-            summary = "Create new order 3",
+            summary = "Delete order by id",
             responses = [
                 ApiResponse(description = "OK", responseCode = "200"),
-                ApiResponse(description = "Bad request", responseCode = "400", content = [Content()])
+                ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()]),
+                ApiResponse(description = "Not found", responseCode = "404", content = [Content()])
             ],
             security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun createOrder3(@RequestBody order: OrderDTO) {
-        orderService.createOrder(order)
-    }
+    fun deleteBusketById(@PathVariable orderId: UUID) =
+            orderService.deleteOrderById(orderId)
 
 }
