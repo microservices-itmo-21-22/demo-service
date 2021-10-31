@@ -96,9 +96,6 @@ public class SaveAndGetUserInformationTest {
                 "password"
         );
         Assert.assertEquals(user, userService.findUser("username"));
-
-        userService.registerUser(new RegistrationRequest(null, null, null, null, null));
-
     }
 
     @org.junit.Test
