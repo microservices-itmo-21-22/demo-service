@@ -2,7 +2,6 @@ package com.itmo.microservices.demo.delivery.api.controller
 
 import com.itmo.microservices.demo.delivery.api.model.DeliveryModel
 import com.itmo.microservices.demo.delivery.api.service.DeliveryService
-import com.itmo.microservices.demo.tasks.api.model.TaskModel
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
