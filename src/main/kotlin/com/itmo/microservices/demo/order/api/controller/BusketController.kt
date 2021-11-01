@@ -1,7 +1,7 @@
 package com.itmo.microservices.demo.tasks.api.controller
 
 import com.itmo.microservices.demo.order.api.model.BusketModel
-import com.itmo.microservices.demo.order.api.service.BusketsService
+import com.itmo.microservices.demo.order.api.service.BusketService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -14,7 +14,7 @@ import java.util.*
 
 @RestController
 @RequestMapping("/orders/buskets")
-class BusketsController(private val busketService: BusketsService) {
+class BusketController(private val busketService: BusketService) {
 
     @GetMapping
     @Operation(
