@@ -1,12 +1,11 @@
 package com.itmo.microservices.demo.notifications.impl.service
 
 import com.itmo.microservices.demo.notifications.api.service.NotificationService
-import com.itmo.microservices.demo.notifications.impl.repository.NotificationUserRepository
 import com.itmo.microservices.demo.notifications.impl.entity.NotificationUser
-import com.itmo.microservices.demo.users.api.model.AppUserModel
+import com.itmo.microservices.demo.notifications.impl.repository.NotificationUserRepository
+import com.itmo.microservices.demo.users.api.model.UserModel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
 @Service
@@ -16,14 +15,11 @@ class StubNotificationService(private val userRepository: NotificationUserReposi
         val log: Logger = LoggerFactory.getLogger(StubNotificationService::class.java)
     }
 
-    override fun processNewUser(user: AppUserModel) {
+    override fun processNewUser(user: UserModel) {
         userRepository.save(modelToEntity(user))
-        log.info("User ${user.username} (${user.email}) was created & should be notified (but who cares)")
+        log.info("User ${user.name} was created & should be notified (but who cares)")
     }
 
-    private fun modelToEntity(user: AppUserModel): NotificationUser = NotificationUser(
-        username = user.username,
-        name = user.name,
-        email = user.email
-    )
+    private fun modelToEntity(user: UserModel): NotificationUser =
+        NotificationUser(name = user.name,)
 }

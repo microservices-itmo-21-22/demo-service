@@ -1,20 +1,20 @@
 package com.itmo.microservices.demo.users.api.controller
 
-import com.itmo.microservices.demo.users.api.model.AppUserModel
-import com.itmo.microservices.demo.users.api.model.RegistrationRequest
-import com.itmo.microservices.demo.users.api.service.UserService
+import com.itmo.microservices.demo.users.api.model.*
+import com.itmo.microservices.demo.users.api.service.IUserService
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
-import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.http.HttpStatus
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
+
 
 @RestController
 @RequestMapping("/users")
-class UserController(private val userService: UserService) {
+class UserController(private val userService: IUserService) {
 
     @PostMapping
     @Operation(
@@ -24,29 +24,45 @@ class UserController(private val userService: UserService) {
             ApiResponse(description = "Bad request", responseCode = "400", content = [Content()])
         ]
     )
-    fun register(@RequestBody request: RegistrationRequest) = userService.registerUser(request)
+    fun addUser(@RequestBody request: UserRequestDto): UserResponseDto {
+        return userService.addUser(request.toModel())
+    }
 
-    @GetMapping("/me")
+    @GetMapping("/{id}")
     @Operation(
-        summary = "Get current user info",
+        summary = "Get user by id",
         responses = [
             ApiResponse(description = "OK", responseCode = "200"),
             ApiResponse(description = "User not found", responseCode = "404", content = [Content()])
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getAccountData(@Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails): AppUserModel =
-            userService.getAccountData(user)
+    fun getUserById(@PathVariable(value = "id") id: Int) = userService.getUserById(id)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "user not found")
 
-    @DeleteMapping("/me")
+    @PostMapping("/auth")
     @Operation(
-        summary = "Delete current user",
+        summary = "Authenticate",
         responses = [
             ApiResponse(description = "OK", responseCode = "200"),
-            ApiResponse(description = "User not found", responseCode = "404", content = [Content()])
+            ApiResponse(description = "User not found", responseCode = "404", content = [Content()]),
+            ApiResponse(description = "Invalid password", responseCode = "403", content = [Content()])
+        ]
+    )
+    fun authUser(@RequestBody request: AuthenticationRequest): AuthenticationResult {
+       return userService.authUser(request)
+    }
+
+    @PostMapping("/refresh")
+    @Operation(
+        summary = "Refresh authentication",
+        responses = [
+            ApiResponse(description = "OK", responseCode = "200"),
+            ApiResponse(description = "Authentication error", responseCode = "403", content = [Content()])
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun deleteCurrentUser(@Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails) =
-            userService.deleteUser(user)
+    fun refreshToken(authentication: Authentication) = userService.refreshToken(authentication)
+
+    private fun UserRequestDto.toModel() = UserModel(this.name, this.password, Status.OFFLINE)
 }
