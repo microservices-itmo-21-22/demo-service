@@ -4,6 +4,7 @@ import com.google.common.eventbus.EventBus
 import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.common.exception.NotFoundException
+import com.itmo.microservices.demo.common.exception.AccessDeniedException
 import com.itmo.microservices.demo.delivery.api.messaging.DeliveryCreatedEvent
 import com.itmo.microservices.demo.delivery.api.messaging.DeliveryDeletedEvent
 import com.itmo.microservices.demo.delivery.api.model.DeliveryModel
@@ -32,14 +33,22 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
         eventLogger.info(DeliveryServiceNotableEvents.I_DELIVERY_CREATED, deliveryEntity.id)
     }
 
-    override fun getDeliveryInfo(deliveryId: UUID): DeliveryModel? = deliveryRepository
-        .findByIdOrNull(deliveryId)?.toModel() ?:
-    throw NotFoundException("Delivery with id : $deliveryId not found")
+    override fun getDeliveryInfo(deliveryId: UUID, user: UserDetails): DeliveryModel {
+        val delivery = deliveryRepository.findByIdOrNull(deliveryId)?.toModel()?:
+            throw NotFoundException("Delivery with id : $deliveryId not found")
+        if (delivery.user != user.username)
+            throw AccessDeniedException("Cannot get delivery that was not created by you")
+        return delivery
+    }
 
     override fun allDeliveries(user: UserDetails) = deliveryRepository.findAllByUser(user.username)
         .map { it.toModel() }
 
-    override fun deleteDelivery(deliveryId: UUID) {
+    override fun deleteDelivery(deliveryId: UUID, user: UserDetails) {
+        val delivery = deliveryRepository.findByIdOrNull(deliveryId)?.toModel()?:
+        throw NotFoundException("Delivery with id : $deliveryId not found")
+        if (delivery.user != user.username)
+            throw AccessDeniedException("Cannot delete delivery that was not created by you")
         runCatching {
             deliveryRepository.deleteById(deliveryId)
         }.onSuccess {
