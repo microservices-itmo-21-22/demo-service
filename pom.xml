@@ -21,13 +21,18 @@
         <kotlin.version>1.5.21</kotlin.version>
         <guava.version>30.1.1-jre</guava.version>
         <jjwt.version>0.9.1</jjwt.version>
-        <common-lib.version>0.5.0-SNAPSHOT</common-lib.version>
+        <common-lib.version>0.6.0-SNAPSHOT</common-lib.version>
              
         <buildnumber-maven-plugin.version>1.4</buildnumber-maven-plugin.version>
         <jib-maven-plugin.version>2.8.0</jib-maven-plugin.version>
     </properties>
          
     <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.8.1</version>
+        </dependency>
         <dependency>
             <groupId>com.itmo.microservices</groupId>
             <artifactId>common-lib</artifactId>
@@ -167,7 +172,7 @@
         </repository>
         <repository>
             <id>itmo-snapshots</id>
-            <url>http://77.234.215.138:30031/artifactory/libs-snapshot</url>
+            <url>http://77.234.215.138:30031/artifactory/libs-snapshot-local</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>

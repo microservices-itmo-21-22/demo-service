@@ -24,7 +24,8 @@ class Delivery {
                 warehouse: Int?,
                 deliveryDuration: Int?,
                 address: String?,
-                courierCompany: String?) {
+                courierCompany: String?
+    ) {
         this.id = id
         this.user = user
         this.type = type
@@ -41,6 +42,7 @@ class Delivery {
                 "warehouse=$warehouse, " +
                 "deliveryDuration=$deliveryDuration, " +
                 "address=$address, " +
-                "courierCompany=$courierCompany)"
+                "courierCompany=$courierCompany" +
+                ")"
 
 }
