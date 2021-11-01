@@ -21,12 +21,13 @@ class OrderServiceImpl(private val orderRepository: OrderRepository): OrderServi
         val log: Logger = LoggerFactory.getLogger(OrderServiceImpl::class.java)
     }
 
-   override fun createOrder(order: OrderModel, author: UserDetails) {
-        val order = OrderEntity(
-                date = order.date
+   override fun createOrder(orderModel: OrderModel, author: UserDetails): OrderModel {
+        var order = OrderEntity(
+                date = orderModel.date
         )
-        orderRepository.save(order)
+        order = orderRepository.save(order)
         log.info("Order ${order.id} was created")
+       return order.toModel()
     }
 
     override fun allOrders(): List<OrderModel> {
@@ -39,7 +40,8 @@ class OrderServiceImpl(private val orderRepository: OrderRepository): OrderServi
     }
 
     override fun deleteOrderById(orderId: UUID) {
-        orderRepository.deleteById(orderId)
+        val order = orderRepository.findByIdOrNull(orderId) ?: throw NotFoundException("Busket $orderId not found")
+        orderRepository.delete(order)
     }
 
 }

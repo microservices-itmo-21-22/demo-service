@@ -8,5 +8,5 @@ interface OrderService {
     fun allOrders(): List<OrderModel>
     fun getOrderById(orderId: UUID): OrderModel
     fun deleteOrderById(orderId: UUID)
-    fun createOrder(order: OrderModel, author: UserDetails)
+    fun createOrder(order: OrderModel, author: UserDetails): OrderModel
 }
