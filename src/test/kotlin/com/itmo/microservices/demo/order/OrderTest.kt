@@ -54,13 +54,4 @@ class OrderTest {
         Assertions.assertEquals(actual, expected)
     }
 
-    @Test
-    fun deleteByIdTest() {
-        val orderService = OrderServiceImpl(orderRepository)
-        Mockito.`when`(orderRepository.findById(Mockito.any())).thenReturn(Optional.ofNullable(orderMock()))
-        val actual = orderService.deleteOrderById(orderId)
-        val expected = orderMock().toModel()
-        Assertions.assertEquals(actual, expected)
-    }
-
 }
