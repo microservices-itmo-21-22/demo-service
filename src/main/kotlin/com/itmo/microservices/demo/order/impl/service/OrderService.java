@@ -30,6 +30,8 @@ public class OrderService implements IOrderService{
     private final CatalogItemRepository catalogItemRepository;
     private final OrderItemRepository orderItemRepository;
 
+    private static final String API_URL = "http://http://77.234.215.138:30019/api/";
+
     @Autowired
     public OrderService(OrderRepository repository, CatalogItemRepository catalogItemRepository, OrderItemRepository orderItemRepository) {
         this.repository = repository;
@@ -72,7 +74,7 @@ public class OrderService implements IOrderService{
     public Booking book(UUID orderId) throws IOException {
         Order order = getOrderById(orderId);
 
-        URL url = new URL("http://http://77.234.215.138:30019/api/warehouse/book");
+        URL url = new URL(API_URL + "warehouse/book");
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
         Map<String, String> parameters = new HashMap<>();
@@ -88,7 +90,20 @@ public class OrderService implements IOrderService{
     }
 
     @Override
-    public void selectDeliveryTime(UUID orderId, int seconds) {
+    public void selectDeliveryTime(UUID orderId, int seconds) throws IOException {
+        Order order = getOrderById(orderId);
 
+        URL url = new URL(API_URL + "delivery/doDelivery");
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("POST");
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("order", order.toString());
+
+        
+        con.setDoOutput(true);
+        DataOutputStream out = new DataOutputStream(con.getOutputStream());
+        out.writeBytes(ParameterStringBuilder.getParamsString(parameters));
+        out.flush();
+        out.close();
     }
 }

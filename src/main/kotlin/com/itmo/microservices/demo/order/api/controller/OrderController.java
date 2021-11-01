@@ -75,7 +75,7 @@ public class OrderController {
                     @ApiResponse(description = "Something went wrong", responseCode = "400")},
             security = {@SecurityRequirement(name = "bearerAuth")})
     public void selectDeliveryTime(@PathVariable("order_id") UUID orderId,
-                                   @PathVariable("slot_in_sec") int seconds) {
+                                   @PathVariable("slot_in_sec") int seconds) throws IOException {
         service.selectDeliveryTime(orderId, seconds);
     }
 }
