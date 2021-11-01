@@ -1,6 +1,6 @@
 package com.itmo.microservices.demo.common.security
 
-import com.itmo.microservices.demo.auth.impl.service.JwtTokenManager
+import com.itmo.microservices.demo.users.impl.service.JwtTokenManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
