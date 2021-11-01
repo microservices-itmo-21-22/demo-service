@@ -30,6 +30,7 @@ class UserControllerTest {
     @Test
     fun addUserTest() {
         val request = UserRequestDto("addedUser", "addedPass")
+
         mockMvc.post("/users") {
             contentType = MediaType.APPLICATION_JSON
             content = jacksonObjectMapper().writeValueAsString(request)
@@ -45,6 +46,7 @@ class UserControllerTest {
     fun authUserTest() {
         addTestUser("authTestUser", "authTestPass")
         val authRequest = AuthenticationRequest("authTestUser", "authTestPass")
+
         mockMvc.post("/users/auth") {
             contentType = MediaType.APPLICATION_JSON
             content = jacksonObjectMapper().writeValueAsString(authRequest)
@@ -59,6 +61,7 @@ class UserControllerTest {
     fun authUserTest_wrongPassword() {
         addTestUser("authTestFailUser", "authTestFailPass")
         val authRequest = AuthenticationRequest("authTestFailUser", "wrongPass")
+
         mockMvc.post("/users/auth") {
             contentType = MediaType.APPLICATION_JSON
             content = jacksonObjectMapper().writeValueAsString(authRequest)
@@ -73,6 +76,7 @@ class UserControllerTest {
         addTestUser("refreshTokenTestUser", "rttPass")
         val authRequest = AuthenticationRequest("refreshTokenTestUser", "rttPass")
         val refreshToken = getRefreshToken("refreshTokenTestUser", "rttPass")
+
         mockMvc.post("/users/refresh") {
             header(HttpHeaders.AUTHORIZATION, "Bearer $refreshToken")
             contentType = MediaType.APPLICATION_JSON
@@ -88,6 +92,7 @@ class UserControllerTest {
     fun getUserTest() {
         val id = addTestUser("getUserTest", "getUserTestPass")
         val accessToken = getAccessToken("getUserTest", "getUserTestPass")
+
         mockMvc.get("/users/$id") {
             header(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
         }.andExpect {
@@ -102,6 +107,7 @@ class UserControllerTest {
     fun getUserTest_wrongUserID() {
         addTestUser("getUserFailTest", "getUserFailTestPass")
         val accessToken = getAccessToken("getUserFailTest", "getUserFailTestPass")
+
         mockMvc.get("/users/666") {
             header(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
         }.andExpect {
@@ -111,31 +117,37 @@ class UserControllerTest {
 
     private fun addTestUser(name: String, password: String): Any? {
         val request = UserRequestDto(name, password)
+
         val result = mockMvc.post("/users") {
             contentType = MediaType.APPLICATION_JSON
             content = jacksonObjectMapper().writeValueAsString(request)
             accept = MediaType.APPLICATION_JSON
         }.andReturn()
+
         return JSONObject(result.response.contentAsString).get("id")
     }
 
     private fun getRefreshToken(name: String, password: String): Any? {
         val authRequest = AuthenticationRequest(name, password)
+
         val result = mockMvc.post("/users/auth") {
             contentType = MediaType.APPLICATION_JSON
             content = jacksonObjectMapper().writeValueAsString(authRequest)
             accept = MediaType.APPLICATION_JSON
         }.andReturn()
+
         return JSONObject(result.response.contentAsString).get("refreshToken")
     }
 
     private fun getAccessToken(name: String, password: String): Any? {
         val authRequest = AuthenticationRequest(name, password)
+
         val result = mockMvc.post("/users/auth") {
             contentType = MediaType.APPLICATION_JSON
             content = jacksonObjectMapper().writeValueAsString(authRequest)
             accept = MediaType.APPLICATION_JSON
         }.andReturn()
+
         return JSONObject(result.response.contentAsString).get("accessToken")
     }
 

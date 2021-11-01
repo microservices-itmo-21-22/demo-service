@@ -31,6 +31,7 @@ class PaymentControllerTest {
     fun executePaymentTest() {
         val accessToken = getTestUserAccessToken()
         val paymentRequest = PaymentRequestDto(1)
+
         mockMvc.post("/payment/transaction") {
             header(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
             contentType = MediaType.APPLICATION_JSON
@@ -45,17 +46,21 @@ class PaymentControllerTest {
 
     private fun getTestUserAccessToken() : Any? {
         val request = UserRequestDto("testUser", "testPass")
+
         mockMvc.post("/users") {
             contentType = MediaType.APPLICATION_JSON
             content = jacksonObjectMapper().writeValueAsString(request)
             accept = MediaType.APPLICATION_JSON
         }
+
         val authRequest = AuthenticationRequest("testUser", "testPass")
+
         val result = mockMvc.post("/users/auth") {
             contentType = MediaType.APPLICATION_JSON
             content = jacksonObjectMapper().writeValueAsString(authRequest)
             accept = MediaType.APPLICATION_JSON
         }.andReturn()
+
         return JSONObject(result.response.contentAsString).get("accessToken")
     }
 }
