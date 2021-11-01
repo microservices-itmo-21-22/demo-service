@@ -4,11 +4,20 @@ import com.itmo.microservices.demo.order.api.dto.Booking;
 import com.itmo.microservices.demo.order.api.dto.CatalogItem;
 import com.itmo.microservices.demo.order.api.dto.Order;
 import com.itmo.microservices.demo.order.api.dto.OrderItem;
+import com.itmo.microservices.demo.order.impl.dao.CatalogItemRepository;
+import com.itmo.microservices.demo.order.impl.dao.OrderItemRepository;
 import com.itmo.microservices.demo.order.impl.dao.OrderRepository;
+import com.itmo.microservices.demo.warehouse.api.controller.WarehouseController;
+import com.itmo.microservices.demo.warehouse.impl.service.WarehouseService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.spel.spi.Function;
 import org.springframework.stereotype.Service;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,10 +27,14 @@ import java.util.stream.Collectors;
 @Service
 public class OrderService implements IOrderService{
     private final OrderRepository repository;
+    private final CatalogItemRepository catalogItemRepository;
+    private final OrderItemRepository orderItemRepository;
 
     @Autowired
-    public OrderService(OrderRepository repository) {
+    public OrderService(OrderRepository repository, CatalogItemRepository catalogItemRepository, OrderItemRepository orderItemRepository) {
         this.repository = repository;
+        this.catalogItemRepository = catalogItemRepository;
+        this.orderItemRepository = orderItemRepository;
     }
 
     @Override
@@ -47,12 +60,30 @@ public class OrderService implements IOrderService{
     }
 
     @Override
-    public void updateOrder(UUID orderId, UUID itemId, int amount) {
+    public void putItemToOrder(UUID orderId, UUID itemId, int amount) {
+        Order order = getOrderById(orderId);
+        com.itmo.microservices.demo.order.impl.entity.OrderItem item = orderItemRepository.getById(itemId);
+        OrderItem itemDto = new OrderItem(item.getUuid(), item.getTitle(), item.getPrice());
 
+        order.getItemList().put(itemDto, amount);
     }
 
     @Override
-    public Booking book(UUID orderId) {
+    public Booking book(UUID orderId) throws IOException {
+        Order order = getOrderById(orderId);
+
+        URL url = new URL("http://http://77.234.215.138:30019/api/warehouse/book");
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("POST");
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("order", order.toString());
+
+        con.setDoOutput(true);
+        DataOutputStream out = new DataOutputStream(con.getOutputStream());
+        out.writeBytes(ParameterStringBuilder.getParamsString(parameters));
+        out.flush();
+        out.close();
+
         return null;
     }
 

@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.UUID;
 
 @RestController
@@ -52,7 +53,7 @@ public class OrderController {
             security = {@SecurityRequirement(name = "bearerAuth")})
     public void updateOrder(@PathVariable("order_id") UUID orderId, @PathVariable("item_id") UUID itemId,
                             @PathVariable("amount") int amount) {
-        service.updateOrder(orderId, itemId, amount);
+        service.putItemToOrder(orderId, itemId, amount);
     }
 
     @PostMapping("/{order_id}/bookings")
@@ -62,7 +63,7 @@ public class OrderController {
                     @ApiResponse(description = "OK", responseCode = "200", content = {@Content}),
                     @ApiResponse(description = "Something went wrong", responseCode = "400", content = {@Content})},
             security = {@SecurityRequirement(name = "bearerAuth")})
-    public void bookOrder(@PathVariable("order_id") UUID orderId) {
+    public void bookOrder(@PathVariable("order_id") UUID orderId) throws IOException {
         service.book(orderId);
     }
 
