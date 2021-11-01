@@ -7,6 +7,7 @@ import org.hibernate.Hibernate;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -24,6 +25,7 @@ public class Order {
     private LocalDateTime timeCreated;
     private OrderStatus status;
 
+    private Timestamp deliveryInfo;
     @OneToMany
     @ToString.Exclude
     private List<CatalogItem> catalogItems;

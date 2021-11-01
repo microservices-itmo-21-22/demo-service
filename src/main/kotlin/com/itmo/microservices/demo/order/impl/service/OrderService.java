@@ -14,6 +14,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +55,7 @@ public class OrderService implements IOrderService{
                 .collect(Collectors.toMap(item -> new OrderItem(item.getUuid(), item.getTitle(), item.getPrice()),
                         CatalogItem::getAmount));
 
-        return new Order(orderEntity.getUuid(), orderEntity.getTimeCreated(), itemList, orderEntity.getStatus());
+        return new Order(orderEntity.getUuid(), orderEntity.getTimeCreated(), itemList, orderEntity.getStatus(), orderEntity.getDeliveryInfo());
     }
 
     @Override
@@ -79,6 +80,7 @@ public class OrderService implements IOrderService{
     @Override
     public void selectDeliveryTime(UUID orderId, int seconds) throws IOException {
         Order order = getOrderById(orderId);
+        order.setDeliveryInfo(new Timestamp(seconds));
         URL url = new URL(API_URL + "delivery/doDelivery");
         sendRequest(order, url);
     }
