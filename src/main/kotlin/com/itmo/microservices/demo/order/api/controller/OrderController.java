@@ -33,48 +33,49 @@ public class OrderController {
         service.createOrder(order);
     }
 
-    @GetMapping("/{order_id}")
+    @GetMapping("/{orderId}")
     @Operation(
             summary = "Get order",
             responses = {
                     @ApiResponse(description = "OK", responseCode = "200", content = {@Content}),
                     @ApiResponse(description = "Something went wrong", responseCode = "400", content = {@Content})},
             security = {@SecurityRequirement(name = "bearerAuth")})
-    public void getOrder(@PathVariable("order_id") UUID uuid) {
+    public void getOrder(@PathVariable("orderId") UUID uuid) {
         service.getOrderById(uuid);
     }
 
-    @PutMapping("/{order_id}/items/{item_id}?amount={amount}")
+    @PutMapping("/{orderId}/items/{itemId}?amount={amount}")
     @Operation(
             summary = "Put the item in the cart",
             responses = {
                     @ApiResponse(description = "OK", responseCode = "200"),
                     @ApiResponse(description = "Something went wrong", responseCode = "400")},
             security = {@SecurityRequirement(name = "bearerAuth")})
-    public void updateOrder(@PathVariable("order_id") UUID orderId, @PathVariable("item_id") UUID itemId,
+    public void updateOrder(@PathVariable("orderId") UUID orderId,
+                            @PathVariable("itemId") UUID itemId,
                             @PathVariable("amount") int amount) {
         service.putItemToOrder(orderId, itemId, amount);
     }
 
-    @PostMapping("/{order_id}/bookings")
+    @PostMapping("/{orderId}/bookings")
     @Operation(
             summary = "Book",
             responses = {
                     @ApiResponse(description = "OK", responseCode = "200", content = {@Content}),
                     @ApiResponse(description = "Something went wrong", responseCode = "400", content = {@Content})},
             security = {@SecurityRequirement(name = "bearerAuth")})
-    public void bookOrder(@PathVariable("order_id") UUID orderId) throws IOException {
+    public void bookOrder(@PathVariable("orderId") UUID orderId) throws IOException {
         service.book(orderId);
     }
 
-    @PostMapping("/{order_id}/delivery?slot={slot_in_sec}")
+    @PostMapping("/{orderId}/delivery?slot={slot_in_sec}")
     @Operation(
             summary = "Deliveru time selection",
             responses = {
                     @ApiResponse(description = "OK", responseCode = "200"),
                     @ApiResponse(description = "Something went wrong", responseCode = "400")},
             security = {@SecurityRequirement(name = "bearerAuth")})
-    public void selectDeliveryTime(@PathVariable("order_id") UUID orderId,
+    public void selectDeliveryTime(@PathVariable("orderId") UUID orderId,
                                    @PathVariable("slot_in_sec") int seconds) throws IOException {
         service.selectDeliveryTime(orderId, seconds);
     }

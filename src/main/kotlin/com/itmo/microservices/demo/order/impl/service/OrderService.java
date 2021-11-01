@@ -79,10 +79,8 @@ public class OrderService implements IOrderService{
     @Override
     public void selectDeliveryTime(UUID orderId, int seconds) throws IOException {
         Order order = getOrderById(orderId);
-
         URL url = new URL(API_URL + "delivery/doDelivery");
         sendRequest(order, url);
-        return;
     }
 
     private void sendRequest(Order order, URL url) throws IOException {
@@ -90,7 +88,6 @@ public class OrderService implements IOrderService{
         con.setRequestMethod("POST");
         Map<String, String> parameters = new HashMap<>();
         parameters.put("order", order.toString());
-
 
         con.setDoOutput(true);
         DataOutputStream out = new DataOutputStream(con.getOutputStream());
