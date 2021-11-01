@@ -7,16 +7,12 @@ import com.itmo.microservices.demo.order.api.dto.OrderItem;
 import com.itmo.microservices.demo.order.impl.dao.CatalogItemRepository;
 import com.itmo.microservices.demo.order.impl.dao.OrderItemRepository;
 import com.itmo.microservices.demo.order.impl.dao.OrderRepository;
-import com.itmo.microservices.demo.warehouse.api.controller.WarehouseController;
-import com.itmo.microservices.demo.warehouse.impl.service.WarehouseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -75,16 +71,7 @@ public class OrderService implements IOrderService{
         Order order = getOrderById(orderId);
 
         URL url = new URL(API_URL + "warehouse/book");
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("POST");
-        Map<String, String> parameters = new HashMap<>();
-        parameters.put("order", order.toString());
-
-        con.setDoOutput(true);
-        DataOutputStream out = new DataOutputStream(con.getOutputStream());
-        out.writeBytes(ParameterStringBuilder.getParamsString(parameters));
-        out.flush();
-        out.close();
+        sendRequest(order, url);
 
         return null;
     }
@@ -94,12 +81,17 @@ public class OrderService implements IOrderService{
         Order order = getOrderById(orderId);
 
         URL url = new URL(API_URL + "delivery/doDelivery");
+        sendRequest(order, url);
+        return;
+    }
+
+    private void sendRequest(Order order, URL url) throws IOException {
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
         Map<String, String> parameters = new HashMap<>();
         parameters.put("order", order.toString());
 
-        
+
         con.setDoOutput(true);
         DataOutputStream out = new DataOutputStream(con.getOutputStream());
         out.writeBytes(ParameterStringBuilder.getParamsString(parameters));
