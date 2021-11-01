@@ -1,5 +1,9 @@
 package com.itmo.microservices.demo.order.impl.service;
 
+import com.itmo.microservices.demo.order.api.dto.Booking;
+import com.itmo.microservices.demo.order.api.dto.CatalogItem;
+import com.itmo.microservices.demo.order.api.dto.Order;
+import com.itmo.microservices.demo.order.api.dto.OrderItem;
 import com.itmo.microservices.demo.order.impl.dao.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +33,7 @@ public class OrderService implements IOrderService{
 
         // entity.CatalogItem -> dto.CatalogItem
         List<CatalogItem> dtoItems = orderEntity.getCatalogItems().stream()
-                .map(item -> new CatalogItem(item.getUuid(), item.getTitle(), item.getDescription(),
+                .map(item -> new CatalogItem(item., item.getTitle(), item.getDescription(),
                         item.getPrice(), item.getAmount())).collect(Collectors.toList());
 
         // List<dto.CatalogItem> -> Map<OrderItem, Integer>
