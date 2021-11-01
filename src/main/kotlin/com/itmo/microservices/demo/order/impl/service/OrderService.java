@@ -1,15 +1,9 @@
 package com.itmo.microservices.demo.order.impl.service;
 
-import com.itmo.microservices.demo.order.api.dto.Booking;
-import com.itmo.microservices.demo.order.api.dto.CatalogItem;
-import com.itmo.microservices.demo.order.api.dto.Order;
-import com.itmo.microservices.demo.order.api.dto.OrderItem;
 import com.itmo.microservices.demo.order.impl.dao.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.spel.spi.Function;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
