@@ -30,7 +30,7 @@ class Delivery {
     }
 
     override fun toString(): String =
-        "Task(id=$id, user=$user, type=$type, warehouse=$warehouse, deliveryDuration=$deliveryDuration, " +
+        "Delivery(id=$id, user=$user, type=$type, warehouse=$warehouse, deliveryDuration=$deliveryDuration, " +
                 "address=$address, courierCompany=$courierCompany)"
 
 }
