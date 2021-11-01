@@ -8,7 +8,6 @@ import javax.persistence.Id
 
 @Entity
 public class OrderProduct {
-
     @Id
     @GeneratedValue
     var id: UUID? = null
@@ -33,5 +32,4 @@ public class OrderProduct {
     override fun toString(): String {
         return "Product(id=$id, name=$name, description=$description, country=$country, price=$price, type=$type)"
     }
-
 }

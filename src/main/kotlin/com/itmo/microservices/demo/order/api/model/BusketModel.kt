@@ -1,11 +1,12 @@
 package com.itmo.microservices.demo.order.api.model
 
-import com.itmo.microservices.demo.products.impl.entity.Product
-import com.itmo.microservices.demo.users.impl.entity.AppUser
+import com.fasterxml.jackson.annotation.JsonInclude
 import java.util.*
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class BusketModel (
         val id: UUID?,
-        val products: List<Product>?,
-        val user: AppUser?
+        val products: List<UUID>,
+        val user: String?,
+        val order: UUID?
 )
