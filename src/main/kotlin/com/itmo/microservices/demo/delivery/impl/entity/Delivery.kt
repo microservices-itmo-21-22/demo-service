@@ -18,7 +18,8 @@ class Delivery {
 
     constructor()
 
-    constructor(id: UUID?, user: String?, type: DeliveryType?, warehouse: Int?, deliveryDuration: Int?, address: String?, courierCompany: String?) {
+    constructor(id: UUID?, user: String?, type: DeliveryType?, warehouse: Int?, deliveryDuration: Int?,
+                address: String?, courierCompany: String?) {
         this.id = id
         this.user = user
         this.type = type
@@ -29,6 +30,7 @@ class Delivery {
     }
 
     override fun toString(): String =
-        "Task(id=$id, user=$user, type=$type, warehouse=$warehouse, deliveryDuration=$deliveryDuration, address=$address, courierCompany=$courierCompany)"
+        "Task(id=$id, user=$user, type=$type, warehouse=$warehouse, deliveryDuration=$deliveryDuration, " +
+                "address=$address, courierCompany=$courierCompany)"
 
 }

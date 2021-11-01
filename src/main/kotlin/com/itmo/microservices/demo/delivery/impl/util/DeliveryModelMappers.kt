@@ -7,10 +7,10 @@ fun Delivery.toModel(): DeliveryModel = kotlin.runCatching {
     DeliveryModel(
         id = this.id!!,
         user = this.user,
-        type = this.type!!,
-        warehouse = this.warehouse!!,
-        deliveryDuration = this.deliveryDuration!!,
-        address = this.address!!,
-        courierCompany = this.courierCompany!!
+        type = this.type,
+        warehouse = this.warehouse,
+        deliveryDuration = this.deliveryDuration,
+        address = this.address,
+        courierCompany = this.courierCompany
     )
 }.getOrElse { exception -> throw IllegalStateException("Some of delivery fields are null", exception) }

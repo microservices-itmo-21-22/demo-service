@@ -19,7 +19,8 @@ import java.util.*
 
 @Suppress("UnstableApiUsage")
 @Service
-class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository, private val eventBus: EventBus): DeliveryService {
+class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository, private val eventBus: EventBus):
+    DeliveryService {
 
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
@@ -31,7 +32,8 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
         eventLogger.info(DeliveryServiceNotableEvents.I_DELIVERY_CREATED, deliveryEntity.id)
     }
 
-    override fun getDeliveryInfo(deliveryId: UUID): DeliveryModel? = deliveryRepository.findByIdOrNull(deliveryId)?.toModel() ?:
+    override fun getDeliveryInfo(deliveryId: UUID): DeliveryModel? = deliveryRepository
+        .findByIdOrNull(deliveryId)?.toModel() ?:
     throw NotFoundException("Delivery with id : $deliveryId not found")
 
     override fun allDeliveries(user: UserDetails) = deliveryRepository.findAllByUser(user.username)
