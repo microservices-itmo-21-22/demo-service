@@ -14,19 +14,18 @@ class Delivery {
     var date: Date? = null
     var address: String? = null
     var cost: Double? = null
-    @OneToOne
-    var payment: DeliveryPayment? = null
+    var paymentId: UUID? = null
 
     constructor()
 
-    constructor(date: Date?, address: String?, cost: Double?, payment: DeliveryPayment?) {
+    constructor(date: Date?, address: String?, cost: Double?, paymentId: UUID?) {
         this.date = date
         this.address = address
         this.cost = cost
-        this.payment = payment
+        this.paymentId = paymentId
     }
 
     override fun toString(): String {
-        return "Delivery(date=$date, address=$address, cost=$cost, payment=$payment)"
+        return "Delivery(date=$date, address=$address, cost=$cost, payment=$paymentId)"
     }
 }

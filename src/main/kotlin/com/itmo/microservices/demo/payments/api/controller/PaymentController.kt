@@ -28,11 +28,12 @@ class PaymentController(private val paymentService: PaymentService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getUserTransactionsInfo(@Parameter(hidden = true) @AuthenticationPrincipal userDetails: UserDetails): List<PaymentModel> = paymentService.getUserTransactionsInfo(userDetails)
+    fun getUserTransactionsInfo(@Parameter(hidden = true) @AuthenticationPrincipal userDetails: UserDetails): List<PaymentModel> =
+        paymentService.getUserTransactionsInfo(userDetails)
 
     @PostMapping("/{paymentId}")
     @Operation(
-        summary = "Assign task",
+        summary = "Refund money",
         responses = [
             ApiResponse(description = "OK", responseCode = "200"),
             ApiResponse(
@@ -44,8 +45,10 @@ class PaymentController(private val paymentService: PaymentService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun refund(@PathVariable paymentId: UUID,
-                   @Parameter(hidden = true) @AuthenticationPrincipal userDetails: UserDetails) =
+    fun refund(
+        @PathVariable paymentId: UUID,
+        @Parameter(hidden = true) @AuthenticationPrincipal userDetails: UserDetails
+    ) =
         paymentService.refund(paymentId, userDetails)
 
     @PostMapping
@@ -58,8 +61,8 @@ class PaymentController(private val paymentService: PaymentService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun pay(@RequestBody payment: PaymentModel,
-                @Parameter(hidden = true) @AuthenticationPrincipal userDetails: UserDetails
+    fun pay(
+        @Parameter(hidden = true) @AuthenticationPrincipal userDetails: UserDetails
     ) =
-        paymentService.pay(payment, userDetails)
+        paymentService.pay(userDetails)
 }

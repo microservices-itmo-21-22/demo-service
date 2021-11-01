@@ -8,6 +8,7 @@ import com.itmo.microservices.demo.common.exception.NotFoundException
 import com.itmo.microservices.demo.payments.api.messaging.PaymentProccessedEvent
 import com.itmo.microservices.demo.payments.api.model.PaymentModel
 import com.itmo.microservices.demo.payments.api.service.PaymentService
+import com.itmo.microservices.demo.payments.impl.entity.Payment
 import com.itmo.microservices.demo.payments.impl.repository.PaymentRepository
 import com.itmo.microservices.demo.payments.impl.util.toEntity
 import com.itmo.microservices.demo.payments.impl.util.toModel
@@ -39,9 +40,9 @@ class DefaultPaymentService(private val paymentRepository: PaymentRepository,
         paymentRepository.save(payment)
     }
 
-    override fun pay(payment: PaymentModel, userDetails: UserDetails){
+    override fun pay(userDetails: UserDetails){
         val currentDate = Date()
-        val entity = payment.toEntity().also {
+        val entity = Payment().also {
             it.date = currentDate
             it.username = userDetails.username
         }

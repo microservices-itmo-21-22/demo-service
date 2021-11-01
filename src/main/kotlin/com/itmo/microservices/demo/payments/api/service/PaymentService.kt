@@ -9,5 +9,5 @@ import java.util.*
 interface PaymentService {
     fun getUserTransactionsInfo(userDetails: UserDetails): List<PaymentModel>
     fun refund(paymentId: UUID, userDetails: UserDetails)
-    fun pay(payment: PaymentModel, userDetails: UserDetails)
+    fun pay(userDetails: UserDetails)
 }
