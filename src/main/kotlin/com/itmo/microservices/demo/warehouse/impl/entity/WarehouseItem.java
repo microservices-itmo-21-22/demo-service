@@ -30,13 +30,6 @@ public class WarehouseItem {
 
     }
 
-    public WarehouseItem(UUID id, CatalogItem item, Integer amount, Integer booked) {
-        this.id = id;
-        this.item = item;
-        this.amount = amount;
-        this.booked = booked;
-    }
-
     public UUID getId() {
         return id;
     }

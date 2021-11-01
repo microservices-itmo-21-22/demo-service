@@ -22,7 +22,11 @@ public class CatalogItem {
     public CatalogItem() {
     }
 
-    public CatalogItem(UUID id, WarehouseItem warehouseItem, String title, String description, Integer price) {
+    public CatalogItem(UUID id,
+                       WarehouseItem warehouseItem,
+                       String title,
+                       String description,
+                       Integer price) {
         this.id = id;
         this.warehouseItem = warehouseItem;
         this.title = title;

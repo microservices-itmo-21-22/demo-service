@@ -13,7 +13,7 @@ public enum ResponseMessage {
         this.data = data;
     }
 
-    public String TEXT(){
+    public String TEXT() {
         return data;
     }
 }

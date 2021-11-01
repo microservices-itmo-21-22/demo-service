@@ -23,43 +23,43 @@ public class WarehouseController {
     }
 
     @PostMapping(value = "/income", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<String> income(@RequestBody ItemQuantityChangeRequest values){
+    public ResponseEntity<String> income(@RequestBody ItemQuantityChangeRequest values) {
         return service.income(values);
     }
 
     @PostMapping(value = "/outcome", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<String> outcome(@RequestBody ItemQuantityChangeRequest values){
+    public ResponseEntity<String> outcome(@RequestBody ItemQuantityChangeRequest values) {
         return service.outcome(values);
     }
 
     @PostMapping(value = "/book", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<String> book(@RequestBody ItemQuantityChangeRequest values){
+    public ResponseEntity<String> book(@RequestBody ItemQuantityChangeRequest values) {
         return service.book(values);
     }
 
     @PostMapping(value = "/unbook", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<String> unbook(@RequestBody ItemQuantityChangeRequest values){
+    public ResponseEntity<String> unbook(@RequestBody ItemQuantityChangeRequest values) {
         return service.unbook(values);
     }
 
     @PostMapping(value = "/addItem", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<String> addItem(@RequestBody CatalogItem item){
+    public ResponseEntity<String> addItem(@RequestBody CatalogItem item) {
         return service.addItem(item);
     }
 
     @GetMapping(value = "/getItems")
-    public ResponseEntity<List<CatalogItem>> getItemsList(){
+    public ResponseEntity<List<CatalogItem>> getItemsList() {
         System.out.println();
         return service.getItemsList();
     }
 
     @GetMapping(value = "/getItem")
-    public ResponseEntity<CatalogItem> getItem(@RequestParam("id") UUID id){
+    public ResponseEntity<CatalogItem> getItem(@RequestParam("id") UUID id) {
         return service.getItem(id);
     }
 
     @GetMapping(value = "/getItemQuantity")
-    public ResponseEntity<WarehouseItem> getItemQuantity(@RequestParam("id") UUID id){
+    public ResponseEntity<WarehouseItem> getItemQuantity(@RequestParam("id") UUID id) {
         return service.getItemQuantity(id);
     }
 }
