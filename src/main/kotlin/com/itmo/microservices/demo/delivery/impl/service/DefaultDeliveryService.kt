@@ -19,8 +19,8 @@ import java.util.*
 
 @Suppress("UnstableApiUsage")
 @Service
-class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository, private val eventBus: EventBus):
-    DeliveryService {
+class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
+                             private val eventBus: EventBus): DeliveryService {
 
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
