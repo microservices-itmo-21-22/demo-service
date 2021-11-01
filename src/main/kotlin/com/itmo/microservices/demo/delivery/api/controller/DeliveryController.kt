@@ -30,7 +30,7 @@ class DeliveryController(private val deliveryService: DeliveryService) {
                    @Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails)
                         = deliveryService.doDelivery(request, user)
 
-    @GetMapping("/{deliveryId}") //ToDo user verify
+    @GetMapping("/{deliveryId}")
     @Operation(
         summary = "Get delivery info by ID",
         responses = [
@@ -40,8 +40,9 @@ class DeliveryController(private val deliveryService: DeliveryService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getDeliveryInfo(@PathVariable deliveryId: UUID): DeliveryModel? =
-        deliveryService.getDeliveryInfo(deliveryId)
+    fun getDeliveryInfo(@PathVariable deliveryId: UUID,
+                        @Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails): DeliveryModel? =
+        deliveryService.getDeliveryInfo(deliveryId, user)
 
     @GetMapping("/all")
     @Operation(
@@ -55,7 +56,7 @@ class DeliveryController(private val deliveryService: DeliveryService) {
     fun allDeliveries(@Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails)
         = deliveryService.allDeliveries(user)
 
-    @DeleteMapping("/{deliveryId}") //ToDo user verify
+    @DeleteMapping("/{deliveryId}")
     @Operation(
         summary = "Delete delivery by ID",
         responses = [
@@ -65,6 +66,7 @@ class DeliveryController(private val deliveryService: DeliveryService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun deleteDelivery(@PathVariable deliveryId: UUID) =
-        deliveryService.deleteDelivery(deliveryId)
+    fun deleteDelivery(@PathVariable deliveryId: UUID,
+                       @Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails) =
+        deliveryService.deleteDelivery(deliveryId, user)
 }

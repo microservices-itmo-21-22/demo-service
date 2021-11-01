@@ -32,14 +32,22 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
         eventLogger.info(DeliveryServiceNotableEvents.I_DELIVERY_CREATED, deliveryEntity.id)
     }
 
-    override fun getDeliveryInfo(deliveryId: UUID): DeliveryModel? = deliveryRepository
-        .findByIdOrNull(deliveryId)?.toModel() ?:
-    throw NotFoundException("Delivery with id : $deliveryId not found")
+    override fun getDeliveryInfo(deliveryId: UUID, user: UserDetails): DeliveryModel {
+        val delivery = deliveryRepository.findByIdOrNull(deliveryId)?.toModel()?:
+            throw NotFoundException("Delivery with id : $deliveryId not found")
+        if (delivery.user != user.username)
+            throw AccessDeniedException("Cannot get delivery that was not created by you")
+        return delivery
+    }
 
     override fun allDeliveries(user: UserDetails) = deliveryRepository.findAllByUser(user.username)
         .map { it.toModel() }
 
-    override fun deleteDelivery(deliveryId: UUID) {
+    override fun deleteDelivery(deliveryId: UUID, user: UserDetails) {
+        val delivery = deliveryRepository.findByIdOrNull(deliveryId)?.toModel()?:
+        throw NotFoundException("Delivery with id : $deliveryId not found")
+        if (delivery.user != user.username)
+            throw AccessDeniedException("Cannot delete delivery that was not created by you")
         runCatching {
             deliveryRepository.deleteById(deliveryId)
         }.onSuccess {
