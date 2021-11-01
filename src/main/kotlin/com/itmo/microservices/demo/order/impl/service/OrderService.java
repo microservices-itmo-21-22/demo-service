@@ -18,6 +18,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +59,7 @@ public class OrderService implements IOrderService{
                 .collect(Collectors.toMap(item -> new OrderItem(item.getUuid(), item.getTitle(), item.getPrice()),
                         CatalogItem::getAmount));
 
-        return new Order(orderEntity.getUuid(), orderEntity.getTimeCreated(), itemList, orderEntity.getStatus());
+        return new Order(orderEntity.getUuid(), orderEntity.getTimeCreated(), itemList, orderEntity.getStatus(), orderEntity.getDeliveryInfo());
     }
 
     @Override
@@ -97,9 +98,9 @@ public class OrderService implements IOrderService{
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
         Map<String, String> parameters = new HashMap<>();
+        order.setDeliveryInfo(new Timestamp(seconds));
         parameters.put("order", order.toString());
 
-        
         con.setDoOutput(true);
         DataOutputStream out = new DataOutputStream(con.getOutputStream());
         out.writeBytes(ParameterStringBuilder.getParamsString(parameters));
