@@ -1,10 +1,12 @@
 package com.itmo.microservices.demo.products.impl.entity;
 
 import com.itmo.microservices.demo.products.api.model.ProductType
+import org.hibernate.annotations.GenericGenerator
 import java.util.*
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue
 import javax.persistence.Id;
+
 
 @Entity
 public class Product {
