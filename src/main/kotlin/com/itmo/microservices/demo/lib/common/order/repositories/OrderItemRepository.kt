@@ -1,7 +1,7 @@
-package com.itmo.microservices.demo.order.impl.repository
+package com.itmo.microservices.demo.lib.common.order.repositories
 
-import com.itmo.microservices.demo.order.impl.entities.OrderEntity
-import com.itmo.microservices.demo.order.impl.entities.OrderItemEntity
+import com.itmo.microservices.demo.lib.common.order.entities.OrderEntity
+import com.itmo.microservices.demo.lib.common.order.entities.OrderItemEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 import java.util.*
