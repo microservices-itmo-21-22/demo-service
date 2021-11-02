@@ -1,9 +1,9 @@
 package com.itmo.microservices.demo.tasks.impl.util
 
 import com.itmo.microservices.demo.lib.common.tasks.dto.TaskDto
-import com.itmo.microservices.demo.lib.common.tasks.entity.Task
+import com.itmo.microservices.demo.lib.common.tasks.entity.TaskEntity
 
-fun TaskDto.toEntity(): Task = Task(
+fun TaskDto.toEntity(): TaskEntity = TaskEntity(
     id = this.id,
     author = this.author,
     assignee = this.assignee,
@@ -12,7 +12,7 @@ fun TaskDto.toEntity(): Task = Task(
     status = this.status
 )
 
-fun Task.toModel(): TaskDto = TaskDto(
+fun TaskEntity.toModel(): TaskDto = TaskDto(
     id = this.id,
     author = this.author,
     assignee = this.assignee,

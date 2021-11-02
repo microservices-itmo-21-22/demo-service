@@ -7,7 +7,7 @@ import javax.persistence.GeneratedValue
 import javax.persistence.Id
 
 @Entity
-class Task {
+class TaskEntity {
 
     @Id
     @GeneratedValue
