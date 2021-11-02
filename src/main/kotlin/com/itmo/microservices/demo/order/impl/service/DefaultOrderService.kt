@@ -12,7 +12,10 @@ import java.util.*
 @Service
 class DefaultOrderService(private val orderRepository: OrderRepository) : OrderService {
     override fun getOrder(order_id: UUID): OrderDto {
-        return orderRepository.findByIdOrNull(order_id)?.toModel()
-            ?: throw NotFoundException("Order with Order ID $order_id not found")
+        var optionalOrder = orderRepository.findById(order_id);
+        if (optionalOrder.isEmpty) {
+            throw NotFoundException("Order with Order ID $order_id not found");
+        }
+        return orderRepository.findById(order_id).get().toModel();
     }
 }
