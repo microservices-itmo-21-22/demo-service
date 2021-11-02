@@ -6,6 +6,9 @@ import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.common.logging.CommonNotableEvents
 import com.itmo.microservices.demo.notifications.api.service.NotificationService
+import com.itmo.microservices.demo.payments.api.messaging.PaymentProccessedEvent
+import com.itmo.microservices.demo.products.api.messaging.ProductAddedEvent
+import com.itmo.microservices.demo.products.api.messaging.ProductGotEvent
 import com.itmo.microservices.demo.tasks.api.messaging.TaskAssignedEvent
 import com.itmo.microservices.demo.users.api.messaging.UserCreatedEvent
 import org.springframework.stereotype.Component
@@ -29,14 +32,17 @@ class NotificationModuleEventListener(private val notificationService: Notificat
             event
         )
     }
+    @Subscribe
+    @AllowConcurrentEvents
+    fun accept(event:ProductAddedEvent)= executor.execute{
+        notificationService.processAddProduct(event.product)
+        eventLogger.info(CommonNotableEvents.I_LISTENER_RECEIVED_MESSAGE,event)
+    }
 
     @Subscribe
     @AllowConcurrentEvents
-    fun accept(event: TaskAssignedEvent) = executor.execute {
-        notificationService.processAssignedTask(event.task)
-        eventLogger.info(
-            CommonNotableEvents.I_LISTENER_RECEIVED_MESSAGE,
-            event
-        )
+    fun accept(event: PaymentProccessedEvent)= executor.execute{
+        notificationService.processPayment(event.payment)
+        eventLogger.info(CommonNotableEvents.I_LISTENER_RECEIVED_MESSAGE,event)
     }
 }
