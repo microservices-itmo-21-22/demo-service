@@ -1,7 +1,7 @@
 package com.itmo.microservices.demo.order.impl.service
 
 import com.itmo.microservices.demo.order.api.model.OrderDto
-import com.itmo.microservices.demo.order.api.model.OrderStatus
+import com.itmo.microservices.demo.order.api.model.OrderStatusEnum
 import com.itmo.microservices.demo.order.api.service.OrderService
 import com.itmo.microservices.demo.lib.common.order.entities.OrderEntity
 import com.itmo.microservices.demo.lib.common.order.repositories.OrderItemRepository
@@ -31,7 +31,7 @@ class DefaultOrderService(
     override fun submitOrder(user: UserDetails, order_id: UUID): OrderDto {
         val order = orderRepository.getById(order_id)
         // TODO add check delivery status from delivery service
-        order.status = OrderStatus.SHIPPING;
+        order.status = OrderStatusEnum.SHIPPING;
         return orderRepository.save(order).toModel(orderItemRepository)
     }
 }

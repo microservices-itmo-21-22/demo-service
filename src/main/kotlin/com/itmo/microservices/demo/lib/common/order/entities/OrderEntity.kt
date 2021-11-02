@@ -1,6 +1,6 @@
 package com.itmo.microservices.demo.lib.common.order.entities
 
-import com.itmo.microservices.demo.order.api.model.OrderStatus
+import com.itmo.microservices.demo.order.api.model.OrderStatusEnum
 import com.itmo.microservices.demo.payment.impl.entities.UserAccountFinancialLogRecord
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Type
@@ -25,7 +25,7 @@ class OrderEntity {
 
     var timeCreated: LocalDateTime = LocalDateTime.now()
 
-    var status: OrderStatus = OrderStatus.COLLECTING
+    var status: OrderStatusEnum = OrderStatusEnum.COLLECTING
 
     var deliveryDuration: Int? = 0
 
@@ -41,7 +41,7 @@ class OrderEntity {
         id: UUID?,
         userId: UUID?,
         timeCreated: LocalDateTime,
-        status: OrderStatus,
+        status: OrderStatusEnum,
         itemsMap: List<OrderItemEntity>?,
         deliveryDuration: Int?,
         paymentHistory: List<UserAccountFinancialLogRecord>?
