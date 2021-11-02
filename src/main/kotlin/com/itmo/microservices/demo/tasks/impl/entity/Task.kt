@@ -1,6 +1,6 @@
 package com.itmo.microservices.demo.tasks.impl.entity
 
-import com.itmo.microservices.demo.tasks.api.model.TaskStatus
+import com.itmo.microservices.demo.tasks.api.model.TaskStatusEnum
 import java.util.*
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
@@ -16,11 +16,11 @@ class Task {
     var assignee: String? = null
     var title: String? = null
     var description: String? = null
-    var status: TaskStatus = TaskStatus.TODO
+    var status: TaskStatusEnum = TaskStatusEnum.TODO
 
     constructor()
 
-    constructor(id: UUID? = null, author: String? = null, assignee: String? = null, title: String, description: String? = null, status: TaskStatus) {
+    constructor(id: UUID? = null, author: String? = null, assignee: String? = null, title: String, description: String? = null, status: TaskStatusEnum) {
         this.id = id
         this.author = author
         this.assignee = assignee

@@ -10,4 +10,4 @@ data class TaskModel(
         val assignee: String?,
         val title: String,
         val description: String?,
-        val status: TaskStatus = TaskStatus.TODO)
+        val status: TaskStatusEnum = TaskStatusEnum.TODO)
