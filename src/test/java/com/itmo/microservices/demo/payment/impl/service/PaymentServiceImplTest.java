@@ -4,7 +4,6 @@ import com.itmo.microservices.demo.payment.api.model.FinancialOperationType;
 import com.itmo.microservices.demo.payment.api.model.PaymentSubmissionDto;
 import com.itmo.microservices.demo.payment.impl.model.UserAccountFinancialLogRecord;
 import com.itmo.microservices.demo.payment.impl.repository.UserAccountFinancialLogRecordRepository;
-import com.itmo.microservices.demo.payment.impl.service.PaymentServiceImpl;
 import com.itmo.microservices.demo.users.api.exception.UserNotFoundException;
 import com.itmo.microservices.demo.users.api.service.UserService;
 import com.itmo.microservices.demo.users.impl.entity.AppUser;
@@ -12,7 +11,6 @@ import com.itmo.microservices.demo.users.impl.repository.UserRepository;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -69,7 +67,6 @@ public class PaymentServiceImplTest {
         list.add(entity);
         when(repository.save(entity)).thenReturn(entity);
         when(repository.findAllByUserIdAndOrderId(user.getId(), id)).thenReturn(list);
-        when(userDetails.getUsername()).thenReturn("username");
     }
 
     @Test
