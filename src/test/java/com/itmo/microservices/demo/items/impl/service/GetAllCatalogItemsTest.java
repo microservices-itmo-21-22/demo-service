@@ -1,23 +1,16 @@
 package com.itmo.microservices.demo.items.impl.service;
 
 import com.google.common.eventbus.EventBus;
-import com.itmo.microservices.demo.common.exception.NotFoundException;
-import com.itmo.microservices.demo.items.api.model.CatalogItem;
+import com.itmo.microservices.demo.items.api.service.ItemService;
 import com.itmo.microservices.demo.items.impl.entity.CatalogItemEntity;
 import com.itmo.microservices.demo.items.impl.repository.ItemRepository;
-import com.itmo.microservices.demo.items.api.service.ItemService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
