@@ -3,14 +3,14 @@ package com.itmo.microservices.demo.order.impl.service
 import com.itmo.microservices.demo.order.api.model.OrderDto
 import com.itmo.microservices.demo.order.api.model.OrderStatus
 import com.itmo.microservices.demo.order.api.service.OrderService
+import com.itmo.microservices.demo.order.impl.entities.OrderEntity
 import com.itmo.microservices.demo.order.impl.repository.OrderItemRepository
 import com.itmo.microservices.demo.order.impl.util.toModel
 import com.itmo.microservices.demo.tasks.impl.repository.OrderRepository
 import org.springframework.security.core.userdetails.UserDetails
-import com.itmo.microservices.demo.order.impl.repository.OrderRepository
 import org.springframework.stereotype.Service
 import org.webjars.NotFoundException
-import toModel
+
 import java.util.*
 
 @Service
@@ -20,11 +20,11 @@ class DefaultOrderService(
     ): OrderService {
 
     override fun getOrder(order_id: UUID): OrderDto {
-        var optionalOrder = orderRepository.findById(order_id);
+        val optionalOrder = orderRepository.findById(order_id)
         if (optionalOrder.isEmpty) {
-            throw NotFoundException("Order with Order ID $order_id not found");
+            throw NotFoundException("Order with Order ID $order_id not found")
         }
-        return orderRepository.findById(order_id).get().toModel();
+        return orderRepository.findById(order_id).get().toModel(orderItemRepository)
     }
 
     override fun createOrder(user: UserDetails): OrderDto {
@@ -37,7 +37,7 @@ class DefaultOrderService(
     override fun submitOrder(user: UserDetails, order_id: UUID): OrderDto {
         val order = orderRepository.getById(order_id)
         // TODO add check delivery status from delivery service
-        order.status = OrderStatus.SHIPPING;
+        order.status = OrderStatus.SHIPPING
         return orderRepository.save(order).toModel(orderItemRepository)
     }
 }
