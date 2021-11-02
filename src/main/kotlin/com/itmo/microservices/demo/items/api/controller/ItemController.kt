@@ -1,6 +1,7 @@
 package com.itmo.microservices.demo.items.api.controller
 
 import com.itmo.microservices.demo.items.api.model.CatalogItem
+import com.itmo.microservices.demo.items.api.service.ItemService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/items")
-class ItemController{
+class ItemController(private val itemService: ItemService){
     @GetMapping
     @Operation(
         summary = "Get all items",
@@ -26,9 +27,7 @@ class ItemController{
     fun allItems(
         @RequestParam available: Boolean,
         @Parameter(hidden = true) @AuthenticationPrincipal requester: UserDetails
-    ): List<CatalogItem> {
-        return listOf()
-    }
+    ): List<CatalogItem> = itemService.getCatalogItems();
 
 
     @PutMapping("/orders/{order_id}/items/{item_id}")

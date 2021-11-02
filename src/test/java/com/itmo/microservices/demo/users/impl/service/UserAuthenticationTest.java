@@ -11,8 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -36,7 +34,7 @@ public class UserAuthenticationTest {
         );
 
         userRepository = mock(UserRepository.class);
-        when(userRepository.findById("username")).thenReturn(Optional.of(appUser));
+        when(userRepository.findByUsername("username")).thenReturn(appUser);
 
         var passwordEncoder = mock(PasswordEncoder.class);
         when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
