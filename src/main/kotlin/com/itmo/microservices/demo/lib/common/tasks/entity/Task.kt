@@ -1,6 +1,6 @@
-package com.itmo.microservices.demo.tasks.impl.entity
+package com.itmo.microservices.demo.lib.common.tasks.entity
 
-import com.itmo.microservices.demo.tasks.api.model.TaskStatusEnum
+import com.itmo.microservices.demo.lib.common.tasks.dto.TaskStatusEnum
 import java.util.*
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue

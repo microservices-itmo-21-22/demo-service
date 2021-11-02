@@ -8,12 +8,12 @@ import com.itmo.microservices.demo.common.exception.NotFoundException
 import com.itmo.microservices.demo.tasks.api.messaging.TaskAssignedEvent
 import com.itmo.microservices.demo.tasks.api.messaging.TaskCreatedEvent
 import com.itmo.microservices.demo.tasks.api.messaging.TaskDeletedEvent
-import com.itmo.microservices.demo.tasks.api.model.TaskDto
+import com.itmo.microservices.demo.lib.common.tasks.dto.TaskDto
 import com.itmo.microservices.demo.tasks.api.service.TaskService
 import com.itmo.microservices.demo.tasks.impl.logging.TaskServiceNotableEvents
 import com.itmo.microservices.demo.tasks.impl.util.toEntity
 import com.itmo.microservices.demo.tasks.impl.util.toModel
-import com.itmo.microservices.demo.tasks.impl.repository.TaskRepository
+import com.itmo.microservices.demo.lib.common.tasks.repository.TaskRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service

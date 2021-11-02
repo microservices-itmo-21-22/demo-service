@@ -1,6 +1,6 @@
 package com.itmo.microservices.demo.tasks.api.controller
 
-import com.itmo.microservices.demo.tasks.api.model.TaskDto
+import com.itmo.microservices.demo.lib.common.tasks.dto.TaskDto
 import com.itmo.microservices.demo.tasks.api.service.TaskService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter

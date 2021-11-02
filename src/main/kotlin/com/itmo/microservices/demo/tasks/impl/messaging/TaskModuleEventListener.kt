@@ -1,7 +1,7 @@
 package com.itmo.microservices.demo.tasks.impl.messaging
 
 import com.google.common.eventbus.Subscribe
-import com.itmo.microservices.demo.tasks.impl.repository.TaskRepository
+import com.itmo.microservices.demo.lib.common.tasks.repository.TaskRepository
 import com.itmo.microservices.demo.users.api.messaging.UserDeletedEvent
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

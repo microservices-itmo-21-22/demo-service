@@ -1,7 +1,7 @@
 package com.itmo.microservices.demo.tasks.impl.util
 
-import com.itmo.microservices.demo.tasks.api.model.TaskDto
-import com.itmo.microservices.demo.tasks.impl.entity.Task
+import com.itmo.microservices.demo.lib.common.tasks.dto.TaskDto
+import com.itmo.microservices.demo.lib.common.tasks.entity.Task
 
 fun TaskDto.toEntity(): Task = Task(
     id = this.id,

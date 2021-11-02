@@ -1,6 +1,6 @@
 package com.itmo.microservices.demo.tasks.api.service
 
-import com.itmo.microservices.demo.tasks.api.model.TaskDto
+import com.itmo.microservices.demo.lib.common.tasks.dto.TaskDto
 import org.springframework.security.core.userdetails.UserDetails
 import java.util.*
 

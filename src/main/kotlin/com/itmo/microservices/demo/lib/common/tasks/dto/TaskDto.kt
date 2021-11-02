@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.tasks.api.model
+package com.itmo.microservices.demo.lib.common.tasks.dto
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import java.util.*
@@ -10,4 +10,5 @@ data class TaskDto(
         val assignee: String?,
         val title: String,
         val description: String?,
-        val status: TaskStatusEnum = TaskStatusEnum.TODO)
+        val status: TaskStatusEnum = TaskStatusEnum.TODO
+)

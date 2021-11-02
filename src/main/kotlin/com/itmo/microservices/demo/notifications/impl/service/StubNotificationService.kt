@@ -3,7 +3,7 @@ package com.itmo.microservices.demo.notifications.impl.service
 import com.itmo.microservices.demo.notifications.api.service.NotificationService
 import com.itmo.microservices.demo.lib.common.notifications.repository.NotificationUserRepository
 import com.itmo.microservices.demo.lib.common.notifications.entity.NotificationUser
-import com.itmo.microservices.demo.tasks.api.model.TaskDto
+import com.itmo.microservices.demo.lib.common.tasks.dto.TaskDto
 import com.itmo.microservices.demo.users.api.model.AppUserModel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

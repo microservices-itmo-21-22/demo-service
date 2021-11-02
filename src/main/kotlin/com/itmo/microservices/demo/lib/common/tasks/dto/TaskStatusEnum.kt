@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.tasks.api.model
+package com.itmo.microservices.demo.lib.common.tasks.dto
 
 enum class TaskStatusEnum {
     TODO,
