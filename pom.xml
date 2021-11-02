@@ -22,11 +22,11 @@
         <guava.version>30.1.1-jre</guava.version>
         <jjwt.version>0.9.1</jjwt.version>
         <common-lib.version>0.5.0-SNAPSHOT</common-lib.version>
-             
+
         <buildnumber-maven-plugin.version>1.4</buildnumber-maven-plugin.version>
         <jib-maven-plugin.version>2.8.0</jib-maven-plugin.version>
     </properties>
-         
+
     <dependencies>
         <dependency>
             <groupId>com.itmo.microservices</groupId>
@@ -66,11 +66,6 @@
             <optional>true</optional>
         </dependency>
 
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.5.2</version>
-        </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
@@ -136,6 +131,44 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.modelmapper</groupId>
+            <artifactId>modelmapper</artifactId>
+            <version>2.3.5</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.modelmapper</groupId>
+            <artifactId>modelmapper</artifactId>
+            <version>2.3.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+        </dependency>
+
     </dependencies>
 
     <scm>
@@ -169,7 +202,7 @@
             </snapshots>
         </repository>
     </repositories>
-         
+
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
         <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
@@ -227,7 +260,7 @@
                     <target>11</target>
                 </configuration>
             </plugin>
-                 
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
@@ -255,7 +288,7 @@
                         <tags>${scmBranch}_${project.version}</tags>
                     </to>
                     <allowInsecureRegistries>true</allowInsecureRegistries>
-                    
+
                 </configuration>
                 <executions>
                     <execution>

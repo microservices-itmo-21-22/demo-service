@@ -16,11 +16,11 @@ import com.itmo.microservices.demo.users.api.model.RegistrationRequest
 import com.itmo.microservices.demo.users.impl.logging.UserServiceNotableEvents
 import com.itmo.microservices.demo.users.impl.repository.UserRepository
 import com.itmo.microservices.demo.users.impl.util.toModel
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import javax.validation.constraints.NotNull
 
 @Suppress("UnstableApiUsage")
 @Service
@@ -33,17 +33,20 @@ class DefaultUserService(private val userRepository: UserRepository,
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
 
-    override fun findUser(username: String): AppUserModel? = userRepository
-            .findByIdOrNull(username)?.toModel()
+    override fun getUserModel(username: String): AppUserModel? = this
+            .getUser(username)?.toModel()
+
+    override fun getUser(username: String): AppUser? = userRepository
+            .findByUsername(username)
 
     override fun registerUser(request: RegistrationRequest) {
         val userEntity = userRepository.save(request.toEntity())
         eventBus.post(UserCreatedEvent(userEntity.toModel()))
-        eventLogger.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.username)
+        //eventLogger.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.username)
     }
 
     override fun getAccountData(requester: UserDetails): AppUserModel =
-            userRepository.findByIdOrNull(requester.username)?.toModel() ?:
+            userRepository.findByUsername(requester.username)?.toModel() ?:
             throw NotFoundException("User ${requester.username} not found")
 
     override fun deleteUser(user: UserDetails) {
@@ -51,7 +54,7 @@ class DefaultUserService(private val userRepository: UserRepository,
             userRepository.deleteById(user.username)
         }.onSuccess {
             eventBus.post(UserDeletedEvent(user.username))
-            eventLogger.info(UserServiceNotableEvents.I_USER_DELETED, user.username)
+            //eventLogger.info(UserServiceNotableEvents.I_USER_DELETED, user.username)
         }.onFailure {
             throw NotFoundException("User ${user.username} not found", it)
         }
@@ -66,7 +69,7 @@ class DefaultUserService(private val userRepository: UserRepository,
         )
 
     override fun authenticate(request: AuthenticationRequest): AuthenticationResult {
-        val user = findUser(request.username)
+        val user = getUserModel(request.username)
             ?: throw NotFoundException("User with username ${request.username} not found")
 
         if (!passwordEncoder.matches(request.password, user.password))
