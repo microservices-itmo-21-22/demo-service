@@ -1,27 +1,21 @@
-package com.itmo.microservices.demo.products.api.controller
+package com.itmo.microservices.demo.products
 
 import com.itmo.microservices.demo.DemoServiceApplication
-import org.junit.Test
 
-import org.junit.Assert.*
-import org.junit.FixMethodOrder
-import org.junit.runner.RunWith
-import org.junit.runners.MethodSorters
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 
 @ActiveProfiles("dev")
-@RunWith(SpringRunner::class)
 @SpringBootTest(classes = [DemoServiceApplication::class])
 @AutoConfigureMockMvc
-@FixMethodOrder(MethodSorters.JVM)
 class ProductsControllerTest {
     @Autowired
     private lateinit var mockMvc: MockMvc
@@ -47,7 +41,7 @@ class ProductsControllerTest {
             .response
             .apply(::println)
 
-        assert(mvcResult.status==200)
+        Assertions.assertEquals(mvcResult.status,200)
     }
 
     @Test
@@ -60,7 +54,6 @@ class ProductsControllerTest {
             .andReturn()
             .response
             .apply(::println)
-        assert(mvcResult.status==200)
-        println(mvcResult.contentAsString)
+        Assertions.assertEquals(mvcResult.status,200)
     }
 }

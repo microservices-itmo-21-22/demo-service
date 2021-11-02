@@ -1,14 +1,10 @@
-package com.itmo.microservices.demo.users.api
+package com.itmo.microservices.demo.user
 
 
 
 import com.itmo.microservices.demo.DemoServiceApplication
-
 import com.itmo.microservices.demo.users.api.service.UserService
-import org.junit.FixMethodOrder
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.MethodSorters
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -17,15 +13,15 @@ import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 
 
 @ActiveProfiles("dev")
-@RunWith(SpringRunner::class)
 @SpringBootTest(classes = [DemoServiceApplication::class])
 @AutoConfigureMockMvc
-@FixMethodOrder(MethodSorters.JVM)
 class UserControllerTest {
     @Autowired
     lateinit var userService: UserService
@@ -96,10 +92,8 @@ class UserControllerTest {
             .response
             .apply(::println)
 
-        println(mvcResult.status)
-        println(mvcResult.contentAsString)
-        assert(mvcResult.status==200)
-        assert(mvcResult.contentAsString=="""{"username":"test1","name":"testName","surname":"tt","email":"string@t.ru"}""")
+        Assertions.assertEquals(mvcResult.status,200)
+        Assertions.assertEquals(mvcResult.contentAsString, """{"username":"test1","name":"testName","surname":"tt","email":"string@t.ru"}""")
     }
 
 
@@ -112,7 +106,7 @@ class UserControllerTest {
         ).andReturn()
             .response
             .apply(::println)
-        println(mvcResult.status)
-        assert(mvcResult.status==200)
+
+        Assertions.assertEquals(mvcResult.status,200)
     }
 }
