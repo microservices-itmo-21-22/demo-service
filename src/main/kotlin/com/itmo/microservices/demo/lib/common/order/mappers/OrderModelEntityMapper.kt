@@ -1,8 +1,7 @@
-package com.itmo.microservices.demo.order.impl.util
+package com.itmo.microservices.demo.lib.common.order.mappers
 
-import com.itmo.microservices.demo.items.impl.util.toModel
-import com.itmo.microservices.demo.order.api.model.OrderDto
-import com.itmo.microservices.demo.order.api.model.OrderItemDto
+import com.itmo.microservices.demo.lib.common.order.dto.OrderDto
+import com.itmo.microservices.demo.lib.common.order.dto.OrderItemDto
 import com.itmo.microservices.demo.lib.common.order.entities.OrderEntity
 import com.itmo.microservices.demo.lib.common.order.entities.OrderItemEntity
 import com.itmo.microservices.demo.lib.common.order.repositories.OrderItemRepository

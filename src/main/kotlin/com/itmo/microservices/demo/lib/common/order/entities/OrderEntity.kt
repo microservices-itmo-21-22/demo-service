@@ -1,6 +1,6 @@
 package com.itmo.microservices.demo.lib.common.order.entities
 
-import com.itmo.microservices.demo.order.api.model.OrderStatusEnum
+import com.itmo.microservices.demo.lib.common.order.dto.OrderStatusEnum
 import com.itmo.microservices.demo.payment.impl.entities.UserAccountFinancialLogRecord
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Type

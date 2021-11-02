@@ -1,7 +1,6 @@
 package com.itmo.microservices.demo.order.api.service
 
-import com.itmo.microservices.demo.order.api.model.OrderDto
-import org.hibernate.criterion.Order
+import com.itmo.microservices.demo.lib.common.order.dto.OrderDto
 import org.springframework.security.core.userdetails.UserDetails
 import java.util.*
 

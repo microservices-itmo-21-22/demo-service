@@ -1,11 +1,11 @@
 package com.itmo.microservices.demo.order.impl.service
 
-import com.itmo.microservices.demo.order.api.model.OrderDto
-import com.itmo.microservices.demo.order.api.model.OrderStatusEnum
+import com.itmo.microservices.demo.lib.common.order.dto.OrderDto
+import com.itmo.microservices.demo.lib.common.order.dto.OrderStatusEnum
 import com.itmo.microservices.demo.order.api.service.OrderService
 import com.itmo.microservices.demo.lib.common.order.entities.OrderEntity
 import com.itmo.microservices.demo.lib.common.order.repositories.OrderItemRepository
-import com.itmo.microservices.demo.order.impl.util.toModel
+import com.itmo.microservices.demo.lib.common.order.mappers.toModel
 import com.itmo.microservices.demo.lib.common.order.repositories.OrderRepository
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service

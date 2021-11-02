@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.order.api.model
+package com.itmo.microservices.demo.lib.common.order.dto
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.itmo.microservices.demo.payment.api.model.PaymentLogRecordDto
