@@ -1,7 +1,7 @@
 package com.itmo.microservices.demo.items.impl.util
 
 import com.itmo.microservices.demo.items.api.model.CatalogItem
-import com.itmo.microservices.demo.items.impl.entity.CatalogItemEntity
+import com.itmo.microservices.demo.lib.common.items.entity.CatalogItemEntity
 
 fun CatalogItem.toEntity(): CatalogItemEntity = CatalogItemEntity(
         title = this.title,
