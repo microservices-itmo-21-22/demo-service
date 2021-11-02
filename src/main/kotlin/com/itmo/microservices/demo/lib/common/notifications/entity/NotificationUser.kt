@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.notifications.impl.entity
+package com.itmo.microservices.demo.lib.common.notifications.entity
 
 import javax.persistence.Entity
 import javax.persistence.Id
