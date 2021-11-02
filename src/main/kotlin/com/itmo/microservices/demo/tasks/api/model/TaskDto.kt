@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import java.util.*
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class TaskModel(
+data class TaskDto(
         val id: UUID?,
         val author: String?,
         val assignee: String?,

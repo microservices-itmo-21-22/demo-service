@@ -1,6 +1,6 @@
 package com.itmo.microservices.demo.tasks.api.controller
 
-import com.itmo.microservices.demo.tasks.api.model.TaskModel
+import com.itmo.microservices.demo.tasks.api.model.TaskDto
 import com.itmo.microservices.demo.tasks.api.service.TaskService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -25,7 +25,7 @@ class TaskController(private val taskService: TaskService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun allTasks(): List<TaskModel> = taskService.allTasks()
+    fun allTasks(): List<TaskDto> = taskService.allTasks()
 
     @GetMapping("/{taskId}")
     @Operation(
@@ -37,7 +37,7 @@ class TaskController(private val taskService: TaskService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getTaskById(@PathVariable taskId: UUID): TaskModel = taskService.getTaskById(taskId)
+    fun getTaskById(@PathVariable taskId: UUID): TaskDto = taskService.getTaskById(taskId)
 
     @PostMapping
     @Operation(
@@ -49,7 +49,7 @@ class TaskController(private val taskService: TaskService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun addTask(@RequestBody task: TaskModel,
+    fun addTask(@RequestBody task: TaskDto,
                 @Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
         taskService.addTask(task, author)
 

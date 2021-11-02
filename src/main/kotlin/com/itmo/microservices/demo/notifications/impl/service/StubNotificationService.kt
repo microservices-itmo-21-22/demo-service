@@ -3,7 +3,7 @@ package com.itmo.microservices.demo.notifications.impl.service
 import com.itmo.microservices.demo.notifications.api.service.NotificationService
 import com.itmo.microservices.demo.lib.common.notifications.repository.NotificationUserRepository
 import com.itmo.microservices.demo.lib.common.notifications.entity.NotificationUser
-import com.itmo.microservices.demo.tasks.api.model.TaskModel
+import com.itmo.microservices.demo.tasks.api.model.TaskDto
 import com.itmo.microservices.demo.users.api.model.AppUserModel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -22,7 +22,7 @@ class StubNotificationService(private val userRepository: NotificationUserReposi
         log.info("User ${user.username} (${user.email}) was created & should be notified (but who cares)")
     }
 
-    override fun processAssignedTask(task: TaskModel) {
+    override fun processAssignedTask(task: TaskDto) {
         userRepository.findByIdOrNull(task.assignee)?.let {
             log.info("User ${task.assignee} (${it.email}) was assigned to task ${task.title} & should be notified (but who cares)")
         }

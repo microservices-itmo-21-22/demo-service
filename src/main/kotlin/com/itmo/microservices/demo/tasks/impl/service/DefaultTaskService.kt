@@ -8,7 +8,7 @@ import com.itmo.microservices.demo.common.exception.NotFoundException
 import com.itmo.microservices.demo.tasks.api.messaging.TaskAssignedEvent
 import com.itmo.microservices.demo.tasks.api.messaging.TaskCreatedEvent
 import com.itmo.microservices.demo.tasks.api.messaging.TaskDeletedEvent
-import com.itmo.microservices.demo.tasks.api.model.TaskModel
+import com.itmo.microservices.demo.tasks.api.model.TaskDto
 import com.itmo.microservices.demo.tasks.api.service.TaskService
 import com.itmo.microservices.demo.tasks.impl.logging.TaskServiceNotableEvents
 import com.itmo.microservices.demo.tasks.impl.util.toEntity
@@ -28,14 +28,14 @@ class DefaultTaskService(private val taskRepository: TaskRepository,
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
 
-    override fun allTasks(): List<TaskModel> = taskRepository.findAll()
+    override fun allTasks(): List<TaskDto> = taskRepository.findAll()
             .map { it.toModel() }
 
-    override fun getTaskById(taskId: UUID): TaskModel =
+    override fun getTaskById(taskId: UUID): TaskDto =
             taskRepository.findByIdOrNull(taskId)?.toModel()
                     ?: throw NotFoundException("Task $taskId not found")
 
-    override fun addTask(task: TaskModel, author: UserDetails) {
+    override fun addTask(task: TaskDto, author: UserDetails) {
         val entity = task.toEntity().also { it.author = author.username }
         taskRepository.save(entity)
         eventBus.post(TaskCreatedEvent(entity.toModel()))
