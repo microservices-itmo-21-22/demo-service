@@ -1,6 +1,6 @@
 package com.itmo.microservices.demo.delivery.api.service
 
-import com.itmo.microservices.demo.order.api.model.BookingDto
+import com.itmo.microservices.demo.lib.common.delivery.dto.BookingDto
 import java.time.LocalDateTime
 import java.util.*
 

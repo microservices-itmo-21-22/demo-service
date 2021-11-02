@@ -1,7 +1,7 @@
 package com.itmo.microservices.demo.delivery.api.controller
 
 import com.itmo.microservices.demo.delivery.api.service.DeliveryService
-import com.itmo.microservices.demo.order.api.model.BookingDto
+import com.itmo.microservices.demo.lib.common.delivery.dto.BookingDto
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse
