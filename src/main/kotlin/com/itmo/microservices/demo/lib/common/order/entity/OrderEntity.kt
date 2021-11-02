@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.lib.common.order.entities
+package com.itmo.microservices.demo.lib.common.order.entity
 
 import com.itmo.microservices.demo.lib.common.order.dto.OrderStatusEnum
 import com.itmo.microservices.demo.payment.impl.entities.UserAccountFinancialLogRecord

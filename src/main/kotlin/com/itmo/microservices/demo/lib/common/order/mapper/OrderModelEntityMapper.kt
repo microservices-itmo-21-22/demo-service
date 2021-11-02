@@ -1,10 +1,10 @@
-package com.itmo.microservices.demo.lib.common.order.mappers
+package com.itmo.microservices.demo.lib.common.order.mapper
 
 import com.itmo.microservices.demo.lib.common.order.dto.OrderDto
 import com.itmo.microservices.demo.lib.common.order.dto.OrderItemDto
-import com.itmo.microservices.demo.lib.common.order.entities.OrderEntity
-import com.itmo.microservices.demo.lib.common.order.entities.OrderItemEntity
-import com.itmo.microservices.demo.lib.common.order.repositories.OrderItemRepository
+import com.itmo.microservices.demo.lib.common.order.entity.OrderEntity
+import com.itmo.microservices.demo.lib.common.order.entity.OrderItemEntity
+import com.itmo.microservices.demo.lib.common.order.repository.OrderItemRepository
 import java.time.ZoneOffset
 
 fun OrderEntity.toModel(orderItemRepository: OrderItemRepository): OrderDto = OrderDto(

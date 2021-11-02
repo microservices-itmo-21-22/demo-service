@@ -1,8 +1,8 @@
-package com.itmo.microservices.demo.lib.common.order.mappers
+package com.itmo.microservices.demo.lib.common.order.mapper
 
 import com.itmo.microservices.demo.lib.common.order.dto.OrderItemDto
-import com.itmo.microservices.demo.lib.common.order.entities.OrderItemEntity
-import com.itmo.microservices.demo.lib.common.order.entities.OrderEntity
+import com.itmo.microservices.demo.lib.common.order.entity.OrderItemEntity
+import com.itmo.microservices.demo.lib.common.order.entity.OrderEntity
 
 fun OrderItemDto.toEntity(amountFromOrderDto: Int?, orderFromOrderEntityDto: OrderEntity?): OrderItemEntity = OrderItemEntity(
     id = this.id,

@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.lib.common.order.entities
+package com.itmo.microservices.demo.lib.common.order.entity
 
 import java.util.*
 import javax.persistence.Entity
