@@ -50,44 +50,42 @@ class DefaultStockItemService(private val stockItemRepository: StockItemReposito
 
     }
 
-    override fun addStockItem(stockItem: StockItemModel, number: Int) {
-        if (number == null){
-            val entity = stockItem.toEntity()
-            stockItemRepository.save(entity)
-            eventBus.post(StockItemCreatedEvent(entity.toModel()))
-            eventLogger.info(
-                StockItemServiceNotableEvents.I_STOCK_ITEM_CREATED,
-                entity
-            )
-        }
-        else {
-            val stockItem = stockItemRepository.findByIdOrNull(stockItem.id) ?: return
+    override fun createStockItem(stockItem: StockItemModel) {
+        val stockItemEntity = stockItemRepository.save(stockItem.toEntity())
+        stockItemRepository.save(stockItemEntity)
+        eventBus.post(StockItemCreatedEvent(stockItemEntity.toModel()))
+        eventLogger.info(
+            StockItemServiceNotableEvents.I_STOCK_ITEM_CHANGED,
+            stockItem
+        )
+
+    }
+
+    override fun addStockItem(stockItemId: UUID, number: Int) {
+            val stockItem = stockItemRepository.findByIdOrNull(stockItemId) ?: return
             stockItem.setTotalCount(number)
             stockItemRepository.save(stockItem)
             eventBus.post(StockItemCreatedEvent(stockItem.toModel()))
             eventLogger.info(
-                StockItemServiceNotableEvents.I_STOCK_ITEM_CREATED,
+                StockItemServiceNotableEvents.I_STOCK_ITEM_CHANGED,
                 stockItem
             )
-        }
 
     }
 
     override fun changeStockItem(stockItemId: UUID, stockItem: StockItemModel) {
-        val existingStockItem = stockItemRepository.findByIdOrNull(stockItemId) ?: return
-        existingStockItem.name = stockItem.name
-        existingStockItem.price = stockItem.price
-        existingStockItem.category = stockItem.category
-        stockItemRepository.save(existingStockItem)
-        eventBus.post(StockItemCreatedEvent(existingStockItem.toModel()))
+        val stockItemToChange = stockItemRepository.findByIdOrNull(stockItemId) ?: return
+        stockItemRepository.deleteById(stockItemId)
+        val stockItemEntity = stockItemRepository.save(stockItem.toEntity())
+        stockItemRepository.save(stockItemEntity)
+        eventBus.post(StockItemCreatedEvent(stockItemEntity.toModel()))
         eventLogger.info(
             StockItemServiceNotableEvents.I_STOCK_ITEM_CHANGED,
             stockItem
         )
     }
 
-    override fun deleteStockItemById(stockItemId: UUID, number: Int) {
-        if (number == null){
+    override fun deleteStockItemById(stockItemId: UUID) {
             val stockItem = stockItemRepository.findByIdOrNull(stockItemId) ?: return
             stockItemRepository.deleteById(stockItemId)
             eventBus.post(StockItemDeletedEvent(stockItem.toModel()))
@@ -95,17 +93,5 @@ class DefaultStockItemService(private val stockItemRepository: StockItemReposito
                 StockItemServiceNotableEvents.I_STOCK_ITEM_DELETED,
                 stockItem
             )
-        }
-        else {
-            val stockItem = stockItemRepository.findByIdOrNull(stockItemId) ?: return
-            stockItem.setTotalCount(-number)
-            stockItemRepository.save(stockItem)
-            eventBus.post(StockItemDeletedEvent(stockItem.toModel()))
-            eventLogger.info(
-                StockItemServiceNotableEvents.I_STOCK_ITEM_DELETED,
-                stockItem
-            )
-        }
-
     }
 }
