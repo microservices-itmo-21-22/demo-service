@@ -26,9 +26,8 @@ class DefaultCartService(private val shoppingCartRepository: ShoppingCartReposit
 
             catalogItems.add(catalogItemDTO)
         }
-
         return catalogItems
-    }
+     }
 
     override fun getCart(cartId: UUID): ShoppingCartDTO? {
         val shoppingCart = shoppingCartRepository.getById(cartId)

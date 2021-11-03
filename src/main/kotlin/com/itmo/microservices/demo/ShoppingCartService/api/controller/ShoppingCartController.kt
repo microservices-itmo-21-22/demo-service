@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.ShoppingCartService.impl.controller
+package com.itmo.microservices.demo.ShoppingCartService.api.controller
 
 import com.itmo.microservices.demo.ShoppingCartService.impl.dto.CatalogItemDTO
 import com.itmo.microservices.demo.ShoppingCartService.impl.dto.ShoppingCartDTO
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
-@Controller
+@RestController
 @RequestMapping("user/{userId}/basket")
 class ShoppingCartController (private val CartService: DefaultCartService){
 

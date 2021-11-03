@@ -1,12 +1,10 @@
 package com.itmo.microservices.demo.ShoppingCartService.impl.entity
 
 import java.util.*
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
+import javax.persistence.*
 
 @Entity
+@Table(name="CatalogItem304")
 class CatalogItem {
 
     @Id
