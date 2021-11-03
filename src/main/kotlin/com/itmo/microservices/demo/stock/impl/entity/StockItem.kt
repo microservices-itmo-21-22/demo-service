@@ -5,7 +5,7 @@ import java.util.*
 import javax.persistence.*
 
 @Entity
-@Table(name = "stock")
+@Table(name = "stock304")
 class StockItem {
 
     @Id
