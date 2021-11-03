@@ -74,11 +74,14 @@ class DefaultStockItemService(private val stockItemRepository: StockItemReposito
     }
 
     override fun changeStockItem(stockItemId: UUID, stockItem: StockItemModel) {
-        val stockItemToChange = stockItemRepository.findByIdOrNull(stockItemId) ?: return
-        stockItemRepository.deleteById(stockItemId)
-        val stockItemEntity = stockItemRepository.save(stockItem.toEntity())
-        stockItemRepository.save(stockItemEntity)
-        eventBus.post(StockItemCreatedEvent(stockItemEntity.toModel()))
+        val stockItemFromDb = stockItemRepository.findByIdOrNull(stockItemId) ?: return
+        stockItemFromDb.name = stockItem.name
+        stockItemFromDb.reservedCount = stockItem.reservedCount
+        stockItemFromDb.totalCount = stockItem.totalCount
+        stockItemFromDb.price = stockItem.price
+        stockItemFromDb.category = stockItem.category
+        stockItemRepository.save(stockItemFromDb)
+        eventBus.post(StockItemCreatedEvent(stockItemFromDb.toModel()))
         eventLogger.info(
             StockItemServiceNotableEvents.I_STOCK_ITEM_CHANGED,
             stockItem
