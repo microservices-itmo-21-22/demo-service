@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:h2DB;DB_CLOSE_DELAY=-1;CASE_INSENSITIVE_IDENTIFIERS=true
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:password}
+    driver-class-name: org.h2.Driver
+  jpa:
+    database: h2
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+security:
+  token-lifetime: 30m
