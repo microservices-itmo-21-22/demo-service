@@ -10,28 +10,35 @@ create table if not exists app_user (
 );
 
 -- order service
+create type order_status as enum ('COLLECTING', 'DISCARD', 'BOOKED', 'PAID', 'SHIPPING', 'REFUND', 'COMPLETED');
 
 create table if not exists orders (
     id uuid primary key,
-    userId uuid references users not null,
-    timeCreated date not null,
+    user_id uuid not null,
+    time_created timestamp not null,
     status order_status not null,
-    deliveryDuration integer not null,
-    itemsMap uuid[] references order_items not null,
-    paymentHistory payment_log
+    delivery_duration integer not null
 );
 
-create type order_status as enum ('COLLECTING', 'DISCARD', 'BOOKED', 'PAID', 'SHIPPING', 'REFUND', 'COMPLETED');
+
 
 create table if not exists order_items (
     id uuid primary key,
     title text not null,
     price text not null,
     amount integer not null,
-    orderEntity uuid references orders
+    orderEntity uuid
 );
 
 -- item service
+
+create table if not exists catalog_item (
+    id uuid primary key,
+    title text not null,
+    description text not null,
+    amount integer not null,
+    price integer not null
+);
 
 -- payment service
 
@@ -69,3 +76,4 @@ create table if not exists payment_order (
 -- TODO: add user stubs here and in other services
 
 -- delivery service
+
