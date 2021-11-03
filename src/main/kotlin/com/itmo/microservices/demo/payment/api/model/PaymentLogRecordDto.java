@@ -9,10 +9,21 @@ import java.util.UUID;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
+//@AllArgsConstructor
 public class PaymentLogRecordDto {
-    private LocalDateTime timestamp;
-    private PaymentStatus status;
-    private Integer amount;
-    private UUID transactionId;
+    public UUID transactionId;
+    public LocalDateTime timestamp;
+    public PaymentStatus status;
+    public Integer amount;
+
+    public PaymentLogRecordDto(UUID _transactionId,
+                        LocalDateTime _timestamp,
+                        PaymentStatus _status,
+                        Integer _amount)
+    {
+        transactionId = _transactionId;
+        timestamp = _timestamp;
+        status = _status;
+        amount = _amount;
+    }
 }
