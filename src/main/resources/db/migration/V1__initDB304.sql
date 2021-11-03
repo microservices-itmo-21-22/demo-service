@@ -8,6 +8,12 @@ CREATE TABLE IF NOT EXISTS stock
     category        VARCHAR(255),
     primary key (id)
     );
+CREATE TABLE IF NOT EXISTS delivery
+(
+    id        INT8 not null,
+    address         VARCHAR(255),
+    date            DATE
+);
 /*
 CREATE TABLE IF NOT EXISTS catalog_item
 (
@@ -62,4 +68,5 @@ CREATE TABLE IF NOT EXISTS basket_catalog_item
     order_id        INTEGER REFERENCES order (id),
     address         VARCHAR(255),
     date            DATE
-);*/
+);
+*/
