@@ -9,6 +9,7 @@ import com.itmo.microservices.demo.order.impl.service.DefaultOrderService;
 import com.itmo.microservices.demo.tasks.impl.repository.OrderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.core.userdetails.User;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -46,6 +47,10 @@ public class OrderServiceTests {
 		orderRepository = mock(OrderRepository.class);
 		when(orderRepository.findById(any()))
 				.thenReturn(Optional.ofNullable(orderEntity));
+		when(orderRepository.save(any()))
+				.thenReturn(orderEntity);
+		when(orderRepository.getById(any()))
+				.thenReturn(orderEntity);
 
 		orderItemRepository = mock(OrderItemRepository.class);
 
@@ -56,5 +61,17 @@ public class OrderServiceTests {
 	public void testGetOrder() {
 		OrderDto result = orderService.getOrder(Objects.requireNonNull(orderEntity.getId()));
 		assertEquals(OrderStatus.COLLECTING, result.getStatus());
+	}
+
+	@Test
+	public void testCreateOrder() {
+		OrderDto result = orderService.createOrder(new User("name", "pass", new ArrayList<>()));
+		assertEquals(OrderStatus.COLLECTING, result.getStatus());
+	}
+
+	@Test
+	public void testSubmitOrder() {
+		OrderDto result = orderService.submitOrder(new User("name", "pass", new ArrayList<>()), UUID.randomUUID());
+		assertEquals(OrderStatus.SHIPPING, result.getStatus());
 	}
 }
