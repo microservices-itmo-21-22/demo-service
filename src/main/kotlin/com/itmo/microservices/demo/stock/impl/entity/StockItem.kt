@@ -9,7 +9,7 @@ import javax.persistence.*
 class StockItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    //@GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: UUID? = null
     var name: String? = null
     var price: Double? = null
