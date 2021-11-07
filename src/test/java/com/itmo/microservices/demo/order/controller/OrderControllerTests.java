@@ -1,4 +1,4 @@
-package java.com.itmo.microservices.demo.order.controller;
+package com.itmo.microservices.demo.order.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itmo.microservices.demo.order.api.controller.OrderController;

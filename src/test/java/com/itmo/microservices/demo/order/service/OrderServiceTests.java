@@ -1,4 +1,4 @@
-package java.com.itmo.microservices.demo.order.service;
+package com.itmo.microservices.demo.order.service;
 
 import com.itmo.microservices.demo.order.api.model.OrderDto;
 import com.itmo.microservices.demo.order.api.service.OrderService;
