@@ -9,7 +9,7 @@ fun Delivery.toModel(): DeliveryModel = kotlin.runCatching {
         user = this.user,
         type = this.type,
         warehouse = this.warehouse,
-        deliveryDuration = this.deliveryDuration,
+        preferredDeliveryTime = this.preferredDeliveryTime!!,
         address = this.address,
         courierCompany = this.courierCompany
     )

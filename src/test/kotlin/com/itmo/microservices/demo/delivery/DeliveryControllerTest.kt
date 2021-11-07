@@ -21,6 +21,9 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
+import java.text.DateFormat
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -38,7 +41,7 @@ class DeliveryControllerTest {
             "user",
             DeliveryType.COURIER,
             0,
-            0,
+            LocalDateTime.parse("2021-11-05T14:35:44"),
             "address",
             "courierCompany"
         )
@@ -60,7 +63,7 @@ class DeliveryControllerTest {
             "user",
             DeliveryType.COURIER,
             0,
-            0,
+            LocalDateTime.parse("2021-11-05T14:35:44"),
             "address",
             "courierCompany"
         )
@@ -89,7 +92,7 @@ class DeliveryControllerTest {
             "user",
             DeliveryType.COURIER,
             0,
-            0,
+            LocalDateTime.parse("2021-11-05T14:35:44"),
             "address",
             "courierCompany"
         )
@@ -115,7 +118,7 @@ class DeliveryControllerTest {
             "user",
             DeliveryType.COURIER,
             0,
-            0,
+            LocalDateTime.parse("2021-11-05T14:35:44"),
             "address",
             "courierCompany"
         )
@@ -123,7 +126,7 @@ class DeliveryControllerTest {
             "user",
             DeliveryType.COURIER,
             0,
-            0,
+            LocalDateTime.parse("2021-11-05T14:35:44"),
             "address",
             "courierCompany"
         )
