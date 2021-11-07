@@ -35,7 +35,7 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
             deliveryRepository.save(deliveryEntity)
             eventBus.post(DeliveryCreatedEvent(deliveryEntity.toModel()))
             eventLogger.info(DeliveryServiceNotableEvents.I_DELIVERY_CREATED, deliveryEntity.id)
-        } else throw AccessDeniedException("Please, choose another delivery time")
+        } else throw NotFoundException("Please, choose another delivery time")
     }
 
     override fun getDeliveryInfo(deliveryId: UUID, user: UserDetails): DeliveryModel {

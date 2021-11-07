@@ -41,7 +41,7 @@ class Delivery {
                 "user=$user, " +
                 "type=$type, " +
                 "warehouse=$warehouse, " +
-                "deliveryDuration=$preferredDeliveryTime, " +
+                "preferredDeliveryTime=$preferredDeliveryTime, " +
                 "address=$address, " +
                 "courierCompany=$courierCompany" +
                 ")"
