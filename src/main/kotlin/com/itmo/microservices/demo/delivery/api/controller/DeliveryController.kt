@@ -43,8 +43,8 @@ class DeliveryController(private val deliveryService: DeliveryService) {
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun getDeliverySlots(date: String,
-                        @Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails): String? =
-        deliveryService.getDeliverySlots(date)
+                        @Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails):
+            String? = deliveryService.getDeliverySlots(date)
 
     @GetMapping("/{deliveryId}")
     @Operation(

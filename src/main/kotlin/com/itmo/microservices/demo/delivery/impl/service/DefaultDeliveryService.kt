@@ -17,7 +17,6 @@ import com.itmo.microservices.demo.delivery.impl.util.toModel
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -35,7 +34,8 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
             deliveryRepository.save(deliveryEntity)
             eventBus.post(DeliveryCreatedEvent(deliveryEntity.toModel()))
             eventLogger.info(DeliveryServiceNotableEvents.I_DELIVERY_CREATED, deliveryEntity.id)
-        } else throw NotFoundException("Please, choose another delivery time")
+        } else
+            throw NotFoundException("Please, choose another delivery time")
     }
 
     override fun getDeliveryInfo(deliveryId: UUID, user: UserDetails): DeliveryModel {
@@ -48,22 +48,14 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
 
     override fun getDeliverySlots(date: String): String {
         val slots: MutableList<Int> = mutableListOf(5, 5, 5, 5, 5)
-        slots[0] = slots[0] -
-                deliveryRepository.findAllByPreferredDeliveryTimeBetween(LocalDateTime.parse(date + "T10:00:00"),
-            LocalDateTime.parse(date + "T11:30:00")).size
-        slots[1] = slots[1] -
-                deliveryRepository.findAllByPreferredDeliveryTimeBetween(LocalDateTime.parse(date + "T11:30:00"),
-            LocalDateTime.parse(date + "T13:00:00")).size
-        slots[2] = slots[2] -
-                deliveryRepository.findAllByPreferredDeliveryTimeBetween(LocalDateTime.parse(date + "T13:00:00"),
-            LocalDateTime.parse(date + "T14:30:00")).size
-        slots[3] = slots[3] -
-                deliveryRepository.findAllByPreferredDeliveryTimeBetween(LocalDateTime.parse(date + "T14:30:00"),
-            LocalDateTime.parse(date + "T16:00:00")).size
-        slots[4] = slots[4] -
-                deliveryRepository.findAllByPreferredDeliveryTimeBetween(LocalDateTime.parse(date + "T16:00:00"),
-            LocalDateTime.parse(date + "T17:30:00")).size
-        return slotsVisualise(date, slots)
+
+        slots.forEachIndexed { index, element ->
+            slots[index] = element - deliverySearch(date, slotTimes[index], slotTimes[index + 1]) }
+
+        var slotsAvailable = ""
+        slots.forEach { slotsAvailable += it.toString() }
+
+        return slotsVisualise(date, slots) //slotsAvailable
     }
 
     override fun allDeliveries(user: UserDetails) = deliveryRepository.findAllByUser(user.username)
@@ -94,37 +86,36 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
             courierCompany = "CDEC"
         )
 
-    fun slotsVisualise(date: String, slots: MutableList<Int>): String =
-    "On $date available:\n" +
-            "slot#1: ${slots[0]} of 5 (10.00-11.30),\n" +
-            "slot#2: ${slots[1]} of 5 (11.30-13.00),\n" +
-            "slot#3: ${slots[2]} of 5 (13.00-14.30),\n" +
-            "slot#4: ${slots[3]} of 5 (14.30-16.00),\n" +
-            "slot#5: ${slots[4]} of 5 (16.00-17.30)"
+    fun  deliverySearch (date: String, time1: String, time2: String) =
+        deliveryRepository.findAllByPreferredDeliveryTimeBetween(LocalDateTime.parse(date + "T" + time1),
+            LocalDateTime.parse(date + "T" + time2)).size
+
+    fun slotsVisualise(date: String, slots: MutableList<Int>): String {
+        var visualise = "On $date available:\n"
+
+        slots.forEachIndexed { index, element ->
+            visualise += "slot#${index + 1}: $element of 5 (${slotTimes[index]} - ${slotTimes[index + 1]}),\n" }
+        return visualise
+    }
 
     fun getSlot(time: LocalDateTime): Boolean {
         val date = time.toString().substring(0, 10)
+        var answer = false
 
-        if (time > LocalDateTime.parse(date + "T10:00:00") &&
-            time < LocalDateTime.parse(date + "T11:30:00")) {
-            return deliveryRepository.findAllByPreferredDeliveryTimeBetween(LocalDateTime.parse(date + "T10:00:00"),
-                LocalDateTime.parse(date + "T11:30:00")).size < 5
-        } else if (time > LocalDateTime.parse(date + "T11:30:00") &&
-            time < LocalDateTime.parse(date + "T13:00:00")) {
-            return deliveryRepository.findAllByPreferredDeliveryTimeBetween(LocalDateTime.parse(date + "T11:30:00"),
-                LocalDateTime.parse(date + "T13:00:00")).size < 5
-        } else if (time > LocalDateTime.parse(date + "T13:00:00") &&
-            time < LocalDateTime.parse(date + "T14:30:00")) {
-            return deliveryRepository.findAllByPreferredDeliveryTimeBetween(LocalDateTime.parse(date + "T13:00:00"),
-                LocalDateTime.parse(date + "T14:30:00")).size < 5
-        } else if (time > LocalDateTime.parse(date + "T14:30:00") &&
-            time < LocalDateTime.parse(date + "T16:00:00")) {
-            return deliveryRepository.findAllByPreferredDeliveryTimeBetween(LocalDateTime.parse(date + "T14:30:00"),
-                LocalDateTime.parse(date + "T16:00:00")).size < 5
-        } else if (time > LocalDateTime.parse(date + "T16:00:00") &&
-            time < LocalDateTime.parse(date + "T17:30:00")) {
-            return deliveryRepository.findAllByPreferredDeliveryTimeBetween(LocalDateTime.parse(date + "T16:00:00"),
-                LocalDateTime.parse(date + "T17:30:00")).size < 5
-        } else return false
+        slotTimes.forEachIndexed { index, element ->
+            if (time > LocalDateTime.parse(date + "T" + slotTimes[index]) &&
+                time < LocalDateTime.parse(date + "T" + slotTimes[index + 1])) {
+                answer = deliverySearch(date, slotTimes[index], slotTimes[index + 1]) < 5
+            }
+        }
+        return answer
     }
+
+    val slotTimes: MutableList<String> = mutableListOf("10:00:00",
+                                                    "11:30:00",
+                                                    "13:00:00",
+                                                    "14:30:00",
+                                                    "16:00:00",
+                                                    "17:30:00"
+                                                )
 }
