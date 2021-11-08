@@ -15,11 +15,11 @@ class WarehouseItem {
     @MapsId
     @OneToOne
     @JoinColumn(name = "id")
-    var item: CatalogItem? = null
+    var item: WCatalogItem? = null
     var amount: Int = 0
     var booked: Int = 0
 
-    constructor(item: CatalogItem?, amount: Int, booked: Int) {
+    constructor(item: WCatalogItem?, amount: Int, booked: Int) {
         this.item = item
         this.amount = amount
         this.booked = booked

@@ -1,23 +1,23 @@
 package com.itmo.microservices.demo.warehouse.impl.service
 
-import com.itmo.microservices.demo.warehouse.impl.repository.WarehouseItemRepository
 import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.warehouse.api.model.ItemQuantityChangeRequest
-import org.springframework.http.ResponseEntity
 import com.itmo.microservices.demo.warehouse.api.model.ResponseMessage
-import com.itmo.microservices.demo.warehouse.impl.entity.CatalogItem
-import org.springframework.http.HttpStatus
+import com.itmo.microservices.demo.warehouse.impl.entity.WCatalogItem
 import com.itmo.microservices.demo.warehouse.impl.entity.WarehouseItem
 import com.itmo.microservices.demo.warehouse.impl.logging.WarehouseServiceNotableEvents
-import com.itmo.microservices.demo.warehouse.impl.repository.CatalogItemRepository
+import com.itmo.microservices.demo.warehouse.impl.repository.ICatalogItemRepository
+import com.itmo.microservices.demo.warehouse.impl.repository.WarehouseItemRepository
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
-import java.util.UUID
+import java.util.*
 
 @Service
 class WarehouseService(
     private val warehouseRepository: WarehouseItemRepository,
-    private val catalogRepository: CatalogItemRepository
+    private val catalogRepository: ICatalogItemRepository
 ) {
     @InjectEventLogger
     private val eventLogger: EventLogger? = null
@@ -102,7 +102,7 @@ class WarehouseService(
         }
     }
 
-    fun addItem(item: CatalogItem): ResponseEntity<String> {
+    fun addItem(item: WCatalogItem): ResponseEntity<String> {
         if (ValidationError()) return ResponseEntity(ResponseMessage.BAD_REQUEST.getText(), HttpStatus.BAD_REQUEST)
         val catalogItem = catalogRepository.save(item)
         val warehouseItem = WarehouseItem(catalogItem, 0, 0)
@@ -111,13 +111,13 @@ class WarehouseService(
         return ResponseEntity(ResponseMessage.OK_CREATED.getText(), HttpStatus.OK)
     }
 
-    val itemsList: ResponseEntity<List<CatalogItem>>
+    val itemsList: ResponseEntity<List<WCatalogItem>>
         get() {
             val list = catalogRepository.findAll()
             return ResponseEntity(list, HttpStatus.OK)
         }
 
-    fun getItem(id: UUID?): ResponseEntity<CatalogItem> {
+    fun getItem(id: UUID?): ResponseEntity<WCatalogItem> {
         return ResponseEntity(catalogRepository.findCatalogItemById(id), HttpStatus.OK)
     }
 

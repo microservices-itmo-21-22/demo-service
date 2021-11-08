@@ -6,7 +6,7 @@ import com.itmo.microservices.demo.warehouse.impl.entity.WarehouseItem
 import javax.persistence.*
 
 @Entity
-class CatalogItem {
+class WCatalogItem {
     @Id
     @GeneratedValue
     var id: UUID? = null

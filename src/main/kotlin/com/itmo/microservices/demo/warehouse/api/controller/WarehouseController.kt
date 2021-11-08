@@ -2,7 +2,7 @@ package com.itmo.microservices.demo.warehouse.api.controller
 
 import com.itmo.microservices.demo.warehouse.impl.service.WarehouseService
 import com.itmo.microservices.demo.warehouse.api.model.ItemQuantityChangeRequest
-import com.itmo.microservices.demo.warehouse.impl.entity.CatalogItem
+import com.itmo.microservices.demo.warehouse.impl.entity.WCatalogItem
 import org.springframework.http.ResponseEntity
 import java.util.UUID
 import com.itmo.microservices.demo.warehouse.impl.entity.WarehouseItem
@@ -34,16 +34,16 @@ class WarehouseController(private val service: WarehouseService) {
     }
 
     @PostMapping(value = ["/addItem"], consumes = ["application/json"], produces = ["application/json"])
-    fun addItem(@RequestBody item: CatalogItem?): ResponseEntity<String> {
+    fun addItem(@RequestBody item: WCatalogItem?): ResponseEntity<String> {
         return service.addItem(item!!)
     }
 
     @get:GetMapping(value = ["/getItems"])
-    val itemsList: ResponseEntity<List<CatalogItem>>
+    val itemsList: ResponseEntity<List<WCatalogItem>>
         get() = service.itemsList
 
     @GetMapping(value = ["/getItem"])
-    fun getItem(@RequestParam("id") id: UUID?): ResponseEntity<CatalogItem> {
+    fun getItem(@RequestParam("id") id: UUID?): ResponseEntity<WCatalogItem> {
         return service.getItem(id)
     }
 
