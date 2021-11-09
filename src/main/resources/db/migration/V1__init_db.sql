@@ -74,6 +74,4 @@ create table if not exists payment_order (
     user_id uuid not null
 );
 
--- TODO: add user stubs here and in other services
-
 -- delivery service
