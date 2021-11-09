@@ -12,7 +12,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.junit4.SpringRunner
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.test.web.servlet.MockMvc
@@ -34,12 +33,6 @@ class UserControllerTest {
     val password:String = "stringpwd"
     @Test
     fun register() {
-//        val om : ObjectMapper;
-//        val re = RegistrationRequest(name = "rq",surname = "yy",username = "123",email = "123@145.com",password = "123");
-//        val res= userService.registerUser(re)
-//        print(res)
-
-
           mockMvc.perform(
             MockMvcRequestBuilders.post("http://127.0.0.1:8080/users")
                 .contentType(MediaType.APPLICATION_JSON)

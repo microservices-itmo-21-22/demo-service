@@ -23,6 +23,7 @@ class StubNotificationService(private val userRepository: NotificationUserReposi
     }
 
     override fun processPayment(payment: PaymentModel) {
+        //send email to user
         when(payment.status){
             0->log.info("Payment at ${payment.date},user: ${payment.username} successful")
             1->log.info("Payment at ${payment.date},user: ${payment.username} not successful")
@@ -30,7 +31,8 @@ class StubNotificationService(private val userRepository: NotificationUserReposi
     }
 
     override fun processAddProduct(product: ProductModel) {
-        log.info("Product '${product.name}' ${product.price} added into database ")
+        // just for debugging
+        log.info("Product 'ID:${product.id}  ${product.name}' ${product.price} added into database ")
     }
 
     private fun modelToEntity(user: AppUserModel): NotificationUser = NotificationUser(

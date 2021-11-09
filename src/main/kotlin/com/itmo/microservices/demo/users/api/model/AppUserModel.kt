@@ -12,6 +12,5 @@ data class AppUserModel(
         val email: String,
         @JsonIgnore
         val password: String) {
-
         fun userDetails(): UserDetails = User(username, password, emptyList())
 }
