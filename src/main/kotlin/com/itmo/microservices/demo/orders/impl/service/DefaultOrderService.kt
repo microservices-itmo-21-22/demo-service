@@ -16,24 +16,29 @@ import com.itmo.microservices.demo.orders.impl.repository.OrderRepository
 import com.itmo.microservices.demo.orders.impl.repository.PaymentRepository
 import com.itmo.microservices.demo.orders.impl.util.toEntity
 import com.itmo.microservices.demo.orders.impl.util.toModel
+import com.itmo.microservices.demo.users.api.service.UserService
+import org.hibernate.service.spi.InjectService
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.*
 import javax.naming.OperationNotSupportedException
 
+@Suppress("UnstableApiUsage")
 @Service
 class DefaultOrderService(private val orderRepository: OrderRepository,
                           private val paymentRepository: PaymentRepository,
-                          private val eventBus: EventBus) : OrderService {
+                          private val eventBus: EventBus,
+                          private val userService: UserService) : OrderService {
 
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
 
     override fun getOrdersByUserId(userName: String): List<OrderModel> {
+        val userId = getUserIdByName(userName)
         val orders = orderRepository.findAll()
         val result = mutableListOf<OrderModel>()
         for (order in orders) {
-            if(order.userName == userName) {
+            if(order.userId == userId) {
                 result.add(order.toModel())
             }
         }
@@ -44,15 +49,17 @@ class DefaultOrderService(private val orderRepository: OrderRepository,
         return orderRepository.findByIdOrNull(orderId)?.toModel() ?: throw NotFoundException("Order $orderId not found")
     }
 
-    override fun addOrder(order: OrderModel, userName : String) {
-        orderRepository.save(order.toEntity().also { it.userName = userName })
+    override fun addOrder(order: OrderModel, userName: String) {
+        val userId = getUserIdByName(userName)
+        orderRepository.save(order.toEntity().also { it.userId = userId })
         eventBus.post(OrderCreatedEvent(order))
         eventLogger.info(OrderServiceNotableEvents.I_ORDER_CREATED, order.toEntity())
     }
 
     override fun deleteOrder(orderId: UUID, userName : String) {
+        val userId = getUserIdByName(userName);
         val order = orderRepository.findByIdOrNull(orderId) ?: throw NotFoundException("Order $orderId not found")
-        if(order.userName != userName)
+        if(order.userId != userId)
             throw AccessDeniedException("Cannot delete order that was not created by you")
         eventBus.post(OrderDeletedEvent(order.toModel()))
         eventLogger.info(OrderServiceNotableEvents.I_ORDER_DELETED, order)
@@ -69,5 +76,10 @@ class DefaultOrderService(private val orderRepository: OrderRepository,
         eventBus.post(PaymentAssignedEvent(payment))
         eventLogger.info(OrderServiceNotableEvents.I_PAYMENT_ASSIGNED, paymentEntity)
         paymentRepository.save(paymentEntity)
+    }
+
+    fun getUserIdByName(userName: String): UUID {
+        // TODO
+        return UUID.fromString("123")
     }
 }
