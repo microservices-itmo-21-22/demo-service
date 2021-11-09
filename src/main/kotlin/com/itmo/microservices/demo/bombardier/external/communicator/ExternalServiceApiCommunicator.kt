@@ -25,13 +25,12 @@ open class ExternalServiceApiCommunicator(private val baseUrl: URL, private val 
 
     open suspend fun authenticate(username: String, password: String) = execute("/authentication") {
         jsonPost(
-            "name" to username,
+            "username" to username,
             "password" to password
         )
 
     }.run {
-        val resp = body()!!.string()
-        mapper.readValue(resp, TokenResponse::class.java).toExternalServiceToken(baseUrl)
+        mapper.readValue(body()!!.string(), TokenResponse::class.java).toExternalServiceToken(baseUrl)
     }
 
     protected suspend fun reauthenticate(token: ExternalServiceToken) = execute("/authentication/refresh") {
@@ -56,14 +55,14 @@ open class ExternalServiceApiCommunicator(private val baseUrl: URL, private val 
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    if (HttpStatus.Series.resolve(response.code()) == HttpStatus.Series.SUCCESSFUL) {
+                    if (response.code() == HttpStatus.OK.value()) {
                         it.resume(response)
                         return
                     }
                     it.resumeWithException(InvalidExternalServiceResponseException(
                         response.code(),
                         response,
-                        "External service returned non-OK code: ${response.code()}\n\n${response.body()?.string()}"
+                        "External service returned non-OK code: ${response.code()}"
                     ))
                 }
             })

@@ -2,28 +2,27 @@ package com.itmo.microservices.demo.bombardier.stages
 
 import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
-import com.itmo.microservices.demo.bombardier.flow.BookingStatus
+import com.itmo.microservices.demo.bombardier.external.BookingStatus
 import com.itmo.microservices.demo.bombardier.flow.CoroutineLoggingFactory
-import com.itmo.microservices.demo.bombardier.flow.OrderStatus
-import com.itmo.microservices.demo.bombardier.flow.ServiceApi
+import com.itmo.microservices.demo.bombardier.external.OrderStatus
+import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
 import com.itmo.microservices.demo.bombardier.logging.OrderCommonNotableEvents
 import com.itmo.microservices.demo.bombardier.logging.OrderFinaizingNotableEvents.*
-import org.springframework.stereotype.Component
 
-@Component
-class OrderFinalizingStage(private val serviceApi: ServiceApi) : TestStage {
+class OrderFinalizingStage(private val externalServiceApi: ExternalServiceApi) : TestStage {
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
 
+
     override suspend fun run(): TestStage.TestContinuationType {
         eventLogger.info(I_START_FINALIZING, testCtx().orderId)
-        val orderStateBeforeFinalizing = serviceApi.getOrder(testCtx().orderId!!)
+        val orderStateBeforeFinalizing = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
 
-        val bookingResult = serviceApi.bookOrder(testCtx().orderId!!)
+        val bookingResult = externalServiceApi.bookOrder(testCtx().userId!!, testCtx().orderId!!)
 
-        val orderStateAfterBooking = serviceApi.getOrder(testCtx().orderId!!)
+        val orderStateAfterBooking = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
 
-        val bookingRecords = serviceApi.getBookingHistory(bookingResult.id)
+        val bookingRecords = externalServiceApi.getBookingHistory(bookingResult.id)
         for (item in orderStateAfterBooking.itemsMap.keys) {
             if (bookingRecords.none { it.itemId == item.id }) {
                 eventLogger.error(E_BOOKING_LOG_RECORD_NOT_FOUND, bookingResult.id, item.id, testCtx().orderId)
@@ -82,7 +81,6 @@ class OrderFinalizingStage(private val serviceApi: ServiceApi) : TestStage {
                     orderStateBeforeFinalizing.status,
                     orderStateAfterBooking.status
                 )
-
                 return TestStage.TestContinuationType.FAIL
             }
         }

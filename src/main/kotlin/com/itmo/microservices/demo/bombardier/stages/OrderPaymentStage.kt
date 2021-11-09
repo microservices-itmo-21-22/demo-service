@@ -2,22 +2,24 @@ package com.itmo.microservices.demo.bombardier.stages
 
 import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
+import com.itmo.microservices.demo.bombardier.external.FinancialOperationType
+import com.itmo.microservices.demo.bombardier.external.OrderStatus
+import com.itmo.microservices.demo.bombardier.external.PaymentStatus
+import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
 import com.itmo.microservices.demo.bombardier.flow.*
 import com.itmo.microservices.demo.bombardier.logging.OrderCommonNotableEvents
 import com.itmo.microservices.demo.bombardier.logging.OrderPaymentNotableEvents.*
 import com.itmo.microservices.demo.bombardier.utils.ConditionAwaiter
-import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
 
-@Component
 class OrderPaymentStage(
-    private val serviceApi: ServiceApi
+    private val externalServiceApi: ExternalServiceApi
 ) : TestStage {
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
 
     override suspend fun run(): TestStage.TestContinuationType {
-        val order = serviceApi.getOrder(testCtx().orderId!!)
+        val order = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
 
         val paymentDetails = testCtx().paymentDetails
         paymentDetails.attempt++
@@ -26,27 +28,26 @@ class OrderPaymentStage(
 
         paymentDetails.startedAt = System.currentTimeMillis()
 
-        val paymentSubmissionDto =
-            serviceApi.payOrder(testCtx().userId!!, testCtx().orderId!!) // todo sukhoa add payment details to test ctx
+        val paymentSubmissionDto = externalServiceApi.payOrder(testCtx().userId!!, testCtx().orderId!!) // todo sukhoa add payment details to test ctx
 
         ConditionAwaiter.awaitAtMost(6, TimeUnit.SECONDS)
             .condition {
-                serviceApi.getOrder(testCtx().orderId!!).paymentHistory
-                    .any { it.transactionId == paymentSubmissionDto.transactionId }
+                externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!).paymentHistory
+                    .any {it.transactionId == paymentSubmissionDto.transactionId}
             }
             .onFailure {
                 eventLogger.error(E_TIMEOUT_EXCEEDED, order.id)
                 throw TestStage.TestStageFailedException("Exception instead of silently fail")
             }.startWaiting()
 
-        val paymentLogRecord = serviceApi.getOrder(testCtx().orderId!!).paymentHistory
+        val paymentLogRecord = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!).paymentHistory
             .find { it.transactionId == paymentSubmissionDto.transactionId }!!
 
         when (val status = paymentLogRecord.status) {
             PaymentStatus.SUCCESS -> {
                 ConditionAwaiter.awaitAtMost(5, TimeUnit.SECONDS)
                     .condition {
-                        serviceApi.getOrder(testCtx().orderId!!).status is OrderStatus.OrderPayed
+                        externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!).status is OrderStatus.OrderPayed
                     }
                     .onFailure {
                         eventLogger.error(E_PAYMENT_STATUS_FAILED, order.id)
@@ -55,7 +56,7 @@ class OrderPaymentStage(
 
                 ConditionAwaiter.awaitAtMost(2, TimeUnit.SECONDS)
                     .condition {
-                        val userChargedRecord = serviceApi.userFinancialHistory(testCtx().userId!!, testCtx().orderId!!)
+                        val userChargedRecord = externalServiceApi.userFinancialHistory(testCtx().userId!!, testCtx().orderId!!)
                             .find { it.paymentTransactionId == paymentSubmissionDto.transactionId }
 
                         userChargedRecord?.type == FinancialOperationType.WITHDRAW

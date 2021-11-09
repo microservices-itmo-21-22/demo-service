@@ -1,5 +1,12 @@
 package com.itmo.microservices.demo.bombardier.flow
 
+import com.itmo.microservices.demo.bombardier.exceptions.IllegalTestingFlowNameException
+import com.itmo.microservices.demo.bombardier.exception.BadRequestException
+import com.itmo.microservices.demo.bombardier.external.ExternalServiceSimulator
+import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
+import com.itmo.microservices.demo.bombardier.external.storage.ItemStorage
+import com.itmo.microservices.demo.bombardier.external.storage.OrderStorage
+import com.itmo.microservices.demo.bombardier.external.storage.UserStorage
 import com.itmo.microservices.demo.bombardier.stages.*
 import com.itmo.microservices.demo.bombardier.stages.TestStage.TestContinuationType.CONTINUE
 import com.itmo.microservices.demo.common.exception.BadRequestException
@@ -16,7 +23,7 @@ import kotlin.coroutines.CoroutineContext
 @Service
 class TestController(
     private val userManagement: UserManagement,
-    private val serviceApi: ServiceApi,
+    private val externalServiceApi: ExternalServiceApi,
     choosingUserAccountStage: ChoosingUserAccountStage,
     orderCreationStage: OrderCreationStage,
     orderCollectingStage: OrderCollectingStage,
@@ -143,7 +150,7 @@ data class PaymentDetails(
     var failedAt: Long? = null,
     var finishedAt: Long? = null,
     var attempt: Int = 0,
-    var amount: Amount? = null,
+    var amount: Int? = null,
 )
 
 data class TestParameters(
