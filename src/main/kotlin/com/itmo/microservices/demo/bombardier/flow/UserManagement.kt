@@ -5,6 +5,7 @@ import com.itmo.microservices.demo.bombardier.external.User
 import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.NoSuchElementException
 
 class UserManagement(
     private val externalServiceApi: ExternalServiceApi
@@ -13,28 +14,29 @@ class UserManagement(
         val log = LoggerFactory.getLogger(UserManagement::class.java)
     }
 
-    private val userIdsByService = ConcurrentHashMap<String, MutableSet<UUID>>()
-    private val externalServiceUserCache = ConcurrentHashMap<UUID, User>()
+    private val serviceName = externalServiceApi.descriptor.name
 
-    suspend fun createUsersPool(service: String, numberOfUsers: Int): Set<UUID> {
+    private val userIdsByService = mutableListOf<UUID>()
+
+    suspend fun createUsersPool(numberOfUsers: Int): List<UUID> {
         repeat(numberOfUsers) { index ->
             kotlin.runCatching {
-                externalServiceApi.createUser("service-$service-user-$index-${System.currentTimeMillis()}")
+                externalServiceApi.createUser("service-${serviceName}-user-$index-${System.currentTimeMillis()}")
             }.onSuccess { user ->
-                userIdsByService
-                    .computeIfAbsent(service) { ConcurrentHashMap.newKeySet() }
-                    .add(user.id)
-
-                externalServiceUserCache[user.id] = user
+                userIdsByService.add(user.id)
             }.onFailure {
                 log.error("User has not been created", it)
             }
         }
-        return userIdsByService[service].orEmpty() // todo make immutable
+        return userIdsByService
     }
 
     fun getRandomUserId(service: String): UUID {
-        return userIdsByService[service]?.random()
-            ?: throw IllegalStateException("There are no users for service $service")
+        return try {
+            userIdsByService.random()
+        }
+        catch (t: NoSuchElementException) {
+            throw IllegalStateException("There are no users for service $service")
+        }
     }
 }

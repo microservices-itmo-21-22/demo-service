@@ -24,9 +24,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/test")
 class BombardierController {
-    val externalServiceMock = ExternalServiceSimulator(OrderStorage(), UserStorage(), ItemStorage())
-    val userManagement = UserManagement(externalServiceMock)
-    val testApi = TestController(userManagement, externalServiceMock)
+    private val testController = TestController()
 
     companion object {
         val logger = LoggerFactory.getLogger(BombardierController::class.java)
@@ -41,7 +39,7 @@ class BombardierController {
         ]
     )
     fun listRunningTestsPerService(@PathVariable id: String): RunningTestsResponse {
-        val currentServiceTestFlow = testApi.getTestingFlowForService(id)
+        val currentServiceTestFlow = testController.getTestingFlowForService(id)
 
         val testParamsExt = currentServiceTestFlow.testParams.toExtended(
             currentServiceTestFlow.testsStarted.get(),
@@ -58,7 +56,7 @@ class BombardierController {
         ]
     )
     fun listAllRunningTests(): RunningTestsResponse {
-        val currentTests = testApi.runningTests
+        val currentTests = testController.runningTests
             .map { it.value.testParams.toExtended(
                 it.value.testsStarted.get(),
                 it.value.testsFinished.get())
@@ -78,7 +76,7 @@ class BombardierController {
         ]
     )
     fun runTest(@RequestBody request: RunTestRequest) {
-        testApi.startTestingForService(
+        testController.startTestingForService(
             TestParameters(
                 request.serviceName,
                 request.usersCount,
@@ -100,7 +98,7 @@ class BombardierController {
     )
     fun stopTest(@PathVariable serviceName: String) {
         runBlocking {
-            testApi.stopTestByServiceName(serviceName)
+            testController.stopTestByServiceName(serviceName)
         }
     }
 
@@ -113,7 +111,7 @@ class BombardierController {
     )
     fun stopAllTests() {
         runBlocking {
-            testApi.stopAllTests()
+            testController.stopAllTests()
         }
     }
 }

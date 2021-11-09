@@ -17,12 +17,4 @@ class DemoServiceApplication
 
 fun main(args: Array<String>) {
     runApplication<DemoServiceApplication>(*args)
-
-    val externalServiceMock = ExternalServiceSimulator(OrderStorage(), UserStorage(), ItemStorage())
-    val userManagement = UserManagement(externalServiceMock)
-
-    val testApi = TestController(userManagement, externalServiceMock)
-
-    runBlocking {
-    }
 }

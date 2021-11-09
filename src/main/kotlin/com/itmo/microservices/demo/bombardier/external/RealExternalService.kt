@@ -3,6 +3,7 @@ package com.itmo.microservices.demo.bombardier.external
 import com.itmo.microservices.demo.bombardier.external.communicator.ExternalServiceToken
 import com.itmo.microservices.demo.bombardier.external.communicator.InvalidExternalServiceResponseException
 import com.itmo.microservices.demo.bombardier.external.communicator.UserAwareExternalServiceApiCommunicator
+import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceDescriptor
 import com.itmo.microservices.demo.bombardier.external.storage.UserStorage
 import org.springframework.http.HttpStatus
 import java.net.URL
@@ -11,9 +12,9 @@ import java.util.*
 import java.util.concurrent.ForkJoinPool
 class UserNotAuthenticatedException(username: String) : Exception(username)
 
-class RealExternalService(url: URL, private val userStorage: UserStorage) : ExternalServiceApi {
+class RealExternalService(override val descriptor: ServiceDescriptor, private val userStorage: UserStorage) : ExternalServiceApi {
     private val executorService = ForkJoinPool()
-    private val communicator = UserAwareExternalServiceApiCommunicator(url, executorService)
+    private val communicator = UserAwareExternalServiceApiCommunicator(descriptor.url, executorService)
 
     suspend fun getUserSession(id: UUID): ExternalServiceToken {
         val username = getUser(id).username
@@ -28,10 +29,7 @@ class RealExternalService(url: URL, private val userStorage: UserStorage) : Exte
     override suspend fun createUser(name: String): User {
         val user = communicator.executeWithDeserialize<User>("/users") {
             jsonPost(
-                "username" to name,
                 "name" to name,
-                "surname" to "Keklik",
-                "email" to "$name@povysh.evm",
                 "password" to "pwd_$name"
             )
         }
