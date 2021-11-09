@@ -1,14 +1,14 @@
-package com.itmo.microservices.demo.ShoppingCartService.impl.service
+package com.itmo.microservices.demo.shoppingCartService.impl.service
 
-import com.itmo.microservices.demo.ShoppingCartService.api.service.CartService
-import com.itmo.microservices.demo.ShoppingCartService.impl.ShoppingCartStatus
-import com.itmo.microservices.demo.ShoppingCartService.impl.dto.CatalogItemDTO
-import com.itmo.microservices.demo.ShoppingCartService.impl.dto.ShoppingCartDTO
-import com.itmo.microservices.demo.ShoppingCartService.impl.entity.CatalogItem
-import com.itmo.microservices.demo.ShoppingCartService.impl.entity.ShoppingCart
-import com.itmo.microservices.demo.ShoppingCartService.impl.repository.CatalogItemRepository
-import com.itmo.microservices.demo.ShoppingCartService.impl.repository.ShoppingCartItemRepository
-import com.itmo.microservices.demo.ShoppingCartService.impl.repository.ShoppingCartRepository
+import com.itmo.microservices.demo.shoppingCartService.api.service.CartService
+import com.itmo.microservices.demo.shoppingCartService.impl.ShoppingCartStatus
+import com.itmo.microservices.demo.shoppingCartService.api.dto.CatalogItemDTO
+import com.itmo.microservices.demo.shoppingCartService.api.dto.ShoppingCartDTO
+import com.itmo.microservices.demo.shoppingCartService.impl.entity.CatalogItem
+import com.itmo.microservices.demo.shoppingCartService.impl.entity.ShoppingCart
+import com.itmo.microservices.demo.shoppingCartService.impl.repository.CatalogItemRepository
+import com.itmo.microservices.demo.shoppingCartService.impl.repository.ShoppingCartItemRepository
+import com.itmo.microservices.demo.shoppingCartService.impl.repository.ShoppingCartRepository
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -46,7 +46,7 @@ class DefaultCartService(private val shoppingCartRepository: ShoppingCartReposit
     override fun makeCart(): ShoppingCartDTO? {
         val cart = ShoppingCart(ShoppingCartStatus.active())
 
-        shoppingCartRepository.save(cart)
+        // shoppingCartRepository.save(cart)
 
         return getCart(cart.id)
     }

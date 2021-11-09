@@ -1,14 +1,12 @@
-package com.itmo.microservices.demo.ShoppingCartService.api.controller
+package com.itmo.microservices.demo.shoppingCartService.api.controller
 
-import com.itmo.microservices.demo.ShoppingCartService.impl.dto.CatalogItemDTO
-import com.itmo.microservices.demo.ShoppingCartService.impl.dto.ShoppingCartDTO
-import com.itmo.microservices.demo.ShoppingCartService.impl.entity.CatalogItem
-import com.itmo.microservices.demo.ShoppingCartService.impl.service.DefaultCartService
+import com.itmo.microservices.demo.shoppingCartService.api.dto.CatalogItemDTO
+import com.itmo.microservices.demo.shoppingCartService.api.dto.ShoppingCartDTO
+import com.itmo.microservices.demo.shoppingCartService.impl.service.DefaultCartService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
@@ -24,7 +22,7 @@ class ShoppingCartController (private val CartService: DefaultCartService){
             ],
             security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getCart(@PathVariable cartId: UUID): ShoppingCartDTO? = CartService.getCart(cartId)
+    fun getCart(@PathVariable("cartID") cartID : UUID): ShoppingCartDTO? = CartService.getCart(cartID)
 
     @PostMapping("/{cartID}/item")
     @Operation(
@@ -34,7 +32,7 @@ class ShoppingCartController (private val CartService: DefaultCartService){
             ],
             security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun createCartItem(@RequestBody itemId: UUID): CatalogItemDTO? = CartService.makeCatalogItem(UUID.randomUUID(), 100)
+    fun createCartItem(@RequestBody cartID: UUID): CatalogItemDTO? = CartService.makeCatalogItem(UUID.randomUUID(), 100)
 
     @GetMapping("/{cartID}/put/{catalogItemId}")
     @Operation(
@@ -44,7 +42,7 @@ class ShoppingCartController (private val CartService: DefaultCartService){
             ],
             security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun putCartItemInCart(@PathVariable cartId: UUID, @PathVariable catalogItemId: UUID) = CartService.putItemInCart(cartId, catalogItemId)
+    fun putCartItemInCart(@PathVariable cartID: UUID, @PathVariable catalogItemId: UUID) = CartService.putItemInCart(cartID, catalogItemId)
 
     @GetMapping("/create_cart")
     @Operation(

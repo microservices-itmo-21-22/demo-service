@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.ShoppingCartService.impl
+package com.itmo.microservices.demo.shoppingCartService.impl
 
 class ShoppingCartStatus {
     companion object {

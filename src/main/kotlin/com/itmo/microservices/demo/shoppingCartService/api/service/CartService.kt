@@ -1,8 +1,7 @@
-package com.itmo.microservices.demo.ShoppingCartService.api.service
+package com.itmo.microservices.demo.shoppingCartService.api.service
 
-import com.itmo.microservices.demo.ShoppingCartService.impl.dto.CatalogItemDTO
-import com.itmo.microservices.demo.ShoppingCartService.impl.dto.ShoppingCartDTO
-import com.itmo.microservices.demo.ShoppingCartService.impl.entity.CatalogItem
+import com.itmo.microservices.demo.shoppingCartService.api.dto.CatalogItemDTO
+import com.itmo.microservices.demo.shoppingCartService.api.dto.ShoppingCartDTO
 import java.util.*
 
 interface CartService {

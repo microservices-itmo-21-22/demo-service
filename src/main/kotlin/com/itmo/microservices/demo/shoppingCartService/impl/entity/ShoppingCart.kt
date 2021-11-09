@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.ShoppingCartService.impl.entity
+package com.itmo.microservices.demo.shoppingCartService.impl.entity
 
 
 import java.util.*
