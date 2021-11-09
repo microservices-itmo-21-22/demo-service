@@ -1,20 +1,23 @@
 package com.itmo.microservices.demo.bombardier.stages
 
+import com.itmo.microservices.demo.bombardier.external.DeliverySubmissionOutcome
+import com.itmo.microservices.demo.bombardier.external.FinancialOperationType
+import com.itmo.microservices.demo.bombardier.external.OrderStatus
+import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
 import com.itmo.microservices.demo.bombardier.flow.*
 import com.itmo.microservices.demo.bombardier.utils.ConditionAwaiter
-import kotlinx.coroutines.delay
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 class OrderDeliveryStage(
-    private val serviceApi: ServiceApi
+    private val externalServiceApi: ExternalServiceApi
 ) : TestStage {
     companion object {
         val log = CoroutineLoggingFactory.getLogger(OrderDeliveryStage::class.java)
     }
 
     override suspend fun run(): TestStage.TestContinuationType {
-        val orderBeforeDelivery = serviceApi.getOrder(testCtx().orderId!!)
+        val orderBeforeDelivery = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
 
         if (orderBeforeDelivery.status !is OrderStatus.OrderPayed) {
             log.error("Incorrect order ${orderBeforeDelivery.id} status before OrderDeliveryStage ${orderBeforeDelivery.status}")
@@ -26,14 +29,14 @@ class OrderDeliveryStage(
             return TestStage.TestContinuationType.FAIL
         }
 
-        serviceApi.simulateDelivery(testCtx().orderId!!)
+        externalServiceApi.simulateDelivery(testCtx().userId!!, testCtx().orderId!!)
 
         ConditionAwaiter.awaitAtMost(orderBeforeDelivery.deliveryDuration.toSeconds() + 5, TimeUnit.SECONDS)
             .condition {
-                val updatedOrder = serviceApi.getOrder(testCtx().orderId!!)
+                val updatedOrder = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
                 updatedOrder.status is OrderStatus.OrderDelivered ||
                         updatedOrder.status is OrderStatus.OrderRefund &&
-                        serviceApi.userFinancialHistory(
+                        externalServiceApi.userFinancialHistory(
                             testCtx().userId!!,
                             testCtx().orderId!!
                         ).last().type == FinancialOperationType.REFUND
@@ -43,10 +46,10 @@ class OrderDeliveryStage(
                 throw TestStage.TestStageFailedException("Exception instead of silently fail")
             }
             .startWaiting()
-        val orderAfterDelivery = serviceApi.getOrder(testCtx().orderId!!)
+        val orderAfterDelivery = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
         when (orderAfterDelivery.status) {
             is OrderStatus.OrderDelivered -> {
-                val deliveryLog = serviceApi.deliveryLog(testCtx().orderId!!)
+                val deliveryLog = externalServiceApi.deliveryLog(testCtx().orderId!!)
                 if (deliveryLog.outcome != DeliverySubmissionOutcome.SUCCESS) {
                     log.error("Delivery log for order ${orderAfterDelivery.id} is not DeliverySubmissionOutcome.SUCCESS")
                     return TestStage.TestContinuationType.FAIL
@@ -60,7 +63,7 @@ class OrderDeliveryStage(
                 log.info("Order ${orderAfterDelivery.id} was successfully delivered")
             }
             is OrderStatus.OrderRefund -> {
-                val userFinancialHistory = serviceApi.userFinancialHistory(testCtx().userId!!, testCtx().orderId!!)
+                val userFinancialHistory = externalServiceApi.userFinancialHistory(testCtx().userId!!, testCtx().orderId!!)
                 if (userFinancialHistory.filter { it.type == FinancialOperationType.WITHDRAW }.sumOf { it.amount } !=
                     userFinancialHistory.filter { it.type == FinancialOperationType.REFUND }.sumOf { it.amount }) {
                     log.error("Withdraw and refund amount are different for order ${orderAfterDelivery.id}, " +

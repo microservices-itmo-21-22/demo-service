@@ -3,6 +3,7 @@ package com.itmo.microservices.demo.bombardier.flow
 import com.itmo.microservices.demo.bombardier.exceptions.IllegalTestingFlowNameException
 import com.itmo.microservices.demo.bombardier.exception.BadRequestException
 import com.itmo.microservices.demo.bombardier.external.ExternalServiceSimulator
+import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
 import com.itmo.microservices.demo.bombardier.external.storage.ItemStorage
 import com.itmo.microservices.demo.bombardier.external.storage.OrderStorage
 import com.itmo.microservices.demo.bombardier.external.storage.UserStorage
@@ -19,7 +20,7 @@ import kotlin.coroutines.CoroutineContext
 
 class TestController(
     private val userManagement: UserManagement,
-    private val serviceApi: ServiceApi
+    private val externalServiceApi: ExternalServiceApi
 ) {
     companion object {
         val log = LoggerFactory.getLogger(TestController::class.java)
@@ -33,14 +34,14 @@ class TestController(
 
     private val testStages = listOf(
         ChoosingUserAccountStage(userManagement).asErrorFree(),
-        OrderCreationStage(serviceApi).asErrorFree(),
-        OrderCollectingStage(serviceApi).asErrorFree(),
+        OrderCreationStage(externalServiceApi).asErrorFree(),
+        OrderCollectingStage(externalServiceApi).asErrorFree(),
 //        OrderAbandonedStage(serviceApi).asErrorFree(),
-        OrderFinalizingStage(serviceApi).asErrorFree(),
-        OrderSettingDeliverySlotsStage(serviceApi).asErrorFree(),
-        OrderChangeItemsAfterFinalizationStage(serviceApi),
-        OrderPaymentStage(serviceApi).asRetryable().asErrorFree(),
-        OrderDeliveryStage(serviceApi).asErrorFree(),
+        OrderFinalizingStage(externalServiceApi).asErrorFree(),
+        OrderSettingDeliverySlotsStage(externalServiceApi).asErrorFree(),
+        OrderChangeItemsAfterFinalizationStage(externalServiceApi),
+        OrderPaymentStage(externalServiceApi).asRetryable().asErrorFree(),
+        OrderDeliveryStage(externalServiceApi).asErrorFree(),
     )
 
     fun startTestingForService(params: TestParameters) {
@@ -136,7 +137,7 @@ data class PaymentDetails(
     var failedAt: Long? = null,
     var finishedAt: Long? = null,
     var attempt: Int = 0,
-    var amount: Amount? = null,
+    var amount: Int? = null,
 )
 
 data class TestParameters(

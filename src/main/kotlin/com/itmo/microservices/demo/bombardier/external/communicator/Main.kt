@@ -11,8 +11,8 @@ import java.util.concurrent.ForkJoinPool
 
 suspend fun main() {
     val executor = ForkJoinPool(5)
+    val communicator = UserAwareExternalServiceApiCommunicator(URL("http://77.234.215.138:30014/"), executor)
     CoroutineScope(executor.asCoroutineDispatcher()).launch {
-        val communicator = ExternalServiceApiCommunicator(URL("http://localhost:8080/"), executor)
 
         communicator.execute("/users") {
             JSONObject().apply {

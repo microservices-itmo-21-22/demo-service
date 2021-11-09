@@ -24,11 +24,10 @@ open class ExternalServiceApiCommunicator(private val baseUrl: URL, private val 
     }
 
     open suspend fun authenticate(username: String, password: String) = execute("/authentication") {
-        val body = JSONObject().apply {
-            put("username", username)
-            put("password", password)
-        }
-        post(body.toRequestBody())
+        jsonPost(
+            "username" to username,
+            "password" to password
+        )
 
     }.run {
         mapper.readValue(body()!!.string(), TokenResponse::class.java).toExternalServiceToken(baseUrl)
@@ -43,8 +42,8 @@ open class ExternalServiceApiCommunicator(private val baseUrl: URL, private val 
 
     suspend fun execute(url: String) = execute(url) {}
 
-    suspend fun execute(url: String, builderContext: Request.Builder.() -> Unit): Response {
-        val requestBuilder = RequestBuilderWithBaseUrl(baseUrl).apply {
+    suspend fun execute(url: String, builderContext: CustomRequestBuilder.() -> Unit): Response {
+        val requestBuilder = CustomRequestBuilder(baseUrl).apply {
             _url(url)
             builderContext(this)
         }
@@ -72,7 +71,7 @@ open class ExternalServiceApiCommunicator(private val baseUrl: URL, private val 
 
     suspend fun executeWithAuth(url: String, credentials: ExternalServiceToken) = executeWithAuth(url, credentials) {}
 
-    suspend fun executeWithAuth(url: String, credentials: ExternalServiceToken, builderContext: Request.Builder.() -> Unit): Response {
+    suspend fun executeWithAuth(url: String, credentials: ExternalServiceToken, builderContext: CustomRequestBuilder.() -> Unit): Response {
         if (credentials.isTokenExpired()) {
             reauthenticate(credentials)
         }
@@ -85,7 +84,10 @@ open class ExternalServiceApiCommunicator(private val baseUrl: URL, private val 
 
 
 
-    private class RequestBuilderWithBaseUrl(private val baseUrl: URL) : Request.Builder() {
+    class CustomRequestBuilder(private val baseUrl: URL) : Request.Builder() {
+        companion object {
+            val emptyBody = RequestBody.create(null, ByteArray(0))
+        }
         fun _url(url: String) = super.url(URL(baseUrl, url))
 
         /**
@@ -100,6 +102,19 @@ open class ExternalServiceApiCommunicator(private val baseUrl: URL, private val 
         @Deprecated("Not allowed to use")
         override fun url(url: String) = throw IllegalStateException("Not allowed to call this function")
 
+        fun jsonPost(ctx: JSONObject.() -> Unit) {
+            val obj = JSONObject()
+            ctx(obj)
+            post(obj.toRequestBody())
+        }
+
+        fun jsonPost(vararg items: Pair<String, String>) {
+            post(JSONObject().withItems(*items).toRequestBody())
+        }
+
+        fun post() {
+            post(emptyBody)
+        }
     }
 }
 

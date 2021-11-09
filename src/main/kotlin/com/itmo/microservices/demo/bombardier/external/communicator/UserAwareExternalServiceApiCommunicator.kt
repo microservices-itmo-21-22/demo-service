@@ -6,12 +6,17 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.net.URL
+import java.util.*
 import java.util.concurrent.ExecutorService
 
 class UserAwareExternalServiceApiCommunicator(baseUrl: URL, ex: ExecutorService) : ExtendedExternalServiceApiCommunicator(baseUrl, ex) {
     private val usersMap = mutableMapOf<String, ExternalServiceToken>()
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
+
+    private val refresherCoroutine = CoroutineScope(ex.asCoroutineDispatcher()).launch {
+        //runSessionRefresher()
+    }
 
     override suspend fun authenticate(username: String, password: String): ExternalServiceToken {
         val availableToken = usersMap[username]
@@ -26,11 +31,12 @@ class UserAwareExternalServiceApiCommunicator(baseUrl: URL, ex: ExecutorService)
 
     fun getUserSession(username: String) = usersMap[username]
 
-    suspend fun runSessionRefresher() {
+    private suspend fun runSessionRefresher() {
         var refresherLast = runSessionRefresherImpl(0)
         while (refresherLast < 10) {
             refresherLast = runSessionRefresherImpl(refresherLast)
         }
+        throw Exception("Too many attempts")
     }
 
     private suspend fun runSessionRefresherImpl(currentRetries: Int): Int {

@@ -1,11 +1,13 @@
 package com.itmo.microservices.demo.bombardier.flow
 
+import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
+import com.itmo.microservices.demo.bombardier.external.User
 import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class UserManagement(
-    private val serviceApi: ServiceApi
+    private val externalServiceApi: ExternalServiceApi
 ) {
     companion object {
         val log = LoggerFactory.getLogger(UserManagement::class.java)
@@ -17,7 +19,7 @@ class UserManagement(
     suspend fun createUsersPool(service: String, numberOfUsers: Int): Set<UUID> {
         repeat(numberOfUsers) { index ->
             kotlin.runCatching {
-                serviceApi.createUser("service-$service-user-$index-${System.currentTimeMillis()}")
+                externalServiceApi.createUser("service-$service-user-$index-${System.currentTimeMillis()}")
             }.onSuccess { user ->
                 userIdsByService
                     .computeIfAbsent(service) { ConcurrentHashMap.newKeySet() }

@@ -1,7 +1,7 @@
 package com.itmo.microservices.demo.bombardier.external.storage
 
-import com.itmo.microservices.demo.bombardier.flow.BookingLogRecord
-import com.itmo.microservices.demo.bombardier.flow.CatalogItem
+import com.itmo.microservices.demo.bombardier.external.BookingLogRecord
+import com.itmo.microservices.demo.bombardier.external.CatalogItem
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.*

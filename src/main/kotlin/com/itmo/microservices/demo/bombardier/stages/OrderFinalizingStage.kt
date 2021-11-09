@@ -1,24 +1,24 @@
 package com.itmo.microservices.demo.bombardier.stages
 
-import com.itmo.microservices.demo.bombardier.flow.BookingStatus
+import com.itmo.microservices.demo.bombardier.external.BookingStatus
 import com.itmo.microservices.demo.bombardier.flow.CoroutineLoggingFactory
-import com.itmo.microservices.demo.bombardier.flow.OrderStatus
-import com.itmo.microservices.demo.bombardier.flow.ServiceApi
+import com.itmo.microservices.demo.bombardier.external.OrderStatus
+import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
 
-class OrderFinalizingStage(private val serviceApi: ServiceApi) : TestStage {
+class OrderFinalizingStage(private val externalServiceApi: ExternalServiceApi) : TestStage {
     companion object {
         val log = CoroutineLoggingFactory.getLogger(OrderFinalizingStage::class.java)
     }
 
     override suspend fun run(): TestStage.TestContinuationType {
         log.info("Starting booking items stage for order ${testCtx().orderId}")
-        val orderStateBeforeFinalizing = serviceApi.getOrder(testCtx().orderId!!)
+        val orderStateBeforeFinalizing = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
 
-        val bookingResult = serviceApi.bookOrder(testCtx().orderId!!)
+        val bookingResult = externalServiceApi.bookOrder(testCtx().userId!!, testCtx().orderId!!)
 
-        val orderStateAfterBooking = serviceApi.getOrder(testCtx().orderId!!)
+        val orderStateAfterBooking = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
 
-        val bookingRecords = serviceApi.getBookingHistory(bookingResult.id)
+        val bookingRecords = externalServiceApi.getBookingHistory(bookingResult.id)
         for (item in orderStateAfterBooking.itemsMap.keys) {
             if (bookingRecords.none { it.itemId == item.id }) {
                 log.error("Cannot find booking log record: booking id = ${bookingResult.id}; itemId = ${item.id}; orderId = ${testCtx().orderId}")

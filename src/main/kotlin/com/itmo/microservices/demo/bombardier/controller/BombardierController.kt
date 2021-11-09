@@ -32,19 +32,6 @@ class BombardierController {
         val logger = LoggerFactory.getLogger(BombardierController::class.java)
     }
 
-    @GetMapping
-    fun test() {
-        runBlocking {
-            testApi.startTestingForService(TestParameters("test-service", 1, 1, 5))
-
-            testApi.getTestingFlowForService("test-service").testFlowCoroutine.complete()
-            testApi.getTestingFlowForService("test-service").testFlowCoroutine.join()
-
-            logger.info("Finished waiting for test job completion.")
-//            testApi.executor.shutdownNow()
-        }
-    }
-
     @GetMapping("running/{id}", produces = ["application/json"])
     @Operation(
         summary = "View info about running tests on service",

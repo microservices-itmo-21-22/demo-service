@@ -9,13 +9,13 @@ open class ExtendedExternalServiceApiCommunicator(baseUrl: URL, ex: ExecutorServ
     suspend inline fun <reified T> executeWithAuthAndDeserialize(url: String, credentials: ExternalServiceToken)
         = executeWithAuthAndDeserialize<T>(url, credentials) {}
 
-    suspend inline fun <reified T> executeWithDeserialize(url: String, noinline builderContext: Request.Builder.() -> Unit): T =
+    suspend inline fun <reified T> executeWithDeserialize(url: String, noinline builderContext: CustomRequestBuilder.() -> Unit): T =
         mapper.readValue(execute(url, builderContext).body()!!.string(), T::class.java)
 
     suspend inline fun <reified T> executeWithAuthAndDeserialize(
         url: String,
         credentials: ExternalServiceToken,
-        noinline builderContext: Request.Builder.() -> Unit
+        noinline builderContext: CustomRequestBuilder.() -> Unit
     ): T =
         mapper.readValue(executeWithAuth(url, credentials, builderContext).body()!!.string(), T::class.java)
 }
