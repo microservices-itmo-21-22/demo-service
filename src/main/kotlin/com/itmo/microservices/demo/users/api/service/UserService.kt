@@ -7,11 +7,13 @@ import com.itmo.microservices.demo.users.api.model.RegistrationRequest
 import com.itmo.microservices.demo.users.impl.entity.AppUser
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetails
+import java.util.*
 
 interface UserService {
     fun getUserModel(username: String): AppUserModel?
     fun getUser(username: String): AppUser?
-    fun registerUser(request: RegistrationRequest)
+    fun getUser(id: UUID): AppUser?
+    fun registerUser(request: RegistrationRequest): AppUser?
     fun getAccountData(requester: UserDetails): AppUserModel
     fun deleteUser(user: UserDetails)
     fun authenticate(request: AuthenticationRequest): AuthenticationResult

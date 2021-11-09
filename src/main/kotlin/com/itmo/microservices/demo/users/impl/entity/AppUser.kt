@@ -1,5 +1,6 @@
 package com.itmo.microservices.demo.users.impl.entity
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Type
 import java.util.*
@@ -18,12 +19,13 @@ class AppUser {
             name = "UUID",
             strategy = "org.hibernate.id.UUIDGenerator"
     )
-    var id: UUID? = null
+    var id: UUID? = UUID.randomUUID()
     @Column(unique = true)
     var username: String? = null
     var name: String? = null
     var surname: String? = null
     var email: String? = null
+    @JsonIgnore
     var password: String? = null
 
     constructor()

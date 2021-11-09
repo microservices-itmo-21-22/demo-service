@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import java.util.*
 import javax.validation.constraints.NotNull
 
 @Suppress("UnstableApiUsage")
@@ -39,9 +40,12 @@ class DefaultUserService(private val userRepository: UserRepository,
     override fun getUser(username: String): AppUser? = userRepository
             .findByUsername(username)
 
-    override fun registerUser(request: RegistrationRequest) {
+    override fun getUser(id: UUID): AppUser? = userRepository.findById(id)
+
+    override fun registerUser(request: RegistrationRequest): AppUser? {
         val userEntity = userRepository.save(request.toEntity())
         eventBus.post(UserCreatedEvent(userEntity.toModel()))
+        return userEntity
         //eventLogger.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.username)
     }
 
