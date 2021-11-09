@@ -27,10 +27,7 @@ class NotificationModuleEventListener(private val notificationService: Notificat
     @AllowConcurrentEvents
     fun accept(event: UserCreatedEvent) = executor.execute {
         notificationService.processNewUser(event.user)
-        eventLogger.info(
-            CommonNotableEvents.I_LISTENER_RECEIVED_MESSAGE,
-            event
-        )
+        eventLogger.info(CommonNotableEvents.I_LISTENER_RECEIVED_MESSAGE, event)
     }
     @Subscribe
     @AllowConcurrentEvents
