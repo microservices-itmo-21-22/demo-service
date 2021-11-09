@@ -18,7 +18,7 @@ import java.util.UUID;
 @Setter
 @ToString
 @Entity
-public class UserAccountFinancialLogRecord {
+public final class UserAccountFinancialLogRecord {
 
     @Id
     @Type(type = "uuid-char")

@@ -1,6 +1,5 @@
 package com.itmo.microservices.demo.payment.api.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
