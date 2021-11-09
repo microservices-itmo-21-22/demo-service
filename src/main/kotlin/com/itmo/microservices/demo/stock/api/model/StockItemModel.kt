@@ -9,6 +9,7 @@ data class StockItemModel(
     val id: UUID?,
     val name: String?,
     val price: Double?,
+    val externalPrice: Double?,
     val totalCount: Int?,
     val reservedCount: Int?,
     val category: Category = Category.COMMON)
