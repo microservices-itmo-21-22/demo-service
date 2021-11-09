@@ -36,14 +36,11 @@ public class SaveAndGetUserInformationTest {
     @Before
     public void setUp() {
         appUser = new AppUser(
-                "username",
                 "name",
-                "surname",
-                "email",
                 "password"
         );
 
-        when(repository.findByUsername("username")).thenReturn(appUser);
+        when(repository.findByName("name")).thenReturn(appUser);
         when(repository.save(any())).thenReturn(appUser);
 
         when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
@@ -51,37 +48,27 @@ public class SaveAndGetUserInformationTest {
 
     }
 
-    private final RegistrationRequest request = new RegistrationRequest("username", "name", "surname", "email", "password");
+    private final RegistrationRequest request = new RegistrationRequest("name", "password");
 
     @org.junit.Test
     public void registerTest() {
         userService.registerUser(request);
         AppUserModel user = new AppUserModel(
-                "username",
                 "name",
-                "surname",
-                "email",
                 "password"
         );
-        Assert.assertEquals(user.getName(), userService.getUser("username").getName());
-        Assert.assertEquals(user.getSurname(), userService.getUser("username").getSurname());
-        Assert.assertEquals(user.getEmail(), userService.getUser("username").getEmail());
-        Assert.assertEquals(user.getPassword(), userService.getUser("username").getPassword());
+        Assert.assertEquals(user.getName(), userService.getUser("name").getName());
+        Assert.assertEquals(user.getPassword(), userService.getUser("name").getPassword());
     }
 
     @org.junit.Test
     public void findUserTest() {
         AppUserModel user = new AppUserModel(
-                "username",
                 "name",
-                "surname",
-                "email",
                 "password"
         );
-        Assert.assertEquals(user.getName(), userService.getUser("username").getName());
-        Assert.assertEquals(user.getSurname(), userService.getUser("username").getSurname());
-        Assert.assertEquals(user.getEmail(), userService.getUser("username").getEmail());
-        Assert.assertEquals(user.getPassword(), userService.getUser("username").getPassword());
-        Assert.assertEquals(null, userService.getUser("anotherusername"));
+        Assert.assertEquals(user.getName(), userService.getUser("name").getName());
+        Assert.assertEquals(user.getPassword(), userService.getUser("name").getPassword());
+        Assert.assertEquals(null, userService.getUser("anothername"));
     }
 }
