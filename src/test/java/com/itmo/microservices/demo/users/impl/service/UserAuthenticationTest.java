@@ -26,15 +26,12 @@ public class UserAuthenticationTest {
     @BeforeEach
     public void setUp() {
         appUser = new AppUser(
-                "username",
                 "name",
-                "surname",
-                "email",
                 "password"
         );
 
         userRepository = mock(UserRepository.class);
-        when(userRepository.findByUsername("username")).thenReturn(appUser);
+        when(userRepository.findByName("name")).thenReturn(appUser);
 
         var passwordEncoder = mock(PasswordEncoder.class);
         when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
@@ -50,7 +47,7 @@ public class UserAuthenticationTest {
 
     @Test
     public void authenticateTest() {
-        var authenticateResult = userService.authenticate(new AuthenticationRequest("username", "password"));
+        var authenticateResult = userService.authenticate(new AuthenticationRequest("name", "password"));
 
         assertEquals("token", authenticateResult.getAccessToken());
         assertEquals("refreshToken", authenticateResult.getRefreshToken());

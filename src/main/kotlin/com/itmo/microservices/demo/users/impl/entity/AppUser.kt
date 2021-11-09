@@ -21,20 +21,14 @@ class AppUser {
     )
     var id: UUID? = UUID.randomUUID()
     @Column(unique = true)
-    var username: String? = null
     var name: String? = null
-    var surname: String? = null
-    var email: String? = null
     @JsonIgnore
     var password: String? = null
 
     constructor()
 
-    constructor(username: String?, name: String?, surname: String?, email: String?, password: String?) {
-        this.username = username
+    constructor(name: String?, password: String?) {
         this.name = name
-        this.surname = surname
-        this.email = email
         this.password = password
     }
 }
