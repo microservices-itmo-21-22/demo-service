@@ -13,12 +13,12 @@ class CatalogItemEntity {
     var id: UUID? = null
     var title: String = ""
     var description: String = ""
-    var price: Int = 100
+    var price: String = "100"
     var amount: Int = 0
 
     constructor()
 
-    constructor(id: UUID? = null, title: String, description: String, price: Int, amount: Int) {
+    constructor(id: UUID? = null, title: String, description: String, price: String, amount: Int) {
         this.id = id
         this.title = title
         this.description = description

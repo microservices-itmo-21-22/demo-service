@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @RestController
 @RequestMapping("/items")
@@ -41,11 +42,9 @@ class ItemController(private val itemService: ItemService){
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun addItemToBasket(
-        @PathVariable item_id: String,
-        @PathVariable order_id: String,
+        @PathVariable("item_id") itemId: UUID,
+        @PathVariable("order_id") orderId: UUID,
         @RequestParam amount: Int,
         @Parameter(hidden = true) @AuthenticationPrincipal requester: UserDetails
-    ) {
-
-    }
+    ) = itemService.addItemToBasket(itemId, orderId, amount)
 }
