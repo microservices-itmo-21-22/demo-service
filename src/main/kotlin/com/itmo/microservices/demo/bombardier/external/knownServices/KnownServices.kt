@@ -22,7 +22,7 @@ class KnownServices(vararg descriptors: ServiceDescriptor) {
     }
 
     private val storage = mutableListOf<ServiceDescriptor>()
-    private val apis = mutableMapOf<ServiceDescriptor, ServiceWithApiAndAdditional>() // todo make concurrent
+    private val apis = mutableMapOf<ServiceDescriptor, ServiceWithApiAndAdditional>()
 
     init {
         storage.addAll(descriptors)
@@ -50,14 +50,5 @@ class KnownServices(vararg descriptors: ServiceDescriptor) {
 }
 
 val KnownServicesStorage = KnownServices(
-    ServiceDescriptor("p02", "p02", URL("http://77.234.215.138:30012")),
-    ServiceDescriptor("p03", "p03", URL("http://77.234.215.138:30013")),
-    ServiceDescriptor("p04", "p04", URL("http://77.234.215.138:30014")),
-    ServiceDescriptor("p05", "p05", URL("http://77.234.215.138:30015")),
-    ServiceDescriptor("p07", "p07", URL("http://77.234.215.138:30017")),
-    ServiceDescriptor("p08", "p08", URL("http://77.234.215.138:30018")),
-    ServiceDescriptor("p10", "p10", URL("http://77.234.215.138:30020")),
-    ServiceDescriptor("p11", "p11", URL("http://77.234.215.138:30021")),
-    ServiceDescriptor("p12", "p12", URL("http://77.234.215.138:30022")),
-    ServiceDescriptor("p81", "p81", URL("http://77.234.215.138:30023")),
+    ServiceDescriptor("DemoService", "DemoServiceTeam", URL("https://vk.com/baneks"))
 )

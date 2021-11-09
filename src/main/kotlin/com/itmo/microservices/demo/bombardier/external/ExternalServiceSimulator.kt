@@ -1,5 +1,6 @@
 package com.itmo.microservices.demo.bombardier.external
 
+import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceDescriptor
 import com.itmo.microservices.demo.bombardier.external.storage.ItemStorage
 import com.itmo.microservices.demo.bombardier.external.storage.OrderStorage
 import com.itmo.microservices.demo.bombardier.external.storage.UserStorage
@@ -23,6 +24,8 @@ class ExternalServiceSimulator(
     companion object {
         val log = LoggerFactory.getLogger(ExternalServiceSimulator::class.java)
     }
+
+    override val descriptor = ServiceDescriptor("Simulator", "Support", URL("https://2ch.hk"))
 
     private val financialLog = ConcurrentHashMap<UUID, MutableList<UserAccountFinancialLogRecord>>()
     private val deliveryLog = ConcurrentHashMap<UUID, DeliveryInfoRecord>()

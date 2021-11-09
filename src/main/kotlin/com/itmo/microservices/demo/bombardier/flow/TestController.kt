@@ -2,11 +2,10 @@ package com.itmo.microservices.demo.bombardier.flow
 
 import com.itmo.microservices.demo.bombardier.exceptions.IllegalTestingFlowNameException
 import com.itmo.microservices.demo.bombardier.exception.BadRequestException
-import com.itmo.microservices.demo.bombardier.external.ExternalServiceSimulator
 import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
-import com.itmo.microservices.demo.bombardier.external.storage.ItemStorage
-import com.itmo.microservices.demo.bombardier.external.storage.OrderStorage
-import com.itmo.microservices.demo.bombardier.external.storage.UserStorage
+import com.itmo.microservices.demo.bombardier.external.knownServices.KnownServices
+import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceDescriptor
+import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceWithApiAndAdditional
 import com.itmo.microservices.demo.bombardier.stages.*
 import com.itmo.microservices.demo.bombardier.stages.TestStage.TestContinuationType.CONTINUE
 import com.itmo.microservices.demo.common.exception.BadRequestException
@@ -64,13 +63,16 @@ class TestController(
             throw BadRequestException("There is no such feature launch several flows for the service in parallel :(")
         }
 
+        val descriptor = KnownServices.getInstance().descriptorFromName(params.serviceName)
+        val stuff = KnownServices.getInstance().getStuff(params.serviceName)
+
         runBlocking {
-            userManagement.createUsersPool(params.serviceName, params.numberOfUsers)
+            stuff.userManagement.createUsersPool(params.numberOfUsers)
         }
 
         repeat(params.parallelProcessesNumber) {
-            log.info("Launch coroutine for ${params.serviceName}")
-            launchNewTestFlow(params.serviceName)
+            log.info("Launch coroutine for $descriptor")
+            launchNewTestFlow(descriptor, stuff)
         }
     }
 
@@ -98,7 +100,8 @@ class TestController(
         val testsFinished: AtomicInteger = AtomicInteger(0)
     )
 
-    private fun launchNewTestFlow(serviceName: String) {
+    private fun launchNewTestFlow(descriptor: ServiceDescriptor, stuff: ServiceWithApiAndAdditional) {
+        val serviceName = descriptor.name
         val testingFlow = runningTests[serviceName] ?: return
 
         if (testingFlow.testParams.numberOfTests != null && testingFlow.testsFinished.get() >= testingFlow.testParams.numberOfTests) {
@@ -116,7 +119,7 @@ class TestController(
         log.info("Starting $testNum test for service $serviceName, parent job is ${testingFlow.testFlowCoroutine}")
 
         coroutineScope.launch(testingFlow.testFlowCoroutine + TestContext(serviceName = serviceName)) {
-            testStages.forEach { stage ->
+            testStages(stuff.userManagement, stuff.api).forEach { stage ->
                 when (stage.run()) {
                     CONTINUE -> Unit
                     else -> return@launch
@@ -127,7 +130,7 @@ class TestController(
                 log.error("Unexpected fail in test", th)
             }
             log.info("Test ${testingFlow.testsFinished.incrementAndGet()} finished")
-            launchNewTestFlow(serviceName)
+            launchNewTestFlow(descriptor, stuff)
         }
     }
 }

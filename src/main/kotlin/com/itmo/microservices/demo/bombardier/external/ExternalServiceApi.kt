@@ -1,11 +1,14 @@
 package com.itmo.microservices.demo.bombardier.external
 
 import com.itmo.microservices.demo.bombardier.external.OrderStatus.OrderCollecting
+import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceDescriptor
 import java.time.Duration
 import java.util.*
 
 
 interface ExternalServiceApi {
+    abstract val descriptor: ServiceDescriptor
+
     suspend fun getUser(id: UUID): User
     suspend fun createUser(name: String): User
 
