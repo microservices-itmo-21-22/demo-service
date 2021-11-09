@@ -32,7 +32,7 @@ class DefaultUserService(private val userRepository: UserRepository,
             .findByIdOrNull(username)?.toModel()
 
     override fun registerUser(request: RegistrationRequest) {
-        //此处似乎没有阻止重复的用户注册
+        //There is no prevention of duplicate user registrations
         val userEntity = userRepository.save(request.toEntity())
         eventBus.post(UserCreatedEvent(userEntity.toModel()))
         eventLogger.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.username)
