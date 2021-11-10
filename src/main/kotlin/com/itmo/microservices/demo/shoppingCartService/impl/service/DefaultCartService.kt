@@ -30,12 +30,12 @@ class DefaultCartService(private val shoppingCartRepository: ShoppingCartReposit
      }
 
     override fun getCart(cartId: UUID): ShoppingCartDTO? {
-//        val shoppingCart = shoppingCartRepository.getById(cartId)
-//
-//        val items = getCartItems(shoppingCart.id)
-        val shoppingCart = ShoppingCart(ShoppingCartStatus.active())
+        val shoppingCart = shoppingCartRepository.getById(cartId)
 
-        val items : List<CatalogItemDTO> = listOf()
+        val items = getCartItems(shoppingCart.id)
+//        val shoppingCart = ShoppingCart(ShoppingCartStatus.active())
+//
+//        val items : List<CatalogItemDTO> = listOf()
 
         return ShoppingCartDTO(shoppingCart.id, shoppingCart.status, items)
     }
@@ -50,7 +50,7 @@ class DefaultCartService(private val shoppingCartRepository: ShoppingCartReposit
     override fun makeCart(): ShoppingCartDTO? {
         val cart = ShoppingCart(ShoppingCartStatus.active())
 
-        // shoppingCartRepository.save(cart)
+        shoppingCartRepository.save(cart)
 
 //        return getCart(cart.id)
         return ShoppingCartDTO(cart.id, cart.status, listOf())
@@ -74,7 +74,8 @@ class DefaultCartService(private val shoppingCartRepository: ShoppingCartReposit
 
             shoppingCartDTO.items = items
         }
-
+//        shoppingCartRepository.deleteById(cartId)
+//        shoppingCartRepository.save(Shoppin)
         /// @todo put in repo
     }
 

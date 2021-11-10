@@ -1,9 +1,16 @@
 package com.itmo.microservices.demo.shoppingCartService.api.dto
 
+import org.hibernate.annotations.GenericGenerator
+import org.hibernate.annotations.Type
 import java.util.*
 
 class CatalogItemDTO {
 
+    @Type(type = "uuid-char")
+    @GenericGenerator(
+            name = "UUID",
+            strategy = "org.hibernate.id.UUIDGenerator"
+    )
     var id: UUID = UUID.randomUUID()
     var productId: UUID = UUID.randomUUID()
     var amount: Int = 0
