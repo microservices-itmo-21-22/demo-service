@@ -1,5 +1,6 @@
 package com.itmo.microservices.demo.users.impl.entity
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Type
 import java.util.*
@@ -21,6 +22,7 @@ class AppUser {
     var id: UUID? = null
     @Column(unique = true)
     var name: String? = null
+    @JsonIgnore
     var password: String? = null
 
     constructor()
