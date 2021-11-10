@@ -9,15 +9,16 @@ import javax.persistence.Id
 @Entity
 class Delivery {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id : UUID? = null
+    var orderId : UUID? = null
     var address : String? = null
     var date : Date? = null
 
     constructor()
 
-    constructor(id : UUID?, address: String?, date : Date?) {
+    constructor(id : UUID?, orderId : UUID?, address: String?, date : Date?) {
         this.id = id
+        this.orderId = orderId
         this.address = address
         this.date = date
     }

@@ -27,6 +27,12 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
         return deliveryRepository.findByIdOrNull(deliveryId)?.toModel() ?: throw NotFoundException("Order $deliveryId not found")
     }
 
+    override fun getDeliveryByOrder(orderId: UUID): List<DeliveryModel> {
+        //doesn't actually find by id, yet
+        return deliveryRepository.findByOrderId(orderId).map { it.toModel() }
+    }
+
+
     override fun addDelivery(delivery: DeliveryModel) {
         deliveryRepository.save(delivery.toEntity())
         eventBus.post(DeliveryCreatedEvent(delivery))
@@ -41,7 +47,9 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
     }
 
     override fun finalizeDelivery(deliveryId: UUID) {
-
-        TODO("Not yet implemented")
+        val delivery = deliveryRepository.findByIdOrNull(deliveryId) ?: throw NotFoundException("Order $deliveryId not found")
+        //there is nothing, yet
+        eventBus.post(DeliveryDeletedEvent(delivery.toModel()))
+        eventLogger.info(DeliveryServiceNotableEvents.I_DELIVERY_DELIVERED, delivery)
     }
 }
