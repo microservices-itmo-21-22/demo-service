@@ -8,9 +8,11 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import org.springframework.http.HttpStatus
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.client.HttpServerErrorException
 import java.util.*
 
 @RestController
@@ -26,9 +28,9 @@ class StockItemController(private val stockItemService: StockItemService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun allStockItems(): List<StockItemModel> = stockItemService.allStockItems()
+    fun allStockItems(@RequestParam("available") available : Boolean): List<StockItemModel> = stockItemService.allStockItems()
 
-    @GetMapping("/{stockItemId}")
+    @GetMapping("/{itemId}")
     @Operation(
         summary = "Get stock item by id",
         responses = [
@@ -38,8 +40,8 @@ class StockItemController(private val stockItemService: StockItemService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getStockItemById(@PathVariable stockItemId: UUID): StockItemModel =
-        stockItemService.getStockItemById(stockItemId)
+    fun getStockItemById(@PathVariable itemId: UUID): StockItemModel =
+        stockItemService.getStockItemById(itemId)
 
     @PostMapping
     @Operation(
@@ -63,8 +65,9 @@ class StockItemController(private val stockItemService: StockItemService) {
             ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()])
         ],
         security = [SecurityRequirement(name = "bearerAuth")])
-    fun changeStockItem(@PathVariable stockItemId: UUID, @RequestBody stockItem: StockItemModel) =
-        stockItemService.changeStockItem(stockItemId, stockItem)
+    fun changeStockItem(@PathVariable itemId: UUID, @RequestBody stockItem: StockItemModel
+    ) =
+        stockItemService.changeStockItem(itemId, stockItem)
 
     @PutMapping("/{itemId}/add/{number}")
     @Operation(
@@ -76,8 +79,8 @@ class StockItemController(private val stockItemService: StockItemService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun addStockItem(@PathVariable stockItemId: UUID, @PathVariable number: Int) =
-        stockItemService.addStockItem(stockItemId, number)
+    fun addStockItem(@PathVariable itemId: UUID, @PathVariable number: Int) =
+        stockItemService.addStockItem(itemId, number)
 
     @PutMapping("/{itemId}/reserve/{number}")
     @Operation(
@@ -89,8 +92,12 @@ class StockItemController(private val stockItemService: StockItemService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun reserveStockItem(@PathVariable stockItemId: UUID, @PathVariable number: Int) =
-        stockItemService.reserveStockItem(stockItemId, number)
+    fun reserveStockItem(@PathVariable itemId: UUID, @PathVariable number: Int) {
+        if (!stockItemService.reserveStockItem(itemId, number)) {
+            throw HttpServerErrorException(HttpStatus.METHOD_NOT_ALLOWED, "Cannot reserve")
+        }
+    }
+
 
     @DeleteMapping("/{itemId}")
     @Operation(
@@ -105,6 +112,6 @@ class StockItemController(private val stockItemService: StockItemService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun deleteStockItemById(@PathVariable stockItemId: UUID) =
-        stockItemService.deleteStockItemById(stockItemId)
+    fun deleteStockItemById(@PathVariable itemId: UUID) =
+        stockItemService.deleteStockItemById(itemId)
 }
