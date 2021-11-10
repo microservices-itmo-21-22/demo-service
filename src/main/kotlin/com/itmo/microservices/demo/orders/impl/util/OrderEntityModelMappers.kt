@@ -7,7 +7,7 @@ fun OrderModel.toEntity() = Order(
     id = this.id,
     basketId = this.basketId,
     date = this.date,
-    userName = this.userName,
+    userId = this.userId,
     status = this.status
 )
 
@@ -15,6 +15,6 @@ fun Order.toModel(): OrderModel = OrderModel(
     id = this.id,
     basketId = this.basketId,
     date = this.date,
-    userName = this.userName,
+    userId = this.userId,
     status = this.status
 )

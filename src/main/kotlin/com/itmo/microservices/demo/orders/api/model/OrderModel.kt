@@ -8,6 +8,6 @@ data class OrderModel (
     val id: UUID?,
     val basketId: UUID?,
     val date: Date?,
-    val userName: String?,
+    val userId: UUID?,
     val status : Int
 )

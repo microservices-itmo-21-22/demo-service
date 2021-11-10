@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
-@RequestMapping("/stock")
+@RequestMapping("/items")
 class StockItemController(private val stockItemService: StockItemService) {
 
     @GetMapping
@@ -54,7 +54,7 @@ class StockItemController(private val stockItemService: StockItemService) {
     fun createStockItem(@RequestBody stockItem: StockItemModel) =
         stockItemService.createStockItem(stockItem)
 
-    @PutMapping("/{stockItemId}")
+    @PutMapping("/{itemId}")
     @Operation(
         summary = "Change stock item",
         responses = [
@@ -66,7 +66,7 @@ class StockItemController(private val stockItemService: StockItemService) {
     fun changeStockItem(@PathVariable stockItemId: UUID, @RequestBody stockItem: StockItemModel) =
         stockItemService.changeStockItem(stockItemId, stockItem)
 
-    @PutMapping("/{stockItemId}/add/{number}")
+    @PutMapping("/{itemId}/add/{number}")
     @Operation(
         summary = "Add stock item",
         responses = [
@@ -79,7 +79,7 @@ class StockItemController(private val stockItemService: StockItemService) {
     fun addStockItem(@PathVariable stockItemId: UUID, @PathVariable number: Int) =
         stockItemService.addStockItem(stockItemId, number)
 
-    @PutMapping("/{stockItemId}/reserve/{number}")
+    @PutMapping("/{itemId}/reserve/{number}")
     @Operation(
         summary = "Reserve stock item",
         responses = [
@@ -92,7 +92,7 @@ class StockItemController(private val stockItemService: StockItemService) {
     fun reserveStockItem(@PathVariable stockItemId: UUID, @PathVariable number: Int) =
         stockItemService.reserveStockItem(stockItemId, number)
 
-    @DeleteMapping("/{stockItemId}")
+    @DeleteMapping("/{itemId}")
     @Operation(
         summary = "Delete stockItem",
         responses = [

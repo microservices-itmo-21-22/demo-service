@@ -1,14 +1,21 @@
 package com.itmo.microservices.demo.stock.impl.entity
 
 import com.itmo.microservices.demo.stock.api.model.Category
+import org.hibernate.annotations.GenericGenerator
+import org.hibernate.annotations.Type
 import java.util.*
 import javax.persistence.*
 
 @Entity
-@Table(name = "stock304")
+@Table(name = "stock")
 class StockItem {
 
     @Id
+    @Type(type = "uuid-char")
+    @GenericGenerator(
+        name = "UUID",
+        strategy = "org.hibernate.id.UUIDGenerator"
+    )
     //@GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: UUID? = null
     var name: String? = null
@@ -20,7 +27,7 @@ class StockItem {
     constructor()
 
     constructor(id: UUID? = null, name: String? = null, price: Double?,
-    totalCount: Int?, reservedCount: Int?, category: Category) {
+                totalCount: Int?, reservedCount: Int?, category: Category) {
         this.id = id
         this.name = name
         this.price = price

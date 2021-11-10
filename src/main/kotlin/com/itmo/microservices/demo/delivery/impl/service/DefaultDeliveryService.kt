@@ -18,7 +18,7 @@ import java.util.*
 
 @Service
 class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
-                                private val eventBus: EventBus) : DeliveryService {
+                             private val eventBus: EventBus) : DeliveryService {
 
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger

@@ -19,14 +19,14 @@ class DeliveryController(private val deliveryService: DeliveryService) {
     @Operation(
         summary = "Get delivery by id",
         responses = [
-                ApiResponse(
-                    description = "OK",
-                    responseCode = "200"),
-                ApiResponse(
-                    description = "Unauthorized",
-                    responseCode = "403",
-                    content = [io.swagger.v3.oas.annotations.media.Content()]
-                )
+            ApiResponse(
+                description = "OK",
+                responseCode = "200"),
+            ApiResponse(
+                description = "Unauthorized",
+                responseCode = "403",
+                content = [io.swagger.v3.oas.annotations.media.Content()]
+            )
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
