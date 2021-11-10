@@ -20,10 +20,9 @@ import java.util.*
 import javax.websocket.server.PathParam
 
 @RestController
-@RequestMapping("/users")
 class UserController(private val userService: UserService) {
 
-    @PostMapping
+    @PostMapping("/users")
     @Operation(
         summary = "Register new user",
         responses = [
@@ -44,7 +43,7 @@ class UserController(private val userService: UserService) {
     )
     fun getUserById(@PathVariable("user_id") userId: UUID): AppUser? = userService.getUser(userId)
 
-    @GetMapping("/me")
+    @GetMapping("/users/me")
     @Operation(
         summary = "Get current user info",
         responses = [
@@ -56,7 +55,7 @@ class UserController(private val userService: UserService) {
     fun getAccountData(@Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails): AppUserModel =
             userService.getAccountData(user)
 
-    @DeleteMapping("/me")
+    @DeleteMapping("/users/me")
     @Operation(
         summary = "Delete current user",
         responses = [
@@ -68,7 +67,7 @@ class UserController(private val userService: UserService) {
     fun deleteCurrentUser(@Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails) =
             userService.deleteUser(user)
 
-    @PostMapping("/auth")
+    @PostMapping("/authentication")
     @Operation(
         summary = "Authenticate",
         responses = [
@@ -80,7 +79,7 @@ class UserController(private val userService: UserService) {
     fun authenticate(@RequestBody request: AuthenticationRequest): AuthenticationResult =
         userService.authenticate(request);
 
-    @PostMapping("/refresh")
+    @PostMapping("/authentication/refresh")
     @Operation(
         summary = "Refresh authentication",
         responses = [
