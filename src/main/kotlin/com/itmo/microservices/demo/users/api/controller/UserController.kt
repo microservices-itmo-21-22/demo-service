@@ -42,7 +42,7 @@ class UserController(private val userService: UserService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getUserById(@PathVariable user_id: UUID): AppUser? = userService.getUser(user_id)
+    fun getUserById(@PathVariable("user_id") userId: UUID): AppUser? = userService.getUser(userId)
 
     @GetMapping("/me")
     @Operation(

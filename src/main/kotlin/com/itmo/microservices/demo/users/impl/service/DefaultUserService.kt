@@ -40,7 +40,7 @@ class DefaultUserService(private val userRepository: UserRepository,
     override fun getUser(username: String): AppUser? = userRepository
             .findByUsername(username)
 
-    override fun getUser(id: UUID): AppUser? = userRepository.findById(id)
+    override fun getUser(userId: UUID): AppUser? = userRepository.findById(userId)
 
     override fun registerUser(request: RegistrationRequest): AppUser? {
         val userEntity = userRepository.save(request.toEntity())

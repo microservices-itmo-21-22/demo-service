@@ -12,7 +12,7 @@ import java.util.*
 interface UserService {
     fun getUserModel(username: String): AppUserModel?
     fun getUser(username: String): AppUser?
-    fun getUser(id: UUID): AppUser?
+    fun getUser(userId: UUID): AppUser?
     fun registerUser(request: RegistrationRequest): AppUser?
     fun getAccountData(requester: UserDetails): AppUserModel
     fun deleteUser(user: UserDetails)

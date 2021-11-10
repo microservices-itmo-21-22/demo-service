@@ -19,7 +19,7 @@ class AppUser {
             name = "UUID",
             strategy = "org.hibernate.id.UUIDGenerator"
     )
-    var id: UUID? = UUID.randomUUID()
+    var id: UUID? = null
     @Column(unique = true)
     var username: String? = null
     var name: String? = null
