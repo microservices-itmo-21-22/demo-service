@@ -12,8 +12,8 @@ import java.util.*
 interface UserService {
     fun getUserModel(name: String): AppUserModel?
     fun getUser(name: String): AppUser?
-    fun getUser(userId: UUID): AppUser?
-    fun registerUser(request: RegistrationRequest)
+    fun getUser(id: UUID): AppUser?
+    fun registerUser(request: RegistrationRequest) : AppUser?
     fun getAccountData(requester: UserDetails): AppUserModel
     fun deleteUser(user: UserDetails)
     fun authenticate(request: AuthenticationRequest): AuthenticationResult
