@@ -4,8 +4,10 @@ import java.sql.Time
 import java.util.*
 import javax.persistence.Entity
 import javax.persistence.Id
+import javax.persistence.Table
 
 @Entity
+@Table(name = "payment304")
 data class Payment (
     @Id
     val orderId : UUID? = null,
