@@ -25,6 +25,7 @@ class UserController(private val userService: UserService) {
             ApiResponse(description = "Bad request", responseCode = "400", content = [Content()])
         ]
     )
+
     fun register(@RequestBody request: RegistrationRequest) = userService.registerUser(request)
 
     @GetMapping("/{user_id}")

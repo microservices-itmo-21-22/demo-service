@@ -7,4 +7,7 @@ import org.springframework.stereotype.Repository
 
 
 @Repository
-interface ProductsRepository:JpaRepository<Product,String>
+interface ProductsRepository:JpaRepository<Product,String>{
+    fun findAllByAmountGreaterThan(amount:Int):List<Product>
+    fun findAllByAmountLessThan(amount:Int):List<Product>
+}

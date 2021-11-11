@@ -54,7 +54,7 @@ class StubNotificationService(private val userRepository: NotificationUserReposi
 }
 
 
-class CallExternalSystemForNotification(){
+class CallExternalSystemForNotification {
     companion object {
         val log: Logger = LoggerFactory.getLogger(CallExternalSystemForNotification::class.java)
     }
@@ -116,11 +116,11 @@ class CallExternalSystemForNotification(){
     }
 
     private fun pollExternalSystem(id:String){
-        val client = HttpClient.newBuilder().build();
+        val client = HttpClient.newBuilder().build()
         val request=HttpRequest.newBuilder()
             .uri(URI.create("http://localhost:8080/transactions/${id}"))
             .build()
-        val response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
 
         if(response.statusCode()==200){
             processSuccessCode(response)
@@ -136,8 +136,8 @@ class CallExternalSystemForNotification(){
 
 
     fun callExternalSystem(){
-        val client = HttpClient.newBuilder().build();
-        val response = client.send(getPostHeaders(requestBody), HttpResponse.BodyHandlers.ofString());
+        val client = HttpClient.newBuilder().build()
+        val response = client.send(getPostHeaders(requestBody), HttpResponse.BodyHandlers.ofString())
         if(response.statusCode()==200){
             processSuccessCode(response)
         }

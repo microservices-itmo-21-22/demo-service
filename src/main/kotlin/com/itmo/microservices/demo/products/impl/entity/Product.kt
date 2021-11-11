@@ -1,39 +1,29 @@
-package com.itmo.microservices.demo.products.impl.entity;
+package com.itmo.microservices.demo.products.impl.entity
 
-import com.itmo.microservices.demo.products.api.model.ProductType
-import org.hibernate.annotations.GenericGenerator
 import java.util.*
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue
-import javax.persistence.Id;
-
+import javax.persistence.Entity
+import javax.persistence.Id
 
 @Entity
-public class Product {
-
+class Product {
     @Id
-    @GeneratedValue
-    var id: UUID? = null
-    var name: String? = null
+    var id: UUID? = UUID.randomUUID()
+    var title: String? = null
     var description: String? = null
-    var country: String? = null
-    var price: Double? = null
-    var sale: Double? = null
-    var type: ProductType = ProductType.OTHER
+    var price: Int? = 100
+    var amount:Int?=null
 
     constructor()
 
-    constructor(name: String? = null, description: String? = null, country: String? = null, price: Double? = null, sale: Double? = null, type: ProductType) {
-        this.name = name
+    constructor(title: String? = null, description: String? = null,  price: Int? = null, amount:Int) {
+        this.title = title
         this.description = description
-        this.country = country
         this.price = price
-        this.sale = sale
-        this.type = type
+        this.amount=amount
     }
 
     override fun toString(): String {
-        return "Product(id=$id, name=$name, description=$description, country=$country, price=$price, type=$type)"
+        return "Product(id=$id, name=$title, description=$description, price=$price, amount=$amount)"
     }
 
 }
