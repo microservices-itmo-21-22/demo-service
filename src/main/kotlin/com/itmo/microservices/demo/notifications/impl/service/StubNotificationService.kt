@@ -30,7 +30,7 @@ class StubNotificationService(private val userRepository: NotificationUserReposi
 
     override fun processNewUser(user: AppUserModel) {
         //userRepository.save(modelToEntity(user))
-        log.info("User ${user.username} (${user.email}) was created & should be notified (but who cares)")
+        log.info("User ${user.name}  was created & should be notified (but who cares)")
         val call = CallExternalSystemForNotification()
         call.callExternalSystem()
     }
@@ -49,14 +49,12 @@ class StubNotificationService(private val userRepository: NotificationUserReposi
     }
 
     private fun modelToEntity(user: AppUserModel): NotificationUser = NotificationUser(
-        username = user.username,
         name = user.name,
-        email = user.email
     )
 }
 
 
-class CallExternalSystemForNotification(){
+class CallExternalSystemForNotification {
     companion object {
         val log: Logger = LoggerFactory.getLogger(CallExternalSystemForNotification::class.java)
     }
@@ -118,11 +116,11 @@ class CallExternalSystemForNotification(){
     }
 
     private fun pollExternalSystem(id:String){
-        val client = HttpClient.newBuilder().build();
+        val client = HttpClient.newBuilder().build()
         val request=HttpRequest.newBuilder()
             .uri(URI.create("http://localhost:8080/transactions/${id}"))
             .build()
-        val response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
 
         if(response.statusCode()==200){
             processSuccessCode(response)
@@ -138,8 +136,8 @@ class CallExternalSystemForNotification(){
 
 
     fun callExternalSystem(){
-        val client = HttpClient.newBuilder().build();
-        val response = client.send(getPostHeaders(requestBody), HttpResponse.BodyHandlers.ofString());
+        val client = HttpClient.newBuilder().build()
+        val response = client.send(getPostHeaders(requestBody), HttpResponse.BodyHandlers.ofString())
         if(response.statusCode()==200){
             processSuccessCode(response)
         }

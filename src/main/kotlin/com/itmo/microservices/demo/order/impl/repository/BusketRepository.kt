@@ -6,4 +6,4 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface BusketRepository : JpaRepository<Busket, UUID> {}
+interface BusketRepository : JpaRepository<Busket, UUID>

@@ -7,7 +7,7 @@ import javax.persistence.GeneratedValue
 import javax.persistence.Id
 
 @Entity
-public class OrderProduct {
+class OrderProduct {
     @Id
     @GeneratedValue
     var id: UUID? = null
