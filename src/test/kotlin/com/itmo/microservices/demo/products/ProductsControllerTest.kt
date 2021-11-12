@@ -47,13 +47,14 @@ class ProductsControllerTest {
     @Test
     fun getProductCatalog() {
         var mvcResult: MockHttpServletResponse = mockMvc.perform(
-            MockMvcRequestBuilders.get("/items")
+            MockMvcRequestBuilders.get("/items?available=true")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.ALL)
         )
             .andReturn()
             .response
             .apply(::println)
+        System.out.println(mvcResult.status)
         Assertions.assertEquals(mvcResult.status,200)
     }
 }
