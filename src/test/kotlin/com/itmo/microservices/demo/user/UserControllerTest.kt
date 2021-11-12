@@ -34,7 +34,7 @@ class UserControllerTest {
     @Test
     fun register() {
           mockMvc.perform(
-            MockMvcRequestBuilders.post("http://127.0.0.1:8080/users")
+            MockMvcRequestBuilders.post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                         """
@@ -55,7 +55,7 @@ class UserControllerTest {
     @Test
     fun auth(){
         var mvcResult: MockHttpServletResponse = mockMvc.perform(
-            MockMvcRequestBuilders.post("http://127.0.0.1:8080/authentication")
+            MockMvcRequestBuilders.post("/authentication")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -77,7 +77,7 @@ class UserControllerTest {
     fun getAccountData() {
         var mvcResult: MockHttpServletResponse =mockMvc.perform(
             MockMvcRequestBuilders
-                .get("http://127.0.0.1:8080/users/me")
+                .get("/users/me")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
                 .accept(MediaType.ALL)
