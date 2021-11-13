@@ -23,11 +23,7 @@ import java.util.*
 
 @Suppress("UnstableApiUsage")
 @Service
-class DefaultPaymentService(private val paymentRepository: PaymentRepository,
-                            private val eventBus: EventBus) : PaymentService {
-
-    @InjectEventLogger
-    private lateinit var eventLogger: EventLogger
+class DefaultPaymentService(private val paymentRepository: PaymentRepository) : PaymentService {
 
     override fun getUserTransactionsInfo(userDetails: UserDetails): List<PaymentModel> =
         paymentRepository
@@ -35,22 +31,18 @@ class DefaultPaymentService(private val paymentRepository: PaymentRepository,
             ?: throw NotFoundException("User ${userDetails.username} not found")
 
     override fun refund(paymentId: UUID, userDetails: UserDetails){
-        val payment = paymentRepository.findByIdOrNull(paymentId) ?: throw NotFoundException("Task $paymentId not found")
+        val payment = paymentRepository.findByIdOrNull(paymentId) ?: throw NotFoundException("Payment $paymentId not found")
         payment.status = 1
         paymentRepository.save(payment)
     }
 
-    override fun pay(userDetails: UserDetails){
+    override fun pay(userDetails: UserDetails): PaymentModel{
         val currentDate = Date()
         val entity = Payment().also {
             it.date = currentDate
             it.username = userDetails.username
         }
         paymentRepository.save(entity)
-        eventBus.post(PaymentProccessedEvent(entity.toModel()))
-        eventLogger.info(
-            TaskServiceNotableEvents.I_TASK_CREATED,
-            entity
-        )
+        return entity.toModel()
     }
 }
