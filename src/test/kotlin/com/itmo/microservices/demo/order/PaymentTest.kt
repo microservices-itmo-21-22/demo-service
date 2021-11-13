@@ -46,7 +46,7 @@ class PaymentTest {
         val actual = paymentRepository.findByIdOrNull(paymentId)!!.toModel()
         val expected = paymentMock().also { it.status = 1 }.toModel()
         Assertions.assertEquals(actual, expected)
-        
+
     }
 
     @Test
