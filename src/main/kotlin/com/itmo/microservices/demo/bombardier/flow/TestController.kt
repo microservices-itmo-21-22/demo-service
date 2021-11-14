@@ -1,15 +1,11 @@
 package com.itmo.microservices.demo.bombardier.flow
 
-import com.itmo.microservices.demo.bombardier.exceptions.IllegalTestingFlowNameException
-import com.itmo.microservices.demo.bombardier.exception.BadRequestException
-import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
-import com.itmo.microservices.demo.bombardier.external.knownServices.KnownServices
-import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceDescriptor
-import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceWithApiAndAdditional
 import com.itmo.microservices.demo.bombardier.stages.*
 import com.itmo.microservices.demo.bombardier.stages.TestStage.TestContinuationType.CONTINUE
+import com.itmo.microservices.demo.common.exception.BadRequestException
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
@@ -17,7 +13,19 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 
-class TestController {
+@Service
+class TestController(
+    private val userManagement: UserManagement,
+    private val serviceApi: ServiceApi,
+    choosingUserAccountStage: ChoosingUserAccountStage,
+    orderCreationStage: OrderCreationStage,
+    orderCollectingStage: OrderCollectingStage,
+    orderFinalizingStage: OrderFinalizingStage,
+    orderSettingDeliverySlotsStage: OrderSettingDeliverySlotsStage,
+    orderChangeItemsAfterFinalizationStage: OrderChangeItemsAfterFinalizationStage,
+    orderPaymentStage: OrderPaymentStage,
+    orderDeliveryStage: OrderDeliveryStage
+) {
     companion object {
         val log = LoggerFactory.getLogger(TestController::class.java)
     }
@@ -28,19 +36,18 @@ class TestController {
 
     private val coroutineScope = CoroutineScope(executor.asCoroutineDispatcher())
 
-    private val testStages = { um: UserManagement, api: ExternalServiceApi ->
-        listOf(
-            ChoosingUserAccountStage(um).asErrorFree(),
-            OrderCreationStage(api).asErrorFree(),
-            OrderCollectingStage(api).asErrorFree(),
+    private val testStages = listOf(
+        choosingUserAccountStage.asErrorFree(),
+        orderCreationStage.asErrorFree(),
+        orderCollectingStage.asErrorFree(),
 //        OrderAbandonedStage(serviceApi).asErrorFree(),
-            OrderFinalizingStage(api).asErrorFree(),
-            OrderSettingDeliverySlotsStage(api).asErrorFree(),
-            OrderChangeItemsAfterFinalizationStage(api),
-            OrderPaymentStage(api).asRetryable().asErrorFree(),
-            OrderDeliveryStage(api).asErrorFree(),
-        )
-    }
+        orderFinalizingStage.asErrorFree(),
+        orderSettingDeliverySlotsStage.asErrorFree(),
+        orderChangeItemsAfterFinalizationStage,
+        orderPaymentStage.asRetryable().asErrorFree(),
+        orderCollectingStage.asErrorFree(),
+        orderDeliveryStage.asErrorFree()
+    )
 
     fun startTestingForService(params: TestParameters) {
         val testingFlowCoroutine = SupervisorJob()
@@ -50,25 +57,23 @@ class TestController {
             throw BadRequestException("There is no such feature launch several flows for the service in parallel :(")
         }
 
-        val descriptor = KnownServices.getInstance().descriptorFromName(params.serviceName)
-        val stuff = KnownServices.getInstance().getStuff(params.serviceName)
-
         runBlocking {
-            stuff.userManagement.createUsersPool(params.numberOfUsers)
+            userManagement.createUsersPool(params.serviceName, params.numberOfUsers)
         }
 
         repeat(params.parallelProcessesNumber) {
-            log.info("Launch coroutine for $descriptor")
-            launchNewTestFlow(descriptor, stuff)
+            log.info("Launch coroutine for ${params.serviceName}")
+            launchNewTestFlow(params.serviceName)
         }
     }
 
     fun getTestingFlowForService(serviceName: String): TestingFlow {
-        return runningTests[serviceName] ?: throw IllegalTestingFlowNameException("There is no running test for $serviceName")
+        return runningTests[serviceName] ?: throw IllegalArgumentException("There is no running test for $serviceName")
     }
 
     suspend fun stopTestByServiceName(serviceName: String) {
-        getTestingFlowForService(serviceName).testFlowCoroutine.cancelAndJoin()
+        runningTests[serviceName]?.testFlowCoroutine?.cancelAndJoin()
+            ?: throw BadRequestException("There is no running tests with serviceName = $serviceName")
         runningTests.remove(serviceName)
     }
 
@@ -86,8 +91,7 @@ class TestController {
         val testsFinished: AtomicInteger = AtomicInteger(0)
     )
 
-    private fun launchNewTestFlow(descriptor: ServiceDescriptor, stuff: ServiceWithApiAndAdditional) {
-        val serviceName = descriptor.name
+    private fun launchNewTestFlow(serviceName: String) {
         val testingFlow = runningTests[serviceName] ?: return
 
         if (testingFlow.testParams.numberOfTests != null && testingFlow.testsFinished.get() >= testingFlow.testParams.numberOfTests) {
@@ -105,7 +109,7 @@ class TestController {
         log.info("Starting $testNum test for service $serviceName, parent job is ${testingFlow.testFlowCoroutine}")
 
         coroutineScope.launch(testingFlow.testFlowCoroutine + TestContext(serviceName = serviceName)) {
-            testStages(stuff.userManagement, stuff.api).forEach { stage ->
+            testStages.forEach { stage ->
                 when (stage.run()) {
                     CONTINUE -> Unit
                     else -> return@launch
@@ -116,7 +120,7 @@ class TestController {
                 log.error("Unexpected fail in test", th)
             }
             log.info("Test ${testingFlow.testsFinished.incrementAndGet()} finished")
-            launchNewTestFlow(descriptor, stuff)
+            launchNewTestFlow(serviceName)
         }
     }
 }
@@ -139,7 +143,7 @@ data class PaymentDetails(
     var failedAt: Long? = null,
     var finishedAt: Long? = null,
     var attempt: Int = 0,
-    var amount: Int? = null,
+    var amount: Amount? = null,
 )
 
 data class TestParameters(

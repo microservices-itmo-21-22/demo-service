@@ -8,6 +8,6 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
     constructor() : this(SERVICE_NAME)
 
     companion object {
-        const val SERVICE_NAME = "demo_service"
+        const val SERVICE_NAME = "bombardier"
     }
 }

@@ -1,84 +1,89 @@
 package com.itmo.microservices.demo.bombardier.stages
 
-import com.itmo.microservices.demo.bombardier.external.FinancialOperationType
-import com.itmo.microservices.demo.bombardier.external.OrderStatus
-import com.itmo.microservices.demo.bombardier.external.PaymentStatus
-import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
+import com.itmo.microservices.commonlib.annotations.InjectEventLogger
+import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.bombardier.flow.*
+import com.itmo.microservices.demo.bombardier.logging.OrderCommonNotableEvents
+import com.itmo.microservices.demo.bombardier.logging.OrderPaymentNotableEvents.*
 import com.itmo.microservices.demo.bombardier.utils.ConditionAwaiter
+import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
 
+@Component
 class OrderPaymentStage(
-    private val externalServiceApi: ExternalServiceApi
+    private val serviceApi: ServiceApi
 ) : TestStage {
-    companion object {
-        val log = CoroutineLoggingFactory.getLogger(OrderPaymentStage::class.java)
-    }
+    @InjectEventLogger
+    private lateinit var eventLogger: EventLogger
 
     override suspend fun run(): TestStage.TestContinuationType {
-        val order = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
+        val order = serviceApi.getOrder(testCtx().orderId!!)
 
         val paymentDetails = testCtx().paymentDetails
         paymentDetails.attempt++
 
-        log.info("Payment started for order ${order.id}, attempt ${paymentDetails.attempt}")
+        eventLogger.info(I_PAYMENT_STARTED, order, paymentDetails.attempt)
 
         paymentDetails.startedAt = System.currentTimeMillis()
 
-        val paymentSubmissionDto = externalServiceApi.payOrder(testCtx().userId!!, testCtx().orderId!!) // todo sukhoa add payment details to test ctx
+        val paymentSubmissionDto =
+            serviceApi.payOrder(testCtx().userId!!, testCtx().orderId!!) // todo sukhoa add payment details to test ctx
 
         ConditionAwaiter.awaitAtMost(6, TimeUnit.SECONDS)
             .condition {
-                externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!).paymentHistory
-                    .any {it.transactionId == paymentSubmissionDto.transactionId}
+                serviceApi.getOrder(testCtx().orderId!!).paymentHistory
+                    .any { it.transactionId == paymentSubmissionDto.transactionId }
             }
             .onFailure {
-                log.error("Payment is started for order: ${order.id} but hasn't finished withing 5 sec")
+                eventLogger.error(E_TIMEOUT_EXCEEDED, order.id)
                 throw TestStage.TestStageFailedException("Exception instead of silently fail")
             }.startWaiting()
 
-        val paymentLogRecord = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!).paymentHistory
+        val paymentLogRecord = serviceApi.getOrder(testCtx().orderId!!).paymentHistory
             .find { it.transactionId == paymentSubmissionDto.transactionId }!!
 
         when (val status = paymentLogRecord.status) {
             PaymentStatus.SUCCESS -> {
                 ConditionAwaiter.awaitAtMost(5, TimeUnit.SECONDS)
                     .condition {
-                        externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!).status is OrderStatus.OrderPayed
+                        serviceApi.getOrder(testCtx().orderId!!).status is OrderStatus.OrderPayed
                     }
                     .onFailure {
-                        log.error("There is payment record for order: ${order.id} for order status is different")
+                        eventLogger.error(E_PAYMENT_STATUS_FAILED, order.id)
                         throw TestStage.TestStageFailedException("Exception instead of silently fail")
                     }.startWaiting()
 
                 ConditionAwaiter.awaitAtMost(2, TimeUnit.SECONDS)
                     .condition {
-                        val userChargedRecord = externalServiceApi.userFinancialHistory(testCtx().userId!!, testCtx().orderId!!)
+                        val userChargedRecord = serviceApi.userFinancialHistory(testCtx().userId!!, testCtx().orderId!!)
                             .find { it.paymentTransactionId == paymentSubmissionDto.transactionId }
 
                         userChargedRecord?.type == FinancialOperationType.WITHDRAW
                     }
                     .onFailure {
-                        log.error("Order ${order.id} is paid but there is not withdrawal operation found for user: ${testCtx().userId}")
+                        eventLogger.error(E_WITHDRAW_NOT_FOUND, order.id, testCtx().userId)
                         throw TestStage.TestStageFailedException("Exception instead of silently fail")
                     }.startWaiting()
 
                 paymentDetails.finishedAt = System.currentTimeMillis()
-                log.info("Payment succeeded for order ${order.id}, attempt ${paymentDetails.attempt}")
+                eventLogger.info(I_PAYMENT_SUCCESS, order.id, paymentDetails.attempt)
                 return TestStage.TestContinuationType.CONTINUE
             }
             PaymentStatus.FAILED -> { // todo sukhoa check order status hasn't changed and user ne charged
                 if (paymentDetails.attempt < 5) {
-                    log.info("Payment failed for order ${order.id}, go to retry. Attempt ${paymentDetails.attempt}")
+                    eventLogger.info(I_PAYMENT_RETRY, order.id, paymentDetails.attempt)
                     return TestStage.TestContinuationType.RETRY
                 } else {
-                    log.info("Payment failed for order ${order.id}, last attempt. Attempt ${paymentDetails.attempt}")
+                    eventLogger.error(E_LAST_ATTEMPT_FAIL, order.id, paymentDetails.attempt)
                     paymentDetails.failedAt = System.currentTimeMillis()
                     return TestStage.TestContinuationType.FAIL
                 }
             } // todo sukhoa not enough money
             else -> {
-                log.error("Illegal transition for order ${order.id} from ${order.status} to $status")
+                eventLogger.error(
+                    OrderCommonNotableEvents.E_ILLEGAL_ORDER_TRANSITION,
+                    order.id, order.status, status
+                )
                 return TestStage.TestContinuationType.FAIL
             }
         }

@@ -4,10 +4,12 @@ import com.itmo.microservices.demo.bombardier.external.BookingLogRecord
 import com.itmo.microservices.demo.bombardier.external.CatalogItem
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.springframework.stereotype.Component
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 
+@Component
 class ItemStorage {
     val items: ConcurrentHashMap<UUID, Pair<CatalogItem, Mutex>> = listOf(
         CatalogItem(title = "Socks", amount = 1),

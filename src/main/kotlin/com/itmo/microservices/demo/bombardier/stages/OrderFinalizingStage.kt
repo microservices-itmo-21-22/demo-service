@@ -1,27 +1,32 @@
 package com.itmo.microservices.demo.bombardier.stages
 
-import com.itmo.microservices.demo.bombardier.external.BookingStatus
+import com.itmo.microservices.commonlib.annotations.InjectEventLogger
+import com.itmo.microservices.commonlib.logging.EventLogger
+import com.itmo.microservices.demo.bombardier.flow.BookingStatus
 import com.itmo.microservices.demo.bombardier.flow.CoroutineLoggingFactory
-import com.itmo.microservices.demo.bombardier.external.OrderStatus
-import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
+import com.itmo.microservices.demo.bombardier.flow.OrderStatus
+import com.itmo.microservices.demo.bombardier.flow.ServiceApi
+import com.itmo.microservices.demo.bombardier.logging.OrderCommonNotableEvents
+import com.itmo.microservices.demo.bombardier.logging.OrderFinaizingNotableEvents.*
+import org.springframework.stereotype.Component
 
-class OrderFinalizingStage(private val externalServiceApi: ExternalServiceApi) : TestStage {
-    companion object {
-        val log = CoroutineLoggingFactory.getLogger(OrderFinalizingStage::class.java)
-    }
+@Component
+class OrderFinalizingStage(private val serviceApi: ServiceApi) : TestStage {
+    @InjectEventLogger
+    private lateinit var eventLogger: EventLogger
 
     override suspend fun run(): TestStage.TestContinuationType {
-        log.info("Starting booking items stage for order ${testCtx().orderId}")
-        val orderStateBeforeFinalizing = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
+        eventLogger.info(I_START_FINALIZING, testCtx().orderId)
+        val orderStateBeforeFinalizing = serviceApi.getOrder(testCtx().orderId!!)
 
-        val bookingResult = externalServiceApi.bookOrder(testCtx().userId!!, testCtx().orderId!!)
+        val bookingResult = serviceApi.bookOrder(testCtx().orderId!!)
 
-        val orderStateAfterBooking = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
+        val orderStateAfterBooking = serviceApi.getOrder(testCtx().orderId!!)
 
-        val bookingRecords = externalServiceApi.getBookingHistory(bookingResult.id)
+        val bookingRecords = serviceApi.getBookingHistory(bookingResult.id)
         for (item in orderStateAfterBooking.itemsMap.keys) {
             if (bookingRecords.none { it.itemId == item.id }) {
-                log.error("Cannot find booking log record: booking id = ${bookingResult.id}; itemId = ${item.id}; orderId = ${testCtx().orderId}")
+                eventLogger.error(E_BOOKING_LOG_RECORD_NOT_FOUND, bookingResult.id, item.id, testCtx().orderId)
                 return TestStage.TestContinuationType.FAIL
             }
         }
@@ -29,25 +34,28 @@ class OrderFinalizingStage(private val externalServiceApi: ExternalServiceApi) :
         when (orderStateAfterBooking.status) { //TODO Elina рассмотреть результат discard
             OrderStatus.OrderBooked -> {
                 if (bookingResult.failedItems.isNotEmpty()) {
-                    log.error("Order ${testCtx().orderId} is booked, but there are failed items")
+                    eventLogger.error(E_ORDER_HAS_FAIL_ITEMS, testCtx().orderId)
                     return TestStage.TestContinuationType.FAIL
                 }
 
                 for (item in orderStateAfterBooking.itemsMap.keys) {
                     val itemRecord = bookingRecords.firstOrNull { it.itemId == item.id }
                     if (itemRecord == null || itemRecord.status != BookingStatus.SUCCESS) {
-                        log.error(
-                            "Booking ${bookingResult.id} of order ${testCtx().orderId} is marked as successful, " +
-                                    "but item ${item.id} is marked as ${itemRecord?.status}"
+                        eventLogger.error(
+                            E_ITEMS_FAIL,
+                            bookingResult.id,
+                            testCtx().orderId,
+                            item.id,
+                            itemRecord?.status
                         )
                         return TestStage.TestContinuationType.FAIL
                     }
                 }
-                log.info("Successfully validated all items in BOOKED order ${testCtx().orderId}")
+                eventLogger.info(I_SUCCESS_VALIDATE_BOOKED, testCtx().orderId)
             }
             OrderStatus.OrderCollecting -> {
                 if (bookingResult.failedItems.isEmpty()) {
-                    log.error("Booking of order ${testCtx().orderId} failed, but booking ${bookingResult.id} doesn't have failed items")
+                    eventLogger.error(E_BOOKING_FAIL_BUT_ITEMS_SUCCESS, testCtx().orderId, bookingResult.id)
                     return TestStage.TestContinuationType.FAIL
                 }
 
@@ -57,21 +65,24 @@ class OrderFinalizingStage(private val externalServiceApi: ExternalServiceApi) :
                     .toSet()
 
                 if (failed != bookingResult.failedItems) {
-                    log.error("List of failed items ${bookingResult.failedItems} doesn't match failed booking info of items $failed")
+                    eventLogger.error(E_LIST_FAILED_ITEMS_MISMATCH, bookingResult.failedItems, failed)
                     return TestStage.TestContinuationType.FAIL
                 }
 
                 val failedList = orderStateAfterBooking.itemsMap.filter { it.key.id in failed }
                     .map { Triple(it.key.id, it.key.title, it.value) }
 
-                log.info("Successfully validated all items in NOT BOOKED order ${testCtx().orderId}, failed items: $failedList")
+                eventLogger.info(I_SUCCESS_VALIDATE_NOT_BOOKED, testCtx().orderId, failedList)
                 return TestStage.TestContinuationType.STOP
             }
             else -> {
-                log.error(
-                    "Illegal transition for order ${orderStateAfterBooking.id} from ${orderStateBeforeFinalizing.status} " +
-                            "to ${orderStateAfterBooking.status}"
+                eventLogger.error(
+                    OrderCommonNotableEvents.E_ILLEGAL_ORDER_TRANSITION,
+                    orderStateAfterBooking.id,
+                    orderStateBeforeFinalizing.status,
+                    orderStateAfterBooking.status
                 )
+
                 return TestStage.TestContinuationType.FAIL
             }
         }
