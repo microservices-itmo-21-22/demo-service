@@ -9,12 +9,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Component
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.math.max
 import kotlin.random.Random
 
+@Component
 class ExternalServiceSimulator(
     private val orderStorage: OrderStorage,
     private val userStorage: UserStorage,

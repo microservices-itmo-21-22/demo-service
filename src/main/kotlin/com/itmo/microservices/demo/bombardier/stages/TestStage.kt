@@ -1,6 +1,7 @@
 package com.itmo.microservices.demo.bombardier.stages
 
 import com.itmo.microservices.demo.bombardier.flow.TestCtxKey
+import com.itmo.microservices.demo.bombardier.logging.UserNotableEvents
 import kotlin.coroutines.coroutineContext
 
 interface TestStage {
@@ -34,7 +35,7 @@ interface TestStage {
             while (decoratedStage is DecoratingStage) {
                 decoratedStage = decoratedStage.wrapped
             }
-            ChoosingUserAccountStage.log.error("Unexpected in ${wrapped::class.simpleName}", th)
+            ChoosingUserAccountStage.eventLogger.error(UserNotableEvents.E_UNEXPECTED_EXCEPTION, wrapped::class.simpleName, th)
             TestContinuationType.ERROR
         }
     }

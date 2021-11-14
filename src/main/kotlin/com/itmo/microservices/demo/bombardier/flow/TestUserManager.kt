@@ -1,9 +1,11 @@
 package com.itmo.microservices.demo.bombardier.flow
 
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Component
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
+@Component
 class UserManagement(
     private val serviceApi: ServiceApi
 ) {

@@ -1,17 +1,20 @@
 package com.itmo.microservices.demo.bombardier.stages
 
-import com.itmo.microservices.demo.bombardier.flow.CoroutineLoggingFactory
+import com.itmo.microservices.commonlib.annotations.InjectEventLogger
+import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.bombardier.flow.ServiceApi
+import com.itmo.microservices.demo.bombardier.logging.OrderSettingsDeliveryNotableEvents.*
+import org.springframework.stereotype.Component
 import java.time.Duration
 import kotlin.random.Random
 
+@Component
 class OrderSettingDeliverySlotsStage(private val serviceApi: ServiceApi) : TestStage {
-    companion object {
-        val log = CoroutineLoggingFactory.getLogger(OrderSettingDeliverySlotsStage::class.java)
-    }
+    @InjectEventLogger
+    private lateinit var eventLogger: EventLogger
 
     override suspend fun run(): TestStage.TestContinuationType {
-        log.info("Choose delivery slot for order ${testCtx().orderId}")
+        eventLogger.info(I_CHOOSE_SLOT, testCtx().orderId)
         val availableSlots = serviceApi.getDeliverySlots(testCtx().orderId!!)
 
         var deliverySlot = Duration.ZERO
@@ -21,12 +24,12 @@ class OrderSettingDeliverySlotsStage(private val serviceApi: ServiceApi) : TestS
 
             val resultSlot = serviceApi.getOrder(testCtx().orderId!!).deliveryDuration
             if (resultSlot != deliverySlot) {
-                log.error("Delivery slot was not chosen. Expected: $deliverySlot, Actual: $resultSlot")
+                eventLogger.error(E_CHOOSE_SLOT_FAIL, deliverySlot, resultSlot)
                 return TestStage.TestContinuationType.FAIL
             }
         }
 
-        log.info("Successfully choose delivery slot: '${deliverySlot.seconds} sec' for order ${testCtx().orderId}")
+        eventLogger.info(I_CHOOSE_SLOT_SUCCESS, deliverySlot.seconds, testCtx().orderId)
         return TestStage.TestContinuationType.CONTINUE
     }
 }

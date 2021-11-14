@@ -1,15 +1,11 @@
 package com.itmo.microservices.demo.bombardier.flow
 
-import com.itmo.microservices.demo.bombardier.exceptions.IllegalTestingFlowNameException
-import com.itmo.microservices.demo.bombardier.exception.BadRequestException
-import com.itmo.microservices.demo.bombardier.external.ExternalServiceSimulator
-import com.itmo.microservices.demo.bombardier.external.storage.ItemStorage
-import com.itmo.microservices.demo.bombardier.external.storage.OrderStorage
-import com.itmo.microservices.demo.bombardier.external.storage.UserStorage
 import com.itmo.microservices.demo.bombardier.stages.*
 import com.itmo.microservices.demo.bombardier.stages.TestStage.TestContinuationType.CONTINUE
+import com.itmo.microservices.demo.common.exception.BadRequestException
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
@@ -17,9 +13,18 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 
+@Service
 class TestController(
     private val userManagement: UserManagement,
-    private val serviceApi: ServiceApi
+    private val serviceApi: ServiceApi,
+    choosingUserAccountStage: ChoosingUserAccountStage,
+    orderCreationStage: OrderCreationStage,
+    orderCollectingStage: OrderCollectingStage,
+    orderFinalizingStage: OrderFinalizingStage,
+    orderSettingDeliverySlotsStage: OrderSettingDeliverySlotsStage,
+    orderChangeItemsAfterFinalizationStage: OrderChangeItemsAfterFinalizationStage,
+    orderPaymentStage: OrderPaymentStage,
+    orderDeliveryStage: OrderDeliveryStage
 ) {
     companion object {
         val log = LoggerFactory.getLogger(TestController::class.java)
@@ -32,15 +37,16 @@ class TestController(
     private val coroutineScope = CoroutineScope(executor.asCoroutineDispatcher())
 
     private val testStages = listOf(
-        ChoosingUserAccountStage(userManagement).asErrorFree(),
-        OrderCreationStage(serviceApi).asErrorFree(),
-        OrderCollectingStage(serviceApi).asErrorFree(),
+        choosingUserAccountStage.asErrorFree(),
+        orderCreationStage.asErrorFree(),
+        orderCollectingStage.asErrorFree(),
 //        OrderAbandonedStage(serviceApi).asErrorFree(),
-        OrderFinalizingStage(serviceApi).asErrorFree(),
-        OrderSettingDeliverySlotsStage(serviceApi).asErrorFree(),
-        OrderChangeItemsAfterFinalizationStage(serviceApi),
-        OrderPaymentStage(serviceApi).asRetryable().asErrorFree(),
-        OrderDeliveryStage(serviceApi).asErrorFree(),
+        orderFinalizingStage.asErrorFree(),
+        orderSettingDeliverySlotsStage.asErrorFree(),
+        orderChangeItemsAfterFinalizationStage,
+        orderPaymentStage.asRetryable().asErrorFree(),
+        orderCollectingStage.asErrorFree(),
+        orderDeliveryStage.asErrorFree()
     )
 
     fun startTestingForService(params: TestParameters) {
@@ -57,16 +63,17 @@ class TestController(
 
         repeat(params.parallelProcessesNumber) {
             log.info("Launch coroutine for ${params.serviceName}")
-            launchNewTestFlow( params.serviceName)
+            launchNewTestFlow(params.serviceName)
         }
     }
 
     fun getTestingFlowForService(serviceName: String): TestingFlow {
-        return runningTests[serviceName] ?: throw IllegalTestingFlowNameException("There is no running test for $serviceName")
+        return runningTests[serviceName] ?: throw IllegalArgumentException("There is no running test for $serviceName")
     }
 
     suspend fun stopTestByServiceName(serviceName: String) {
-        getTestingFlowForService(serviceName).testFlowCoroutine.cancelAndJoin()
+        runningTests[serviceName]?.testFlowCoroutine?.cancelAndJoin()
+            ?: throw BadRequestException("There is no running tests with serviceName = $serviceName")
         runningTests.remove(serviceName)
     }
 
@@ -145,19 +152,3 @@ data class TestParameters(
     val parallelProcessesNumber: Int,
     val numberOfTests: Int? = null
 )
-
-fun main() {
-    val externalServiceMock = ExternalServiceSimulator(OrderStorage(), UserStorage(), ItemStorage())
-    val userManagement = UserManagement(externalServiceMock)
-
-    val testApi = TestController(userManagement, externalServiceMock)
-
-    runBlocking {
-        testApi.startTestingForService(TestParameters("test-service", 1, 1, 5))
-        delay(30_000)
-
-        testApi.getTestingFlowForService("test-service").testFlowCoroutine.join()
-
-        testApi.executor.shutdownNow()
-    }
-}

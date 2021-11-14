@@ -1,28 +1,32 @@
 package com.itmo.microservices.demo.bombardier.stages
 
+import com.itmo.microservices.commonlib.annotations.InjectEventLogger
+import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.bombardier.flow.*
+import com.itmo.microservices.demo.bombardier.logging.OrderCommonNotableEvents
+import com.itmo.microservices.demo.bombardier.logging.OrderDeliveryNotableEvents.*
 import com.itmo.microservices.demo.bombardier.utils.ConditionAwaiter
-import kotlinx.coroutines.delay
+import org.springframework.stereotype.Component
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
+@Component
 class OrderDeliveryStage(
     private val serviceApi: ServiceApi
 ) : TestStage {
-    companion object {
-        val log = CoroutineLoggingFactory.getLogger(OrderDeliveryStage::class.java)
-    }
+    @InjectEventLogger
+    private lateinit var eventLogger: EventLogger
 
     override suspend fun run(): TestStage.TestContinuationType {
         val orderBeforeDelivery = serviceApi.getOrder(testCtx().orderId!!)
 
         if (orderBeforeDelivery.status !is OrderStatus.OrderPayed) {
-            log.error("Incorrect order ${orderBeforeDelivery.id} status before OrderDeliveryStage ${orderBeforeDelivery.status}")
+            eventLogger.error(E_INCORRECT_ORDER_STATUS, orderBeforeDelivery.id)
             return TestStage.TestContinuationType.FAIL
         }
 
         if (orderBeforeDelivery.deliveryDuration == null) {
-            log.error("Incorrect order ${orderBeforeDelivery.id}, deliveryDuration is null")
+            eventLogger.error(E_NULL_DELIVERY_TIME, orderBeforeDelivery.id)
             return TestStage.TestContinuationType.FAIL
         }
 
@@ -39,7 +43,7 @@ class OrderDeliveryStage(
                         ).last().type == FinancialOperationType.REFUND
             }
             .onFailure {
-                log.error("Order status of order ${orderBeforeDelivery.id} not changed and no refund")
+                eventLogger.error(E_ORDER_STATUS_NOT_CHANGED_AND_NO_REFUND, orderBeforeDelivery.id)
                 throw TestStage.TestStageFailedException("Exception instead of silently fail")
             }
             .startWaiting()
@@ -48,38 +52,41 @@ class OrderDeliveryStage(
             is OrderStatus.OrderDelivered -> {
                 val deliveryLog = serviceApi.deliveryLog(testCtx().orderId!!)
                 if (deliveryLog.outcome != DeliverySubmissionOutcome.SUCCESS) {
-                    log.error("Delivery log for order ${orderAfterDelivery.id} is not DeliverySubmissionOutcome.SUCCESS")
+                    eventLogger.error(E_DELIVERY_OUTCOME_FAIL, orderAfterDelivery.id)
                     return TestStage.TestContinuationType.FAIL
                 }
                 val expectedDeliveryTime = Duration.ofMillis(orderBeforeDelivery.paymentHistory.last().timestamp)
                     .plus(Duration.ofSeconds(orderBeforeDelivery.deliveryDuration.toSeconds()))
                 if (orderAfterDelivery.status.deliveryFinishTime > expectedDeliveryTime.toMillis()) {
-                    log.error("Delivery order ${orderAfterDelivery.id} was shipped at time = ${orderAfterDelivery.status.deliveryFinishTime} later than expected ${expectedDeliveryTime.toMillis()}")
+                    eventLogger.error(
+                        E_DELIVERY_LATE,
+                        orderAfterDelivery.id,
+                        orderAfterDelivery.status.deliveryFinishTime,
+                        expectedDeliveryTime.toMillis()
+                    )
                     return TestStage.TestContinuationType.FAIL
                 }
-                log.info("Order ${orderAfterDelivery.id} was successfully delivered")
+                eventLogger.info(I_DELIVERY_SUCCESS, orderAfterDelivery.id)
             }
             is OrderStatus.OrderRefund -> {
                 val userFinancialHistory = serviceApi.userFinancialHistory(testCtx().userId!!, testCtx().orderId!!)
                 if (userFinancialHistory.filter { it.type == FinancialOperationType.WITHDRAW }.sumOf { it.amount } !=
                     userFinancialHistory.filter { it.type == FinancialOperationType.REFUND }.sumOf { it.amount }) {
-                    log.error("Withdraw and refund amount are different for order ${orderAfterDelivery.id}, " +
-                            "withdraw = ${
-                                userFinancialHistory.filter { it.type == FinancialOperationType.WITHDRAW }
-                                    .sumOf { it.amount }
-                            }, " +
-                            "refund = ${
-                                userFinancialHistory.filter { it.type == FinancialOperationType.REFUND }
-                                    .sumOf { it.amount }
-                            }"
+                    eventLogger.error(E_WITHDRAW_AND_REFUND_DIFFERENT, orderAfterDelivery.id,
+                        userFinancialHistory.filter { it.type == FinancialOperationType.WITHDRAW }
+                            .sumOf { it.amount },
+                        userFinancialHistory.filter { it.type == FinancialOperationType.REFUND }
+                            .sumOf { it.amount }
                     )
                 }
-                log.info("Refund for order ${orderAfterDelivery.id} is correct")
+                eventLogger.info(I_REFUND_CORRECT, orderAfterDelivery.id)
             }
             else -> {
-                log.error(
-                    "Illegal transition for order ${orderBeforeDelivery.id} from ${orderBeforeDelivery.status} " +
-                            "to ${orderAfterDelivery.status}"
+                eventLogger.error(
+                    OrderCommonNotableEvents.E_ILLEGAL_ORDER_TRANSITION,
+                    orderBeforeDelivery.id,
+                    orderBeforeDelivery.status,
+                    orderAfterDelivery.status
                 )
                 return TestStage.TestContinuationType.FAIL
             }

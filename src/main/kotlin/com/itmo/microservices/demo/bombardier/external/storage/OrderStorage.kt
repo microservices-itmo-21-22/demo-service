@@ -3,9 +3,11 @@ package com.itmo.microservices.demo.bombardier.external.storage
 import com.itmo.microservices.demo.bombardier.flow.Order
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.springframework.stereotype.Component
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
+@Component
 class OrderStorage {
     private val orders = ConcurrentHashMap<UUID, Pair<Order, Mutex>>()
 
