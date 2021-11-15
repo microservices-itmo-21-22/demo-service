@@ -1,14 +1,14 @@
 package com.itmo.microservices.demo.order.api.service
 
-import com.itmo.microservices.demo.order.api.model.BusketModel
+import com.itmo.microservices.demo.order.api.model.BusketDto
 import org.springframework.security.core.userdetails.UserDetails
 import java.util.*
 
 interface BusketService {
-    fun allBuskets(): List<BusketModel>
-    fun getBusketById(busketId: UUID): BusketModel
-    fun deleteBusketById(busketId: UUID): BusketModel
-    fun createBusket(busket: BusketModel, author: UserDetails): BusketModel
-    fun addProductToBusket(busketId: UUID, productId: UUID): BusketModel
-    fun deleteProductFromBusket(busketId: UUID, productId: UUID): BusketModel?
+    fun allBuskets(): List<BusketDto>
+    fun getBusketById(busketId: UUID): BusketDto
+    fun deleteBusketById(busketId: UUID): BusketDto
+    fun createBusket(busket: BusketDto, author: UserDetails): BusketDto
+    fun addProductToBusket(busketId: UUID, productId: UUID): BusketDto
+    fun deleteProductFromBusket(busketId: UUID, productId: UUID): BusketDto?
 }

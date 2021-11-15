@@ -1,6 +1,5 @@
 package com.itmo.microservices.demo.order.impl.entity
 
-import com.itmo.microservices.demo.order.api.model.ProductType
 import java.util.*
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue

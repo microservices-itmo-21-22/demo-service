@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import java.util.*
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class BusketModel (
+data class BusketDto (
         val id: UUID?,
         val products: List<UUID>,
         val user: String?,

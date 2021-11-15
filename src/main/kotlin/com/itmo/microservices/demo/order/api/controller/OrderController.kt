@@ -1,6 +1,6 @@
 package com.itmo.microservices.demo.order.api.controller
 
-import com.itmo.microservices.demo.order.api.model.OrderModel
+import com.itmo.microservices.demo.order.api.model.OrderDto
 import com.itmo.microservices.demo.order.api.service.OrderService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -25,7 +25,7 @@ class OrderController(private var orderService: OrderService) {
             ],
             security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getOrders(): List<OrderModel> {
+    fun getOrders(): List<OrderDto> {
         return orderService.allOrders()
     }
 
@@ -50,9 +50,47 @@ class OrderController(private var orderService: OrderService) {
             ],
             security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun createOrder(@RequestBody order: OrderModel,
-                    @Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
-        orderService.createOrder(order, author)
+    fun createOrder(@Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
+        orderService.createOrder()
+
+    @PutMapping("/{orderId}/items/{itemId}?amount={amount}")
+    @Operation(
+            summary = "Добавление товара в корзину",
+            responses = [
+                ApiResponse(description = "OK", responseCode = "200"),
+                ApiResponse(description = "Bad request", responseCode = "400", content = [Content()])
+            ],
+            security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    fun addItemToOrder(@PathVariable orderId: UUID, @PathVariable itemId: UUID, @PathVariable amount: Int,
+                       @Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
+            orderService.addItemToOrder(orderId, itemId, amount)
+
+    @PostMapping("{orderId}/bookings")
+    @Operation(
+            summary = "Оформление (финализация/бронирование) заказа",
+            responses = [
+                ApiResponse(description = "OK", responseCode = "200"),
+                ApiResponse(description = "Bad request", responseCode = "400", content = [Content()])
+            ],
+            security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    fun registerOrder(@PathVariable orderId: UUID,
+                      @Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
+        orderService.registerOrder(orderId)
+
+    @PostMapping("/orders/{orderId}/delivery?slot={slotInSec}")
+    @Operation(
+            summary = "Установление желаемого времени доставки",
+            responses = [
+                ApiResponse(description = "OK", responseCode = "200"),
+                ApiResponse(description = "Bad request", responseCode = "400", content = [Content()])
+            ],
+            security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    fun setDeliveryTime(@PathVariable orderId: UUID, @PathVariable slotInSec: Int,
+                        @Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
+            orderService.setDeliveryTime(orderId, slotInSec)
 
 
     @DeleteMapping("/{orderId}")

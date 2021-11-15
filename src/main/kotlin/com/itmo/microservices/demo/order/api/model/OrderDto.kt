@@ -1,15 +1,14 @@
 package com.itmo.microservices.demo.order.api.model
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.itmo.microservices.demo.order.impl.entity.OrderItem
 import java.util.*
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class OrderModel (
+data class OrderDto (
         val id: UUID?,
         val timeCreated: Long?,
         val status: OrderStatus?,
-        val itemsMap: Map<OrderItem, Int>?,
+        val itemsMap: Map<UUID, Int>?,
         val deliveryDuration: Int?,
-        val paymentHistory: List<PaymentLogRecord>?
+        val paymentHistory: List<PaymentLogRecordDto>?
 )

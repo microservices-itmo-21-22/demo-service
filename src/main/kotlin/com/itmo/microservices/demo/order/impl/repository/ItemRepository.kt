@@ -6,4 +6,4 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface OrderProductRepository : JpaRepository<OrderItem, UUID> {}
+interface ItemRepository : JpaRepository<OrderItem, UUID> {}

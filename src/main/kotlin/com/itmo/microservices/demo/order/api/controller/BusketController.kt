@@ -1,6 +1,6 @@
 package com.itmo.microservices.demo.tasks.api.controller
 
-import com.itmo.microservices.demo.order.api.model.BusketModel
+import com.itmo.microservices.demo.order.api.model.BusketDto
 import com.itmo.microservices.demo.order.api.service.BusketService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -25,7 +25,7 @@ class BusketController(private val busketService: BusketService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun allBuskets(): List<BusketModel> = busketService.allBuskets()
+    fun allBuskets(): List<BusketDto> = busketService.allBuskets()
 
     @PostMapping
     @Operation(
@@ -37,8 +37,8 @@ class BusketController(private val busketService: BusketService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun createBusket(@RequestBody busket: BusketModel,
-                @Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
+    fun createBusket(@RequestBody busket: BusketDto,
+                     @Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
         busketService.createBusket(busket, author)
 
     @GetMapping("/{busketId}")

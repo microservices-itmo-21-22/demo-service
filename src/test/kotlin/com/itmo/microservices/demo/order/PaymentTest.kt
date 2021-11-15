@@ -1,14 +1,7 @@
-import com.itmo.microservices.demo.order.api.model.BusketModel
-import com.itmo.microservices.demo.order.api.model.OrderModel
-import com.itmo.microservices.demo.order.impl.entity.OrderEntity
-import com.itmo.microservices.demo.order.impl.service.OrderServiceImpl
-import com.itmo.microservices.demo.order.impl.util.toModel
-import com.itmo.microservices.demo.payments.api.model.PaymentModel
 import com.itmo.microservices.demo.payments.impl.entity.Payment
 import com.itmo.microservices.demo.payments.impl.repository.PaymentRepository
 import com.itmo.microservices.demo.payments.impl.service.DefaultPaymentService
 import com.itmo.microservices.demo.payments.impl.util.toModel
-import com.itmo.microservices.demo.users.impl.repository.UserRepository
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
