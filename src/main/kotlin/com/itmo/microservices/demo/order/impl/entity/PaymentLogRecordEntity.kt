@@ -7,7 +7,7 @@ import javax.persistence.GeneratedValue
 import javax.persistence.Id
 
 @Entity
-class PaymentLogRecord {
+class PaymentLogRecordEntity {
 
     @Id
     @GeneratedValue

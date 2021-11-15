@@ -40,11 +40,11 @@ class OrderEntity {
     var deliveryDuration: Int? = null
 
     @OneToMany
-    var paymentHistory: List<PaymentLogRecord>? = null
+    var paymentHistory: List<PaymentLogRecordEntity>? = null
 
     constructor()
 
-    constructor(timeCreated: Long?, status: OrderStatus?, itemsMap: MutableMap<UUID, Amount>?, deliveryDuration: Int?, paymentHistory: List<PaymentLogRecord>?) {
+    constructor(timeCreated: Long?, status: OrderStatus?, itemsMap: MutableMap<UUID, Amount>?, deliveryDuration: Int?, paymentHistory: List<PaymentLogRecordEntity>?) {
         this.timeCreated = timeCreated
         this.status = status
         this.itemsMap = itemsMap
