@@ -31,7 +31,7 @@ class OrderController(private var orderService: OrderService) {
 
     @GetMapping("/{orderId}")
     @Operation(
-            summary = "Get order by id",
+            summary = "Получение заказа",
             responses = [
                 ApiResponse(description = "OK", responseCode = "200"),
                 ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()]),
@@ -41,9 +41,9 @@ class OrderController(private var orderService: OrderService) {
     )
     fun getOrderById(@PathVariable orderId: UUID) = orderService.getOrderById(orderId)
 
-    @PostMapping("/create")
+    @PostMapping
     @Operation(
-            summary = "Create order",
+            summary = "Создание нового заказа",
             responses = [
                 ApiResponse(description = "OK", responseCode = "200"),
                 ApiResponse(description = "Bad request", responseCode = "400", content = [Content()])
@@ -51,9 +51,9 @@ class OrderController(private var orderService: OrderService) {
             security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun createOrder(@RequestBody order: OrderModel,
-                    @Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) {
+                    @Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
         orderService.createOrder(order, author)
-    }
+
 
     @DeleteMapping("/{orderId}")
     @Operation(

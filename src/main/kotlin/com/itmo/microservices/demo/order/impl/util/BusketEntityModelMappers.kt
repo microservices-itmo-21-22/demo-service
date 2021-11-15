@@ -5,7 +5,7 @@ import com.itmo.microservices.demo.order.impl.entity.Busket
 
 fun Busket.toModel(): BusketModel = BusketModel(
         id = this.id,
-        products = this.products?.mapNotNull { it.id } ?: listOf(),
+        products = this.items?.mapNotNull { it.id } ?: listOf(),
         user = this.username,
         order = this.order?.id
 )

@@ -1,14 +1,11 @@
 package com.itmo.microservices.demo.tasks.impl.service
 
-import com.google.common.eventbus.EventBus
-import com.itmo.microservices.commonlib.annotations.InjectEventLogger
-import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.common.exception.NotFoundException
 import com.itmo.microservices.demo.order.api.model.BusketModel
 import com.itmo.microservices.demo.order.api.model.ProductType
 import com.itmo.microservices.demo.order.api.service.BusketService
 import com.itmo.microservices.demo.order.impl.entity.Busket
-import com.itmo.microservices.demo.order.impl.entity.OrderProduct
+import com.itmo.microservices.demo.order.impl.entity.OrderItem
 import com.itmo.microservices.demo.order.impl.repository.BusketRepository
 import com.itmo.microservices.demo.order.impl.repository.OrderProductRepository
 import com.itmo.microservices.demo.order.impl.util.toModel
@@ -24,7 +21,7 @@ class BusketServiceImpl(private val productRepository: OrderProductRepository,
 ) : BusketService {
 
     override fun allBuskets(): List<BusketModel> {
-        productRepository.save(OrderProduct(
+        productRepository.save(OrderItem(
             name = "Галоши",
             description = "Крутые галоши",
             country = "Русские",
@@ -41,7 +38,7 @@ class BusketServiceImpl(private val productRepository: OrderProductRepository,
         val products = busket.products.mapNotNull { productRepository.findById(it).orElse(null) }.toMutableList()
         val busket = Busket(
             username = author.username,
-            products = products
+            items = products
         )
         println(busket)
         busketRepository.save(busket)
@@ -62,7 +59,7 @@ class BusketServiceImpl(private val productRepository: OrderProductRepository,
     override fun addProductToBusket(busketId: UUID, productId: UUID): BusketModel {
         val busket = busketRepository.findByIdOrNull(busketId) ?: throw NotFoundException("Busket $busketId not found")
         val product = productRepository.findByIdOrNull(productId) ?: throw NotFoundException("Product $productId not found")
-        busket.products?.add(product)
+        busket.items?.add(product)
         busketRepository.save(busket)
         return busket.toModel()
     }
@@ -70,12 +67,12 @@ class BusketServiceImpl(private val productRepository: OrderProductRepository,
     override fun deleteProductFromBusket(busketId: UUID, productId: UUID): BusketModel? {
         val busket = busketRepository.findByIdOrNull(busketId) ?: throw NotFoundException("Busket $busketId not found")
         productRepository.findByIdOrNull(productId) ?: throw NotFoundException("Product $productId not found")
-        val id = busket.products?.indexOfFirst { it.id == productId } ?: -1
+        val id = busket.items?.indexOfFirst { it.id == productId } ?: -1
         if (id == -1) {
             return null
         }
 
-        busket.products?.removeAt(id)
+        busket.items?.removeAt(id)
         busketRepository.save(busket)
         return busket.toModel()
     }

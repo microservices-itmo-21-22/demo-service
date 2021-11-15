@@ -1,5 +1,8 @@
 package com.itmo.microservices.demo.order
 
+import com.google.common.eventbus.EventBus
+import com.itmo.microservices.commonlib.logging.EventLogger
+import com.itmo.microservices.commonlib.metrics.CommonMetricsCollector
 import com.itmo.microservices.demo.order.api.model.OrderModel
 import com.itmo.microservices.demo.order.impl.entity.OrderEntity
 import com.itmo.microservices.demo.order.impl.repository.OrderRepository
@@ -22,7 +25,7 @@ class OrderTest {
 
     @Test
     fun allOrdersTest() {
-        val orderService = OrderServiceImpl(orderRepository)
+        val orderService = OrderServiceImpl(orderRepository, EventBus())
         Mockito.`when`(orderRepository.findAll()).thenReturn(mutableListOf(orderMock()))
         val actual = orderService.allOrders()
         val expected = listOf(orderMock().toModel())
@@ -31,7 +34,7 @@ class OrderTest {
 
     @Test
     fun getOrderByIdTest() {
-        val orderService = OrderServiceImpl(orderRepository)
+        val orderService = OrderServiceImpl(orderRepository, EventBus())
         Mockito.`when`(orderRepository.findById(Mockito.any())).thenReturn(Optional.ofNullable(orderMock()))
         val actual = orderService.getOrderById(orderId)
         val expected = orderMock().toModel()
@@ -41,7 +44,7 @@ class OrderTest {
     @Test
     fun createOrderTest() {
         val orderRepository = Mockito.mock(OrderRepository::class.java)
-        val orderService = OrderServiceImpl(orderRepository)
+        val orderService = OrderServiceImpl(orderRepository, EventBus())
 
         val actual = OrderModel(id = null, date = Date(), busket = null)
         val orderEntity = OrderEntity(actual.date)

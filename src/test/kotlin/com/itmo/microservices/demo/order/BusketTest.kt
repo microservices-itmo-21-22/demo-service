@@ -3,7 +3,7 @@ package com.itmo.microservices.demo.order
 import com.itmo.microservices.demo.order.api.model.BusketModel
 import com.itmo.microservices.demo.order.api.model.ProductType
 import com.itmo.microservices.demo.order.impl.entity.Busket
-import com.itmo.microservices.demo.order.impl.entity.OrderProduct
+import com.itmo.microservices.demo.order.impl.entity.OrderItem
 import com.itmo.microservices.demo.order.impl.repository.BusketRepository
 import com.itmo.microservices.demo.order.impl.repository.OrderProductRepository
 import com.itmo.microservices.demo.order.impl.util.toModel
@@ -20,8 +20,8 @@ class BusketTest {
     private val busketRepo = Mockito.mock(BusketRepository::class.java)
 
     private val productId = UUID.randomUUID()
-    private fun productMock(): OrderProduct {
-        return OrderProduct(
+    private fun productMock(): OrderItem {
+        return OrderItem(
             name = "Галоши",
             description = "Крутые галоши",
             country = "Русские",
@@ -84,7 +84,7 @@ class BusketTest {
     fun addProductToBusketTest() {
         val service = BusketServiceImpl(productRepo, busketRepo)
         Mockito.`when`(productRepo.findById(Mockito.any())).thenReturn(Optional.ofNullable(productMock()))
-        Mockito.`when`(busketRepo.findById(Mockito.any())).thenReturn(Optional.ofNullable(busketMock().also { it.products = mutableListOf() }))
+        Mockito.`when`(busketRepo.findById(Mockito.any())).thenReturn(Optional.ofNullable(busketMock().also { it.items = mutableListOf() }))
         val actual = service.addProductToBusket(busketId, productId)
         val expected = busketMock().toModel()
         Assertions.assertEquals(actual, expected)
@@ -97,7 +97,7 @@ class BusketTest {
         Mockito.`when`(busketRepo.findById(Mockito.any())).thenReturn(Optional.ofNullable(busketMock()))
 
         val actual = service.deleteProductFromBusket(busketId, productId)
-        val expected = busketMock().also { it.products = mutableListOf() }.toModel()
+        val expected = busketMock().also { it.items = mutableListOf() }.toModel()
         Assertions.assertEquals(expected, actual)
     }
 }

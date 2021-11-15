@@ -13,19 +13,19 @@ class Busket {
     var username: String? = null
 
     @ManyToMany
-    var products: MutableList<OrderProduct>? = null
+    var items: MutableList<OrderItem>? = null
 
     @OneToOne
     var order: OrderEntity? = null
 
     constructor()
 
-    constructor(username: String?, products: MutableList<OrderProduct>?) {
+    constructor(username: String?, items: MutableList<OrderItem>?) {
         this.username = username
-        this.products = products
+        this.items = items
     }
 
     override fun toString(): String {
-        return "Busket(products=$products, user=$username, order=$order)"
+        return "Busket(products=$items, user=$username, order=$order)"
     }
 }
