@@ -13,7 +13,19 @@ class Busket {
     var username: String? = null
 
     @ManyToMany
+    @JoinTable
+        (
+        name = "order_product",
+        joinColumns = [JoinColumn(
+            name = "busket_id"
+        )],
+        inverseJoinColumns = [JoinColumn(
+            name = "order_product_id"
+        )]
+    )
     var products: MutableList<OrderProduct>? = null
+
+
 
     @OneToOne
     var order: OrderEntity? = null

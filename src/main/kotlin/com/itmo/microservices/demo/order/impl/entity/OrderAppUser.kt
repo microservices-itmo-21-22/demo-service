@@ -1,8 +1,6 @@
 package com.itmo.microservices.demo.order.impl.entity
 
-import javax.persistence.Entity
-import javax.persistence.Id
-import javax.persistence.OneToMany
+import javax.persistence.*
 
 @Entity
 class OrderAppUser {
@@ -13,6 +11,16 @@ class OrderAppUser {
     var surname: String? = null
     var email: String? = null
     var password: String? = null
+
+    @JoinTable(
+        name = "buskets",
+        joinColumns = [JoinColumn(
+            name = "user_order_id",
+        )],
+        inverseJoinColumns = [JoinColumn(
+            name = "busket_id",
+        )]
+    )
     @OneToMany
     var buskets: List<Busket>? = null
 
