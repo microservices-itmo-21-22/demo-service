@@ -120,6 +120,7 @@ class TestController(
                 when {
                     i == testStages.size - 1 && !stageResult.iSFailState() || stageResult == STOP -> {
                         metrics.testOkInc()
+                        return@launch
                     }
                     stageResult.iSFailState() -> {
                         metrics.testFailInc()
