@@ -7,6 +7,7 @@ import kotlin.coroutines.coroutineContext
 interface TestStage {
     suspend fun run(): TestContinuationType
     suspend fun testCtx() = coroutineContext[TestCtxKey]!!
+    fun name(): String = this::class.simpleName!!
 
     class RetryableTestStage(private val wrapped: TestStage) : TestStage {
         override suspend fun run(): TestContinuationType {
@@ -18,6 +19,10 @@ interface TestStage {
                 }
             }
             return TestContinuationType.RETRY
+        }
+
+        override fun name(): String {
+            return wrapped.name()
         }
     }
 
@@ -38,6 +43,10 @@ interface TestStage {
             ChoosingUserAccountStage.eventLogger.error(UserNotableEvents.E_UNEXPECTED_EXCEPTION, wrapped::class.simpleName, th)
             TestContinuationType.ERROR
         }
+
+        override fun name(): String {
+            return wrapped.name()
+        }
     }
 
     class TestStageFailedException(message: String) : IllegalStateException(message)
@@ -47,7 +56,11 @@ interface TestStage {
         FAIL,
         ERROR,
         RETRY,
-        STOP
+        STOP;
+
+        fun iSFailState(): Boolean {
+            return this == FAIL || this == ERROR
+        }
     }
 }
 

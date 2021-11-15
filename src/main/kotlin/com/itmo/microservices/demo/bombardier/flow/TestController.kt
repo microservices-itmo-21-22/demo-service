@@ -2,6 +2,7 @@ package com.itmo.microservices.demo.bombardier.flow
 
 import com.itmo.microservices.demo.bombardier.stages.*
 import com.itmo.microservices.demo.bombardier.stages.TestStage.TestContinuationType.CONTINUE
+import com.itmo.microservices.demo.bombardier.stages.TestStage.TestContinuationType.STOP
 import com.itmo.microservices.demo.common.exception.BadRequestException
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
@@ -12,6 +13,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
+import   com.itmo.microservices.demo.common.metrics.Metrics
 
 @Service
 class TestController(
@@ -28,6 +30,7 @@ class TestController(
 ) {
     companion object {
         val log = LoggerFactory.getLogger(TestController::class.java)
+        val metrics = Metrics()
     }
 
     val runningTests = ConcurrentHashMap<String, TestingFlow>()
@@ -92,6 +95,8 @@ class TestController(
     )
 
     private fun launchNewTestFlow(serviceName: String) {
+        val metrics = metrics.withTags(metrics.serviceLabel, serviceName)
+
         val testingFlow = runningTests[serviceName] ?: return
 
         if (testingFlow.testParams.numberOfTests != null && testingFlow.testsFinished.get() >= testingFlow.testParams.numberOfTests) {
@@ -109,9 +114,18 @@ class TestController(
         log.info("Starting $testNum test for service $serviceName, parent job is ${testingFlow.testFlowCoroutine}")
 
         coroutineScope.launch(testingFlow.testFlowCoroutine + TestContext(serviceName = serviceName)) {
-            testStages.forEach { stage ->
-                when (stage.run()) {
-                    CONTINUE -> Unit
+            testStages.forEachIndexed() { i, stage ->
+                val stageResult = metrics.withTags(metrics.stageLabel, stage.name())
+                    .stageDurationRecord(stage)
+                when {
+                    i == testStages.size - 1 && !stageResult.iSFailState() || stageResult == STOP -> {
+                        metrics.testOkInc()
+                    }
+                    stageResult.iSFailState() -> {
+                        metrics.testFailInc()
+                        return@launch
+                    }
+                    stageResult == CONTINUE -> Unit
                     else -> return@launch
                 }
             }
