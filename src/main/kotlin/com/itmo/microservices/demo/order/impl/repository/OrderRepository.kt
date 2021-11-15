@@ -6,6 +6,4 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface OrderRepository : JpaRepository<OrderEntity, UUID> {
-
-}
+interface OrderRepository : JpaRepository<OrderEntity, UUID>

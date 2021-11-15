@@ -1,4 +1,4 @@
-# Demo service
+ # Demo service
 
 ## Launch notes
 * Configure settings.xml

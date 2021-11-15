@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.10.xsd">
+    <changeSet id="1" author="jelliedfish">
+
+        <createTable tableName="busket">
+
+
+            <column name="id" type="uuid">
+                <constraints nullable="true" primaryKey="true" primaryKeyName="PK_BUSKET"/>
+            </column>
+
+            <column name="username" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="order" type="uuid">
+                <constraints nullable="true"/>
+            </column>
+
+
+        </createTable>
+
+
+
+        <createTable tableName="order_product">
+
+
+            <column name="busket_id" type="uuid">
+                <constraints nullable="false" />
+            </column>
+
+            <column name="order_product_id" type="uuid">
+                <constraints nullable="false" />
+            </column>
+
+
+        </createTable>
+
+
+        <createTable tableName="orderappuser">
+
+
+            <column name="id" type="varchar(255)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK_USERORDER"/>
+            </column>
+
+            <column name="username" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="name" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="surname" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="email" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="password" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+
+
+        </createTable>
+
+
+        <createTable tableName="buskets">
+
+
+            <column name="user_order_id" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+
+            <column name="busket_id" type="uuid">
+                <constraints nullable="false" />
+            </column>
+
+
+        </createTable>
+
+
+        <createTable tableName="orderentity">
+
+
+            <column name="id" type="uuid">
+                <constraints nullable="true" primaryKey="true" primaryKeyName="PK_ORDERENTITY" />
+            </column>
+
+            <column name="date" type="date">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="date" type="uuid">
+                <constraints nullable="true" />
+            </column>
+
+
+        </createTable>
+
+
+        <createTable tableName="orderproduct">
+
+
+            <column name="id" type="uuid">
+                <constraints nullable="true" primaryKey="true" primaryKeyName="PK_ORDERPRODUCT" />
+            </column>
+
+            <column name="name" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="description" type="varchar(2047)">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="country" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="price" type="real">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="sale" type="real">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="type" type="uuid">
+                <constraints nullable="false" validateForeignKey="true"/>
+            </column>
+
+
+        </createTable>
+
+
+
+        <createTable tableName="product_type">
+
+
+            <column name="id" type="uuid">
+                <constraints nullable="true" primaryKey="true" primaryKeyName="PK_PRODUCTTYPE" />
+            </column>
+
+            <column name="type" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+
+        </createTable>
+
+        <createTable tableName="payment">
+
+
+            <column name="id" type="uuid">
+                <constraints nullable="true" primaryKey="true" primaryKeyName="PK_PAYMENT" />
+            </column>
+
+            <column name="date" type="date">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="status" type="int">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="username" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+
+        </createTable>
+
+        <createTable tableName="paymentappuser">
+
+            <column name="username" type="varchar(255)">
+                <constraints nullable="true" primaryKey="true" primaryKeyName="PK_PAYMENTAPPUSER" />
+            </column>
+
+            <column name="name" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="surname" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="email" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+
+            <column name="password" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+
+        </createTable>
+
+
+    </changeSet>
+</databaseChangeLog>

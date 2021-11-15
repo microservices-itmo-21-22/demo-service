@@ -19,9 +19,6 @@ fun Payment.toModel(): PaymentModel = PaymentModel(
 )
 
 fun AppUser.toPaymentAppUser(): PaymentAppUser = PaymentAppUser(
-    username = this.username,
     name = this.name,
-    surname = this.surname,
-    email = this.email,
     password = this.password
 )
