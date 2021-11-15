@@ -9,15 +9,16 @@ import org.springframework.http.HttpStatus
 import java.net.URL
 import java.time.Duration
 import java.util.*
+import java.util.concurrent.Executors
 import java.util.concurrent.ForkJoinPool
 class UserNotAuthenticatedException(username: String) : Exception(username)
 
 class RealExternalService(override val descriptor: ServiceDescriptor, private val userStorage: UserStorage) : ExternalServiceApi {
-    private val executorService = ForkJoinPool()
+    private val executorService = Executors.newFixedThreadPool(4)
     private val communicator = UserAwareExternalServiceApiCommunicator(descriptor.url, executorService)
 
     suspend fun getUserSession(id: UUID): ExternalServiceToken {
-        val username = getUser(id).username
+        val username = getUser(id).name
 
         return communicator.getUserSession(username) ?: throw UserNotAuthenticatedException(username)
     }
