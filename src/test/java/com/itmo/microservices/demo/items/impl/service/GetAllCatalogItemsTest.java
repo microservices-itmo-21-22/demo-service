@@ -1,7 +1,7 @@
 package com.itmo.microservices.demo.items.impl.service;
 
 import com.google.common.eventbus.EventBus;
-import com.itmo.microservices.demo.items.api.service.ItemService;
+import com.itmo.microservices.demo.items.api.service.WarehouseService;
 import com.itmo.microservices.demo.items.impl.entity.CatalogItemEntity;
 import com.itmo.microservices.demo.items.impl.repository.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("UnstableApiUsage")
 public class GetAllCatalogItemsTest {
     ItemRepository itemRepository;
-    ItemService itemService;
+    WarehouseService itemService;
     CatalogItemEntity catalogItemEntity1;
     CatalogItemEntity catalogItemEntity2;
 
@@ -43,7 +43,8 @@ public class GetAllCatalogItemsTest {
                 .thenReturn(List.of(catalogItemEntity1, catalogItemEntity2));
 
         var eventBus = mock(EventBus.class);
-        itemService = new DefaultItemService(itemRepository, eventBus);
+
+        itemService = new DefaultWarehouseService(itemRepository,  eventBus);
     }
 
     @Test

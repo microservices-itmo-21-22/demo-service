@@ -1,6 +1,6 @@
 package com.itmo.microservices.demo.order.impl.service
 
-import com.itmo.microservices.demo.items.api.service.ItemService
+import com.itmo.microservices.demo.items.api.service.WarehouseService
 import com.itmo.microservices.demo.items.impl.util.toEntity
 import com.itmo.microservices.demo.order.api.model.OrderDto
 import com.itmo.microservices.demo.order.api.model.OrderItemDto
@@ -20,7 +20,7 @@ import java.util.*
 class DefaultOrderService(
     private val orderRepository: OrderRepository,
     private val orderItemRepository: OrderItemRepository,
-    private val itemService: ItemService
+    private val itemService: WarehouseService
     ): OrderService {
 
     override fun getOrder(order_id: UUID): OrderDto {

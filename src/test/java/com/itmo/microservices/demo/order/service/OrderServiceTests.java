@@ -1,6 +1,6 @@
 package com.itmo.microservices.demo.order.service;
 
-import com.itmo.microservices.demo.items.impl.service.DefaultItemService;
+import com.itmo.microservices.demo.items.impl.service.DefaultWarehouseService;
 import com.itmo.microservices.demo.order.api.model.OrderDto;
 import com.itmo.microservices.demo.order.api.model.OrderStatus;
 import com.itmo.microservices.demo.order.api.service.OrderService;
@@ -50,7 +50,7 @@ public class OrderServiceTests {
 
 		orderItemRepository = mock(OrderItemRepository.class);
 
-		orderService = new DefaultOrderService(orderRepository, orderItemRepository, mock(DefaultItemService.class));
+		orderService = new DefaultOrderService(orderRepository, orderItemRepository, mock(DefaultWarehouseService.class));
 	}
 
 	@Test

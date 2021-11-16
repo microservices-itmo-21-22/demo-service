@@ -3,7 +3,7 @@ package com.itmo.microservices.demo.order.service;
 import com.google.common.eventbus.EventBus;
 import com.itmo.microservices.demo.items.impl.entity.CatalogItemEntity;
 import com.itmo.microservices.demo.items.impl.repository.ItemRepository;
-import com.itmo.microservices.demo.items.impl.service.DefaultItemService;
+import com.itmo.microservices.demo.items.impl.service.DefaultWarehouseService;
 import com.itmo.microservices.demo.order.api.model.OrderStatus;
 import com.itmo.microservices.demo.order.impl.entities.OrderEntity;
 import com.itmo.microservices.demo.order.impl.entities.OrderItemEntity;
@@ -49,7 +49,7 @@ public class AddItemToTheCartTest {
         when(orderRepository.getById(orderEntityUUID)).thenReturn(orderEntity);
 
 
-        var itemService = new DefaultItemService(itemRepository, mock(EventBus.class));
+        var itemService = new DefaultWarehouseService(itemRepository, mock(EventBus.class));
         orderItemRepository = mock(OrderItemRepository.class);
         orderService = new DefaultOrderService(orderRepository, orderItemRepository, itemService);
     }

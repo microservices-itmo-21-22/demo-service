@@ -11,6 +11,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -19,18 +21,17 @@ import static org.mockito.Mockito.when;
 
 @SuppressWarnings("UnstableApiUsage")
 public class UserAuthenticationTest {
-    UserRepository userRepository;
     UserService userService;
-    AppUser appUser;
 
     @BeforeEach
     public void setUp() {
-        appUser = new AppUser(
+        var appUser = new AppUser(
                 "name",
                 "password"
         );
+        appUser.setId(UUID.randomUUID());
 
-        userRepository = mock(UserRepository.class);
+        var userRepository = mock(UserRepository.class);
         when(userRepository.findByUsername("name")).thenReturn(appUser);
 
         var passwordEncoder = mock(PasswordEncoder.class);
