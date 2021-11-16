@@ -5,5 +5,5 @@ import java.util.*
 
 interface ItemService {
     fun getCatalogItems(): List<CatalogItem>
-    fun addItemToBasket(itemId: UUID, orderId: UUID, amount: Int)
+    fun getItem(itemId: UUID): CatalogItem?
 }

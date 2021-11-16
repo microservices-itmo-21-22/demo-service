@@ -16,7 +16,6 @@ import java.util.*
 @Service
 @Suppress("UnstableApiUsage")
 class DefaultItemService(private val itemRepository: ItemRepository,
-                         private val orderService: OrderService,
                          private val eventBus: EventBus
                         ) : ItemService {
 
@@ -26,10 +25,6 @@ class DefaultItemService(private val itemRepository: ItemRepository,
     override fun getCatalogItems(): List<CatalogItem> = itemRepository.findAll()
             .map { it.toModel() }
 
-    override fun addItemToBasket(itemId: UUID, orderId: UUID, amount: Int) {
-        val item = itemRepository.findByIdOrNull(itemId)
-            ?: throw NotFoundException("Item with item_id $itemId not found")
-
-        orderService.addOrderItem(item.title, item.price, amount, orderId)
-    }
+    override fun getItem(itemId: UUID): CatalogItem?
+        = itemRepository.findByIdOrNull(itemId)?.toModel();
 }

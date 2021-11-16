@@ -4,7 +4,6 @@ import com.google.common.eventbus.EventBus;
 import com.itmo.microservices.demo.items.api.service.ItemService;
 import com.itmo.microservices.demo.items.impl.entity.CatalogItemEntity;
 import com.itmo.microservices.demo.items.impl.repository.ItemRepository;
-import com.itmo.microservices.demo.order.api.service.OrderService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -43,10 +42,8 @@ public class GetAllCatalogItemsTest {
         when(itemRepository.findAll())
                 .thenReturn(List.of(catalogItemEntity1, catalogItemEntity2));
 
-        var orderService = mock(OrderService.class);
         var eventBus = mock(EventBus.class);
-
-        itemService = new DefaultItemService(itemRepository,  orderService, eventBus);
+        itemService = new DefaultItemService(itemRepository, eventBus);
     }
 
     @Test

@@ -1,9 +1,9 @@
-package com.itmo.microservices.demo.items.impl.service;
+package com.itmo.microservices.demo.order.service;
 
 import com.google.common.eventbus.EventBus;
-import com.itmo.microservices.demo.items.api.service.ItemService;
 import com.itmo.microservices.demo.items.impl.entity.CatalogItemEntity;
 import com.itmo.microservices.demo.items.impl.repository.ItemRepository;
+import com.itmo.microservices.demo.items.impl.service.DefaultItemService;
 import com.itmo.microservices.demo.order.api.model.OrderStatus;
 import com.itmo.microservices.demo.order.impl.entities.OrderEntity;
 import com.itmo.microservices.demo.order.impl.entities.OrderItemEntity;
@@ -23,20 +23,16 @@ import static org.mockito.Mockito.*;
 
 @SuppressWarnings("UnstableApiUsage")
 public class AddItemToTheCartTest {
-    ItemRepository itemRepository;
-    ItemService itemService;
-
-    CatalogItemEntity catalogItemEntity;
     UUID catalogItemEntityUUID;
-
-    OrderEntity orderEntity;
     UUID orderEntityUUID;
+
     OrderItemRepository orderItemRepository;
+    DefaultOrderService orderService;
 
     @BeforeEach
     public void setUp() {
         catalogItemEntityUUID = UUID.randomUUID();
-        catalogItemEntity = new CatalogItemEntity(
+        var catalogItemEntity = new CatalogItemEntity(
                 catalogItemEntityUUID,
                 "test1",
                 "this is a test",
@@ -44,26 +40,24 @@ public class AddItemToTheCartTest {
                 5
         );
 
-        itemRepository = mock(ItemRepository.class);
+        var itemRepository = mock(ItemRepository.class);
         when(itemRepository.findById(catalogItemEntityUUID)).thenReturn(Optional.of(catalogItemEntity));
 
         var orderRepository = mock(OrderRepository.class);
         orderEntityUUID = UUID.randomUUID();
-        orderEntity = new OrderEntity(orderEntityUUID, UUID.randomUUID(), LocalDateTime.now(), OrderStatus.COLLECTING, null, 5, null);
+        var orderEntity = new OrderEntity(orderEntityUUID, UUID.randomUUID(), LocalDateTime.now(), OrderStatus.COLLECTING, null, 5, null);
         when(orderRepository.getById(orderEntityUUID)).thenReturn(orderEntity);
 
 
+        var itemService = new DefaultItemService(itemRepository, mock(EventBus.class));
         orderItemRepository = mock(OrderItemRepository.class);
-        var defaultOrderService = new DefaultOrderService(orderRepository, orderItemRepository);
-
-
-        itemService = new DefaultItemService(itemRepository,  defaultOrderService, mock(EventBus.class));
+        orderService = new DefaultOrderService(orderRepository, orderItemRepository, itemService);
     }
 
     @Test
     public void AddToCart() {
         ArgumentCaptor<OrderItemEntity> orderItemCaptor = ArgumentCaptor.forClass(OrderItemEntity.class);
-        itemService.addItemToBasket(catalogItemEntityUUID,  orderEntityUUID,2);
+        orderService.addItemToBasket(catalogItemEntityUUID,  orderEntityUUID,2);
         verify(orderItemRepository, times(1)).save(orderItemCaptor.capture());
 
         var receivedOrderItemEntity = orderItemCaptor.getValue();

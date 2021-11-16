@@ -1,5 +1,6 @@
 package com.itmo.microservices.demo.order.impl.service
 
+import com.itmo.microservices.demo.items.api.service.ItemService
 import com.itmo.microservices.demo.items.impl.util.toEntity
 import com.itmo.microservices.demo.order.api.model.OrderDto
 import com.itmo.microservices.demo.order.api.model.OrderItemDto
@@ -18,7 +19,8 @@ import java.util.*
 @Service
 class DefaultOrderService(
     private val orderRepository: OrderRepository,
-    private val orderItemRepository: OrderItemRepository
+    private val orderItemRepository: OrderItemRepository,
+    private val itemService: ItemService
     ): OrderService {
 
     override fun getOrder(order_id: UUID): OrderDto {
@@ -43,10 +45,12 @@ class DefaultOrderService(
         return orderRepository.save(order).toModel(orderItemRepository)
     }
 
-    override fun addOrderItem(title: String, price: String, amount: Int, orderId: UUID) {
-        val orderEntity = orderRepository.getById(orderId)
+    override fun addItemToBasket(itemId: UUID, orderId: UUID, amount: Int) {
+        val item = itemService.getItem(itemId)
+            ?: throw NotFoundException("Item with item_id $itemId not found")
 
-        val orderItemEntity = OrderItemDto(UUID.randomUUID(), title, price).toEntity(amount, orderEntity)
+        val orderEntity = orderRepository.getById(orderId)
+        val orderItemEntity = OrderItemDto(UUID.randomUUID(), item.title, item.price).toEntity(amount, orderEntity)
         orderItemRepository.save(orderItemEntity)
     }
 }
