@@ -1,5 +1,10 @@
 package com.itmo.microservices.demo.bombardier.external
 
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.JsonDeserializer
+import com.fasterxml.jackson.databind.KeyDeserializer
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.itmo.microservices.demo.bombardier.external.OrderStatus.OrderCollecting
 import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceDescriptor
 import java.time.Duration
@@ -68,7 +73,6 @@ class PaymentSubmissionDto(
 
 data class User(
     val id: UUID,
-    val username: String,
     val name: String
 )
 
@@ -123,14 +127,38 @@ sealed class OrderStatus {
     class OrderFailed(reason: String, previousStatus: OrderStatus) : OrderStatus()
 }
 
+class OrderStatusDeserializer : JsonDeserializer<OrderStatus>() {
+    override fun deserialize(p0: JsonParser, p1: DeserializationContext): OrderStatus {
+        return when (p0.text) {
+            "COLLECTING" -> OrderStatus.OrderCollecting
+            "DISCARD" -> OrderStatus.OrderDiscarded
+            "BOOKED" -> OrderStatus.OrderBooked
+            "PAID" -> OrderStatus.OrderPayed(0)
+            "SHIPPING" -> OrderStatus.OrderInDelivery(0)
+            "REFUND" -> OrderStatus.OrderRefund
+            else -> throw Exception("Invalid order status")
+        }
+    }
+
+}
+
 data class Order(
     val id: UUID,
     val timeCreated: Long,
+    @JsonDeserialize(using = OrderStatusDeserializer::class)
     val status: OrderStatus = OrderCollecting,
+    @JsonDeserialize(keyUsing = OrderKeyDeserializer::class)
     val itemsMap: Map<OrderItem, Int>,
     val deliveryDuration: Duration? = null,
     val paymentHistory: List<PaymentLogRecord>
 )
+
+class OrderKeyDeserializer : KeyDeserializer() {
+    override fun deserializeKey(p0: String?, p1: DeserializationContext?): Any {
+        return OrderItem(UUID.fromString(p0), "Deserialized order item $p0")
+    }
+
+}
 
 data class AbandonedCardLogRecord(
     val transactionId: UUID,

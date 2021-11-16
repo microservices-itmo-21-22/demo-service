@@ -17,7 +17,7 @@ class RealExternalService(override val descriptor: ServiceDescriptor, private va
     private val communicator = UserAwareExternalServiceApiCommunicator(descriptor.url, executorService)
 
     suspend fun getUserSession(id: UUID): ExternalServiceToken {
-        val username = getUser(id).username
+        val username = getUser(id).name
 
         return communicator.getUserSession(username) ?: throw UserNotAuthenticatedException(username)
     }

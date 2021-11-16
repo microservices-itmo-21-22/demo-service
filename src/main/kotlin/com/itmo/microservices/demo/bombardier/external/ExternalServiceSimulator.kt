@@ -33,7 +33,7 @@ class ExternalServiceSimulator(
     private val orderToUser = ConcurrentHashMap<UUID, UUID>()
 
     override suspend fun createUser(name: String): User {
-        return userStorage.create(User(name = name, id = UUID.randomUUID(), username = name)).also {
+        return userStorage.create(User(name = name, id = UUID.randomUUID())).also {
             financialLog[it.id] = mutableListOf()
         }
     }
