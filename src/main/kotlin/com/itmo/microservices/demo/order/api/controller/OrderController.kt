@@ -28,7 +28,7 @@ class OrderController(private val orderService: OrderService) {
     fun getOrder(
         @PathVariable order_id: UUID,
         @Parameter(hidden = true) @AuthenticationPrincipal requester: UserDetails
-    ): OrderDto = orderService.getOrder(order_id)
+    ): OrderDto? = orderService.getOrder(order_id)
 
     @PostMapping
     @Operation(
@@ -53,8 +53,26 @@ class OrderController(private val orderService: OrderService) {
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun submitOrder(
-        @PathVariable order_id: UUID,
+        @PathVariable("order_id") orderId: UUID,
         @Parameter(hidden = true)
         @AuthenticationPrincipal user : UserDetails
-    ): OrderDto = orderService.submitOrder(user, order_id)
+    ): OrderDto = orderService.submitOrder(user, orderId)
+
+
+    @PutMapping("/{order_id}/items/{item_id}")
+    @Operation(
+        summary = "Put item into the basket",
+        responses = [
+            ApiResponse(description = "OK", responseCode = "200"),
+            ApiResponse(description = "Can't put item into the basket", responseCode = "400", content = [Content()]),
+            ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()])
+        ],
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    fun addItemToBasket(
+        @PathVariable("item_id") itemId: UUID,
+        @PathVariable("order_id") orderId: UUID,
+        @RequestParam amount: Int,
+        @Parameter(hidden = true) @AuthenticationPrincipal requester: UserDetails
+    ) = orderService.addItemToBasket(itemId, orderId, amount)
 }
