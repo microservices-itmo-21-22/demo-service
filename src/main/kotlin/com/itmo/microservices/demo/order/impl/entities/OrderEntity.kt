@@ -12,12 +12,8 @@ import javax.persistence.*
 @Table(name = "orders")
 class OrderEntity {
     @Id
-    @Type(type = "uuid-char")
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-        name = "UUID",
-        strategy = "org.hibernate.id.UUIDGenerator"
-    )
+    @GeneratedValue
+    @Column(columnDefinition = "uuid", updatable = false)
     var id: UUID? = null
 
     @Type(type = "uuid-char")

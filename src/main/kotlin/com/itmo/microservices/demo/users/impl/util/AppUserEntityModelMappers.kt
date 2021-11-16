@@ -5,7 +5,8 @@ import com.itmo.microservices.demo.users.impl.entity.AppUser
 
 fun AppUser.toModel(): AppUserModel = kotlin.runCatching {
     AppUserModel(
-        name = this.name!!,
+        id = this.id!!,
+        name = this.username!!,
         password = this.password!!
     )
 }.getOrElse { exception -> throw IllegalStateException("Some of user fields are null", exception) }

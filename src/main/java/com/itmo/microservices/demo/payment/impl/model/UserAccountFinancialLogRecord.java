@@ -21,12 +21,8 @@ import java.util.UUID;
 public final class UserAccountFinancialLogRecord {
 
     @Id
-    @Type(type = "uuid-char")
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
+    @GeneratedValue
+    @Column(columnDefinition = "uuid", updatable = false)
     private UUID id;
     @Type(type = "uuid-char")
     private UUID userId; // стоит ли джойнить юзера?
