@@ -32,7 +32,7 @@ class UserController(private val userService: UserService) {
     )
     fun register(@RequestBody request: RegistrationRequest): AppUser? = userService.registerUser(request)
 
-    @GetMapping("/{user_id}")
+    @GetMapping("/users/{user_id}")
     @Operation(
         summary = "Get user by id",
         responses = [
