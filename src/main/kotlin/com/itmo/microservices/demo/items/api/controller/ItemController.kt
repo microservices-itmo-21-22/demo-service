@@ -1,7 +1,7 @@
 package com.itmo.microservices.demo.items.api.controller
 
 import com.itmo.microservices.demo.items.api.model.CatalogItem
-import com.itmo.microservices.demo.items.api.service.ItemService
+import com.itmo.microservices.demo.items.api.service.WarehouseService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/items")
-class ItemController(private val itemService: ItemService){
+class ItemController(private val itemService: WarehouseService){
     @GetMapping
     @Operation(
         summary = "Get all items",
