@@ -33,7 +33,7 @@ class FinlogController(private val paymentService: PaymentService) {
     fun getFinlog(
         @Parameter(hidden = true)
         @AuthenticationPrincipal user: UserDetails,
-        @RequestParam(value = "order_id", required = false) orderId: UUID
+        @RequestParam(value = "order_id", required = false) orderId: UUID?
     ): List<UserAccountFinancialLogRecordDto> {
         return try {
             paymentService.getFinlog(user.username, orderId)
