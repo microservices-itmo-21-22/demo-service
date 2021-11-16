@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:h2DB;DB_CLOSE_DELAY=-1;CASE_INSENSITIVE_IDENTIFIERS=true
+    url: jdbc:h2:mem:h2DB;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;CASE_INSENSITIVE_IDENTIFIERS=true
     username: ${DB_USERNAME:sa}
     password: ${DB_PASSWORD:password}
     driver-class-name: org.h2.Driver

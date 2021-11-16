@@ -7,6 +7,6 @@ import java.util.*
 data class CatalogItem(
         val title: String,
         val description: String,
-        val price: Int = 100,
+        val price: String = "100",
         val amount: Int
 )

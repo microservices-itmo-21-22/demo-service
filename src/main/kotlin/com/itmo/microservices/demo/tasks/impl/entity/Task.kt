@@ -2,6 +2,7 @@ package com.itmo.microservices.demo.tasks.impl.entity
 
 import com.itmo.microservices.demo.tasks.api.model.TaskStatus
 import java.util.*
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
@@ -11,6 +12,7 @@ class Task {
 
     @Id
     @GeneratedValue
+    @Column(columnDefinition = "uuid")
     var id: UUID? = null
     var author: String? = null
     var assignee: String? = null

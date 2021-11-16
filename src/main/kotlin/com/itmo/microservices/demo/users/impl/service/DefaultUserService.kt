@@ -20,7 +20,6 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.util.*
-import javax.validation.constraints.NotNull
 
 @Suppress("UnstableApiUsage")
 @Service
@@ -37,19 +36,19 @@ class DefaultUserService(private val userRepository: UserRepository,
             .getUser(name)?.toModel()
 
     override fun getUser(name: String): AppUser? = userRepository
-            .findByName(name)
+            .findByUsername(name)
 
     override fun getUser(id: UUID): AppUser? = userRepository.findById(id)
 
-    override fun registerUser(request: RegistrationRequest): AppUser? {
+    override fun registerUser(request: RegistrationRequest): AppUserModel? {
         val userEntity = userRepository.save(request.toEntity())
         eventBus.post(UserCreatedEvent(userEntity.toModel()))
         //eventLogger.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.username)
-        return userEntity
+        return userEntity.toModel()
     }
 
     override fun getAccountData(requester: UserDetails): AppUserModel =
-            userRepository.findByName(requester.username)?.toModel() ?:
+            userRepository.findByUsername(requester.username)?.toModel() ?:
             throw NotFoundException("User ${requester.username} not found")
 
     override fun deleteUser(user: UserDetails) {
@@ -65,7 +64,7 @@ class DefaultUserService(private val userRepository: UserRepository,
 
     fun RegistrationRequest.toEntity(): AppUser =
         AppUser(
-            name = this.name,
+            username = this.name,
             password = passwordEncoder.encode(this.password)
         )
 

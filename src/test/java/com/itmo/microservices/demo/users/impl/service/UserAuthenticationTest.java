@@ -31,7 +31,7 @@ public class UserAuthenticationTest {
         );
 
         userRepository = mock(UserRepository.class);
-        when(userRepository.findByName("name")).thenReturn(appUser);
+        when(userRepository.findByUsername("name")).thenReturn(appUser);
 
         var passwordEncoder = mock(PasswordEncoder.class);
         when(passwordEncoder.encode("password")).thenReturn("encodedPassword");

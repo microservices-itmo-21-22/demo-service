@@ -13,22 +13,18 @@ import javax.persistence.Id
 class AppUser {
 
     @Id
-    @Type(type = "uuid-char")
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
+    @GeneratedValue
+    @Column(columnDefinition = "uuid", updatable = false)
     var id: UUID? = null
     @Column(unique = true)
-    var name: String? = null
+    var username: String? = null
     @JsonIgnore
     var password: String? = null
 
     constructor()
 
-    constructor(name: String?, password: String?) {
-        this.name = name
+    constructor(username: String?, password: String?) {
+        this.username = username
         this.password = password
     }
 }
