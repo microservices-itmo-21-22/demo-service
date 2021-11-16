@@ -10,16 +10,16 @@ import com.itmo.microservices.demo.bombardier.flow.*
 import com.itmo.microservices.demo.bombardier.logging.OrderCommonNotableEvents
 import com.itmo.microservices.demo.bombardier.logging.OrderDeliveryNotableEvents.*
 import com.itmo.microservices.demo.bombardier.utils.ConditionAwaiter
+import org.springframework.stereotype.Component
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
-class OrderDeliveryStage(
-    private val externalServiceApi: ExternalServiceApi
-) : TestStage {
+@Component
+class OrderDeliveryStage : TestStage {
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
 
-    override suspend fun run(): TestStage.TestContinuationType {
+    override suspend fun run(userManagement: UserManagement, externalServiceApi: ExternalServiceApi): TestStage.TestContinuationType {
         val orderBeforeDelivery = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
 
         if (orderBeforeDelivery.status !is OrderStatus.OrderPayed) {
@@ -71,7 +71,8 @@ class OrderDeliveryStage(
                 eventLogger.info(I_DELIVERY_SUCCESS, orderAfterDelivery.id)
             }
             is OrderStatus.OrderRefund -> {
-                val userFinancialHistory = externalServiceApi.userFinancialHistory(testCtx().userId!!, testCtx().orderId!!)
+                val userFinancialHistory =
+                    externalServiceApi.userFinancialHistory(testCtx().userId!!, testCtx().orderId!!)
                 if (userFinancialHistory.filter { it.type == FinancialOperationType.WITHDRAW }.sumOf { it.amount } !=
                     userFinancialHistory.filter { it.type == FinancialOperationType.REFUND }.sumOf { it.amount }) {
                     eventLogger.error(E_WITHDRAW_AND_REFUND_DIFFERENT, orderAfterDelivery.id,

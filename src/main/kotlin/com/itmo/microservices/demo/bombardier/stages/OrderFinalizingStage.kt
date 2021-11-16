@@ -6,15 +6,18 @@ import com.itmo.microservices.demo.bombardier.external.BookingStatus
 import com.itmo.microservices.demo.bombardier.flow.CoroutineLoggingFactory
 import com.itmo.microservices.demo.bombardier.external.OrderStatus
 import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
+import com.itmo.microservices.demo.bombardier.flow.UserManagement
 import com.itmo.microservices.demo.bombardier.logging.OrderCommonNotableEvents
 import com.itmo.microservices.demo.bombardier.logging.OrderFinaizingNotableEvents.*
+import org.springframework.stereotype.Component
 
-class OrderFinalizingStage(private val externalServiceApi: ExternalServiceApi) : TestStage {
+@Component
+class OrderFinalizingStage : TestStage {
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
 
 
-    override suspend fun run(): TestStage.TestContinuationType {
+    override suspend fun run(userManagement: UserManagement, externalServiceApi: ExternalServiceApi): TestStage.TestContinuationType {
         eventLogger.info(I_START_FINALIZING, testCtx().orderId)
         val orderStateBeforeFinalizing = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
 

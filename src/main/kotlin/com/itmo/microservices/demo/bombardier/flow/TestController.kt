@@ -1,6 +1,5 @@
 package com.itmo.microservices.demo.bombardier.flow
 
-import com.itmo.microservices.demo.bombardier.exceptions.IllegalTestingFlowNameException
 import com.itmo.microservices.demo.bombardier.exception.BadRequestException
 import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
 import com.itmo.microservices.demo.bombardier.external.knownServices.KnownServices
@@ -8,7 +7,6 @@ import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceDesc
 import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceWithApiAndAdditional
 import com.itmo.microservices.demo.bombardier.stages.*
 import com.itmo.microservices.demo.bombardier.stages.TestStage.TestContinuationType.CONTINUE
-import com.itmo.microservices.demo.common.exception.BadRequestException
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -21,8 +19,6 @@ import kotlin.coroutines.CoroutineContext
 
 @Service
 class TestController(
-    private val userManagement: UserManagement,
-    private val externalServiceApi: ExternalServiceApi,
     choosingUserAccountStage: ChoosingUserAccountStage,
     orderCreationStage: OrderCreationStage,
     orderCollectingStage: OrderCollectingStage,
@@ -43,17 +39,17 @@ class TestController(
     private val coroutineScope = CoroutineScope(executor.asCoroutineDispatcher())
 
     private val testStages = listOf(
-        choosingUserAccountStage.asErrorFree(),
-        orderCreationStage.asErrorFree(),
-        orderCollectingStage.asErrorFree(),
+            choosingUserAccountStage.asErrorFree(),
+            orderCreationStage.asErrorFree(),
+            orderCollectingStage.asErrorFree(),
 //        OrderAbandonedStage(serviceApi).asErrorFree(),
-        orderFinalizingStage.asErrorFree(),
-        orderSettingDeliverySlotsStage.asErrorFree(),
-        orderChangeItemsAfterFinalizationStage,
-        orderPaymentStage.asRetryable().asErrorFree(),
-        orderCollectingStage.asErrorFree(),
-        orderDeliveryStage.asErrorFree()
-    )
+            orderFinalizingStage.asErrorFree(),
+            orderSettingDeliverySlotsStage.asErrorFree(),
+            orderChangeItemsAfterFinalizationStage,
+            orderPaymentStage.asRetryable().asErrorFree(),
+            orderCollectingStage.asErrorFree(),
+            orderDeliveryStage.asErrorFree()
+        )
 
     fun startTestingForService(params: TestParameters) {
         val testingFlowCoroutine = SupervisorJob()
@@ -119,8 +115,8 @@ class TestController(
         log.info("Starting $testNum test for service $serviceName, parent job is ${testingFlow.testFlowCoroutine}")
 
         coroutineScope.launch(testingFlow.testFlowCoroutine + TestContext(serviceName = serviceName)) {
-            testStages(stuff.userManagement, stuff.api).forEach { stage ->
-                when (stage.run()) {
+            testStages.forEach { stage ->
+                when (stage.run(stuff.userManagement, stuff.api)) {
                     CONTINUE -> Unit
                     else -> return@launch
                 }

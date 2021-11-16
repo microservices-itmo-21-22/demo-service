@@ -5,20 +5,21 @@ import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
 import com.itmo.microservices.demo.bombardier.external.OrderStatus
 import com.itmo.microservices.demo.bombardier.flow.CoroutineLoggingFactory
+import com.itmo.microservices.demo.bombardier.flow.UserManagement
 import com.itmo.microservices.demo.bombardier.logging.OrderAbandonedNotableEvents
 import com.itmo.microservices.demo.bombardier.utils.ConditionAwaiter
 import kotlinx.coroutines.delay
+import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
-class OrderAbandonedStage(private val externalServiceApi: ExternalServiceApi) : TestStage {
-    companion object {
-        val log = CoroutineLoggingFactory.getLogger(OrderAbandonedStage::class.java)
-        @InjectEventLogger
-        private lateinit var eventLogger: EventLogger
-    }
+@Component
+class OrderAbandonedStage : TestStage {
+    @InjectEventLogger
+    private lateinit var eventLogger: EventLogger
 
-    override suspend fun run(): TestStage.TestContinuationType {
+
+    override suspend fun run(userManagement: UserManagement, externalServiceApi: ExternalServiceApi): TestStage.TestContinuationType {
         val shouldBeAbandoned = Random.nextBoolean()
         if (shouldBeAbandoned) {
             val lastBucketTimestamp = externalServiceApi.abandonedCardHistory(testCtx().orderId!!)
@@ -32,7 +33,6 @@ class OrderAbandonedStage(private val externalServiceApi: ExternalServiceApi) : 
                     bucketLogRecord.maxByOrNull { it.timestamp }?.timestamp ?: 0 > lastBucketTimestamp
                 }
                 .onFailure {
-                    log.error("The order ${testCtx().orderId} was abandoned, but no records were found")
                     eventLogger.error(OrderAbandonedNotableEvents.E_ORDER_ABANDONED, testCtx().orderId)
                     throw TestStage.TestStageFailedException("Exception instead of silently fail")
                 }.startWaiting()
@@ -43,10 +43,6 @@ class OrderAbandonedStage(private val externalServiceApi: ExternalServiceApi) : 
             if (recentLogRecord!!.userInteracted) {
                 val order = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
                 if (order.status != OrderStatus.OrderCollecting) {
-                    log.error(
-                        "User interacted with order ${testCtx().orderId}. " +
-                                "Expected status - ${OrderStatus.OrderCollecting::class.simpleName}, but was ${order.status}"
-                    )
                     eventLogger.error(
                         OrderAbandonedNotableEvents.E_USER_INTERACT_ORDER, testCtx().orderId,
                         OrderStatus.OrderCollecting::class.simpleName, order.status
@@ -61,10 +57,6 @@ class OrderAbandonedStage(private val externalServiceApi: ExternalServiceApi) : 
                     }
                     .onFailure {
                         val order = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
-                        log.error(
-                            "User didn't interact with order ${testCtx().orderId}" +
-                                    "Expected status - ${OrderStatus.OrderDiscarded::class.simpleName}, but was ${order.status}"
-                        )
                         eventLogger.error(
                             OrderAbandonedNotableEvents.E_USER_DIDNT_INTERACT_ORDER, testCtx().orderId,
                             OrderStatus.OrderCollecting::class.simpleName, order.status

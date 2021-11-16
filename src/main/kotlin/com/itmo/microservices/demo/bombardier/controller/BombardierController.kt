@@ -23,8 +23,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/test")
-class BombardierController {
-    private val testController = TestController()
+class BombardierController(private val testApi: TestController) {
 
     companion object {
         val logger = LoggerFactory.getLogger(BombardierController::class.java)
@@ -52,7 +51,7 @@ class BombardierController {
         ]
     )
     fun listRunningTestsPerService(@PathVariable id: String): RunningTestsResponse {
-        val currentServiceTestFlow = testController.getTestingFlowForService(id)
+        val currentServiceTestFlow = testApi.getTestingFlowForService(id)
 
         val testParamsExt = currentServiceTestFlow.testParams.toExtended(
             currentServiceTestFlow.testsStarted.get(),
@@ -69,7 +68,7 @@ class BombardierController {
         ]
     )
     fun listAllRunningTests(): RunningTestsResponse {
-        val currentTests = testController.runningTests
+        val currentTests = testApi.runningTests
             .map { it.value.testParams.toExtended(
                 it.value.testsStarted.get(),
                 it.value.testsFinished.get())
@@ -89,7 +88,7 @@ class BombardierController {
         ]
     )
     fun runTest(@RequestBody request: RunTestRequest) {
-        testController.startTestingForService(
+        testApi.startTestingForService(
             TestParameters(
                 request.serviceName,
                 request.usersCount,
@@ -115,7 +114,7 @@ class BombardierController {
     )
     fun stopTest(@PathVariable serviceName: String) {
         runBlocking {
-            testController.stopTestByServiceName(serviceName)
+            testApi.stopTestByServiceName(serviceName)
         }
     }
 
@@ -128,7 +127,7 @@ class BombardierController {
     )
     fun stopAllTests() {
         runBlocking {
-            testController.stopAllTests()
+            testApi.stopAllTests()
         }
     }
 }
