@@ -24,11 +24,11 @@ public final class UserAccountFinancialLogRecord {
     @GeneratedValue
     @Column(columnDefinition = "uuid", updatable = false)
     private UUID id;
-    @Type(type = "uuid-char")
-    private UUID userId; // стоит ли джойнить юзера?
-    @Type(type = "uuid-char")
+    @Column(columnDefinition = "uuid")
+    private UUID userId;
+    @Column(columnDefinition = "uuid")
     private UUID orderId; //TODO:: replace with related  entity
-    @Type(type = "uuid-char")
+    @Column(columnDefinition = "uuid")
     private UUID paymentTransactionId; //TODO:: replace with related entity
 
     @Enumerated(EnumType.STRING)

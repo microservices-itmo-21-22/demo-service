@@ -16,7 +16,7 @@ class OrderEntity {
     @Column(columnDefinition = "uuid", updatable = false)
     var id: UUID? = null
 
-    @Type(type = "uuid-char")
+    @Column(columnDefinition = "uuid")
     var userId: UUID? = null
 
     var timeCreated: LocalDateTime = LocalDateTime.now()
