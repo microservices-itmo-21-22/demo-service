@@ -13,7 +13,7 @@ interface UserService {
     fun getUserModel(name: String): AppUserModel?
     fun getUser(name: String): AppUser?
     fun getUser(id: UUID): AppUser?
-    fun registerUser(request: RegistrationRequest) : AppUser?
+    fun registerUser(request: RegistrationRequest) : AppUserModel?
     fun getAccountData(requester: UserDetails): AppUserModel
     fun deleteUser(user: UserDetails)
     fun authenticate(request: AuthenticationRequest): AuthenticationResult
