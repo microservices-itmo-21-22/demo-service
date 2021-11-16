@@ -1,6 +1,7 @@
 package com.itmo.microservices.demo.items.impl.entity
 
 import java.util.*
+import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.Id
@@ -10,6 +11,7 @@ class CatalogItemEntity {
 
     @Id
     @GeneratedValue
+    @Column(columnDefinition = "uuid", updatable = false)
     var id: UUID? = null
     var title: String = ""
     var description: String = ""
