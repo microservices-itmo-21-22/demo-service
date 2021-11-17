@@ -8,6 +8,7 @@ import com.itmo.microservices.demo.order.impl.entities.OrderItemEntity;
 import com.itmo.microservices.demo.order.impl.repository.OrderItemRepository;
 import com.itmo.microservices.demo.payment.impl.model.UserAccountFinancialLogRecord;
 import com.itmo.microservices.demo.tasks.impl.repository.OrderRepository;
+import com.itmo.microservices.demo.users.impl.service.DefaultUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +34,6 @@ public class GetOrderTest {
 
         orderEntity = new OrderEntity(
                 UUID.randomUUID(),
-                UUID.randomUUID(),
                 LocalDateTime.now(),
                 OrderStatus.PAID,
                 items,
@@ -47,7 +47,7 @@ public class GetOrderTest {
 
         orderItemRepository = mock(OrderItemRepository.class);
 
-        orderService = new DefaultOrderService(orderRepository, orderItemRepository, mock(DefaultWarehouseService.class));
+        orderService = new DefaultOrderService(orderRepository, orderItemRepository, mock(DefaultWarehouseService.class), mock(DefaultUserService.class));
     }
 
     @Test

@@ -10,6 +10,7 @@ import com.itmo.microservices.demo.order.impl.entities.OrderItemEntity;
 import com.itmo.microservices.demo.order.impl.repository.OrderItemRepository;
 import com.itmo.microservices.demo.order.impl.service.DefaultOrderService;
 import com.itmo.microservices.demo.tasks.impl.repository.OrderRepository;
+import com.itmo.microservices.demo.users.impl.service.DefaultUserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.ArgumentCaptor;
@@ -45,13 +46,12 @@ public class AddItemToTheCartTest {
 
         var orderRepository = mock(OrderRepository.class);
         orderEntityUUID = UUID.randomUUID();
-        var orderEntity = new OrderEntity(orderEntityUUID, UUID.randomUUID(), LocalDateTime.now(), OrderStatus.COLLECTING, null, 5, null);
-        when(orderRepository.getById(orderEntityUUID)).thenReturn(orderEntity);
-
+        var orderEntity = new OrderEntity(UUID.randomUUID(), LocalDateTime.now(), OrderStatus.COLLECTING, null, 5, null);
+        when(orderRepository.getById(orderEntity.getId())).thenReturn(orderEntity);
 
         var itemService = new DefaultWarehouseService(itemRepository, mock(EventBus.class));
         orderItemRepository = mock(OrderItemRepository.class);
-        orderService = new DefaultOrderService(orderRepository, orderItemRepository, itemService);
+        orderService = new DefaultOrderService(orderRepository, orderItemRepository, itemService, mock(DefaultUserService.class));
     }
 
     @Test

@@ -35,7 +35,12 @@ class OrderEntity {
     constructor()
 
     constructor(
-        id: UUID?,
+            userId: UUID?,
+    ) {
+        this.userId = userId
+    }
+
+    constructor(
         userId: UUID?,
         timeCreated: LocalDateTime,
         status: OrderStatus,
@@ -43,7 +48,6 @@ class OrderEntity {
         deliveryDuration: Int?,
         paymentHistory: List<UserAccountFinancialLogRecord>?
     ) {
-        this.id = id
         this.userId = userId
         this.timeCreated = timeCreated
         this.status = status
