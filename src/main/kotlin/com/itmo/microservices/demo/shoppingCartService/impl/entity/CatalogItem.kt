@@ -8,8 +8,7 @@ import javax.persistence.*
 class CatalogItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    lateinit var id: UUID
+    var id: UUID = UUID.randomUUID()
     var productId: UUID = UUID.randomUUID()
     var amount: Int = 0
 
