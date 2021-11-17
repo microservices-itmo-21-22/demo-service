@@ -1,8 +1,11 @@
 package com.itmo.microservices.demo.orders.api.controller
 
+import com.itmo.microservices.demo.delivery.api.model.DeliveryModel
+import com.itmo.microservices.demo.delivery.api.service.DeliveryService
 import com.itmo.microservices.demo.orders.api.model.OrderModel
 import com.itmo.microservices.demo.orders.api.model.PaymentModel
 import com.itmo.microservices.demo.orders.api.service.OrderService
+import com.itmo.microservices.demo.shoppingCartService.api.service.CartService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -12,69 +15,63 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.*
 import java.util.*
+import javax.transaction.NotSupportedException
 
 @RestController
-@RequestMapping("/user")
-class OrderController(private val orderService: OrderService) {
-
-    @GetMapping("/{userName}/orders")
-    @Operation(
-        summary = "Get all orders",
-        responses = [
-            ApiResponse(description = "OK", responseCode = "200"),
-            ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()])
-        ],
-        security = [SecurityRequirement(name = "bearerAuth")]
-    )
-    fun getOrders(@PathVariable userName : String) : List<OrderModel> = orderService.getOrdersByUserId(userName)
-
-    @GetMapping("/orders/{orderId}")
-    @Operation(
-        summary = "Get order by id",
-        responses = [
-            ApiResponse(description = "OK", responseCode = "200"),
-            ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()])
-        ],
-        security = [SecurityRequirement(name = "bearerAuth")]
-    )
-    fun getOrder(@PathVariable orderId : UUID) : OrderModel = orderService.getOrder(orderId)
+class OrderController(private val orderService: OrderService,
+                      private val shoppingCartService: CartService,
+                      private val deliveryService: DeliveryService) {
 
     @PostMapping("/orders")
     @Operation(
-        summary = "Creates new order",
-        responses = [
-            ApiResponse(description = "OK", responseCode = "200"),
-            ApiResponse(description = "Bad request", responseCode = "400", content = [Content()]),
-            ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()])
-        ],
-        security = [SecurityRequirement(name = "bearerAuth")]
+            summary = "Creates new order",
+            responses = [
+                ApiResponse(description = "OK", responseCode = "200"),
+                ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()]),
+                ApiResponse(description = "Bad request", responseCode = "400", content = [Content()]),
+                ApiResponse(description = "Service error", responseCode = "500", content = [Content()])
+            ],
+            security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun createOrder(@RequestBody order : OrderModel,
-                    @Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails) = orderService.addOrder(order, user.username)
+    fun getOrders(@RequestBody order : OrderModel, @AuthenticationPrincipal user: UserDetails) = orderService.getOrdersByUsername(user.username)
 
-    @DeleteMapping("order/{orderId}")
+    @PutMapping("/orders/{order_id}/items/{item_id}?amount={amount}")
     @Operation(
-        summary = "Creates new order",
-        responses = [
-            ApiResponse(description = "OK", responseCode = "200"),
-            ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()])
-        ],
-        security = [SecurityRequirement(name = "bearerAuth")]
+            summary = "Put items to cart",
+            responses = [
+                ApiResponse(description = "OK", responseCode = "200"),
+                ApiResponse(description = "Bad request", responseCode = "400", content = [Content()]),
+                ApiResponse(description = "Service error", responseCode = "500", content = [Content()]),
+                ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()])
+            ],
+            security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun deleteOrder(@PathVariable orderId : UUID,
-                    @Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails) = orderService.deleteOrder(orderId, user.username)
+    fun putItemsToCart(@PathVariable orderId : UUID, @PathVariable itemId : UUID, @AuthenticationPrincipal user : UserDetails) = shoppingCartService.putItemInCart(orderId, itemId)
 
-    @PostMapping("/order/{orderId}/pay")
+    @DeleteMapping("/orders/{order_id}/bookings")
     @Operation(
-        summary = "Assign payment entity to order",
-        responses = [
-            ApiResponse(description = "OK", responseCode = "200"),
-            ApiResponse(description = "Bad request", responseCode = "400", content = [Content()]),
-            ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()])
-        ],
-        security = [SecurityRequirement(name = "bearerAuth")]
+            summary = "Finalization and booking",
+            responses = [
+                ApiResponse(description = "OK", responseCode = "200"),
+                ApiResponse(description = "Bad request", responseCode = "400", content = [Content()]),
+                ApiResponse(description = "Service error", responseCode = "500", content = [Content()]),
+                ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()])
+            ],
+            security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun assignPayment(@PathVariable orderId : UUID,
-                      @RequestBody payment : PaymentModel) = orderService.assignPayment(orderId, payment)
+    fun book(@PathVariable orderId : UUID, @AuthenticationPrincipal user : UserDetails) = orderService.createOrderFromBusket(orderId, user.username)
+
+    @PostMapping("/orders/{order_id}/delivery?slot={slot_in_sec}")
+    @Operation(
+            summary = "Choosing desired slot",
+            responses = [
+                ApiResponse(description = "OK", responseCode = "200"),
+                ApiResponse(description = "Bad request", responseCode = "400", content = [Content()]),
+                ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()]),
+                ApiResponse(description = "Service error", responseCode = "500", content = [Content()])
+            ],
+            security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    fun deliver(@RequestBody deliveryModel: DeliveryModel) = deliveryService.addDelivery(deliveryModel)
 
 }
