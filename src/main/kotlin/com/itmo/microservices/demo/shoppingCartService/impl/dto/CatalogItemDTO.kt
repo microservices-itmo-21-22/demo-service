@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.ShoppingCartService.impl.dto
+package com.itmo.microservices.demo.shoppingCartService.impl.dto
 
 import java.util.*
 

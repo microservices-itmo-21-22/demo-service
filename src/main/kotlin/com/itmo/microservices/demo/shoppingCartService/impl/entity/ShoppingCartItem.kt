@@ -8,7 +8,8 @@ import javax.persistence.*
 class ShoppingCartItem {
 
     @Id
-    var id: UUID = UUID.randomUUID()
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    lateinit var id: UUID
 
     var shoppingCartID: UUID = UUID.randomUUID()
     var catalogItemID: UUID = UUID.randomUUID()

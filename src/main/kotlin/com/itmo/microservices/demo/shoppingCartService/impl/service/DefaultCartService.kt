@@ -2,8 +2,8 @@ package com.itmo.microservices.demo.shoppingCartService.impl.service
 
 import com.itmo.microservices.demo.shoppingCartService.api.service.CartService
 import com.itmo.microservices.demo.shoppingCartService.impl.ShoppingCartStatus
-import com.itmo.microservices.demo.shoppingCartService.api.dto.CatalogItemDTO
-import com.itmo.microservices.demo.shoppingCartService.api.dto.ShoppingCartDTO
+import com.itmo.microservices.demo.shoppingCartService.impl.dto.CatalogItemDTO
+import com.itmo.microservices.demo.shoppingCartService.impl.dto.ShoppingCartDTO
 import com.itmo.microservices.demo.shoppingCartService.impl.entity.CatalogItem
 import com.itmo.microservices.demo.shoppingCartService.impl.entity.ShoppingCart
 import com.itmo.microservices.demo.shoppingCartService.impl.repository.CatalogItemRepository
@@ -27,22 +27,18 @@ class DefaultCartService(private val shoppingCartRepository: ShoppingCartReposit
             catalogItems.add(catalogItemDTO)
         }
         return catalogItems
-     }
+    }
 
     override fun getCart(cartId: UUID): ShoppingCartDTO? {
         val shoppingCart = shoppingCartRepository.getById(cartId)
 
         val items = getCartItems(shoppingCart.id)
-//        val shoppingCart = ShoppingCart(ShoppingCartStatus.active())
-//
-//        val items : List<CatalogItemDTO> = listOf()
 
         return ShoppingCartDTO(shoppingCart.id, shoppingCart.status, items)
     }
 
     override fun getCatalogItem(catalogItemId: UUID): CatalogItemDTO? {
-//        val catalogItem = catalogItemRepository.getById(catalogItemId)
-        val catalogItem = CatalogItem(UUID.randomUUID(), 123)
+        val catalogItem = catalogItemRepository.getById(catalogItemId)
 
         return CatalogItemDTO(catalogItem.id, catalogItem.productId, catalogItem.amount)
     }
@@ -52,8 +48,7 @@ class DefaultCartService(private val shoppingCartRepository: ShoppingCartReposit
 
         shoppingCartRepository.save(cart)
 
-//        return getCart(cart.id)
-        return ShoppingCartDTO(cart.id, cart.status, listOf())
+        return getCart(cart.id)
     }
 
     override fun putItemInCart(cartId: UUID, catalogItemId: UUID) {
@@ -74,15 +69,12 @@ class DefaultCartService(private val shoppingCartRepository: ShoppingCartReposit
 
             shoppingCartDTO.items = items
         }
-//        shoppingCartRepository.deleteById(cartId)
-//        shoppingCartRepository.save(Shoppin)
-        /// @todo put in repo
     }
 
     override fun makeCatalogItem(productId: UUID, amount: Int): CatalogItemDTO? {
         val catalogItem = CatalogItem(productId, amount)
 
-//        catalogItemRepository.save(catalogItem)
+        catalogItemRepository.save(catalogItem)
 
         return CatalogItemDTO(catalogItem.id, catalogItem.productId, catalogItem.amount)
     }
