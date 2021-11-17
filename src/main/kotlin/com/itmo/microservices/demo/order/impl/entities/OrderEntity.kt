@@ -21,6 +21,7 @@ class OrderEntity {
 
     var timeCreated: LocalDateTime = LocalDateTime.now()
 
+    @Enumerated(EnumType.STRING)
     var status: OrderStatus = OrderStatus.COLLECTING
 
     var deliveryDuration: Int? = 0

@@ -2,7 +2,7 @@ spring:
   application:
     name: p03
   datasource:
-    url: jdbc:postgresql://postgresql:5432/p03
+    url: jdbc:postgresql://postgresql:5432/p03?stringtype=unspecified
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
