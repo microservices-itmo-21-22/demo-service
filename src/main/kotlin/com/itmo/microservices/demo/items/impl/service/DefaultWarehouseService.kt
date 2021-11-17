@@ -3,12 +3,11 @@ package com.itmo.microservices.demo.items.impl.service
 import com.google.common.eventbus.EventBus
 import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
-import com.itmo.microservices.demo.common.exception.NotFoundException
 import com.itmo.microservices.demo.items.api.model.CatalogItem
 import com.itmo.microservices.demo.items.api.service.WarehouseService
 import com.itmo.microservices.demo.lib.common.items.repository.ItemRepository
 import com.itmo.microservices.demo.items.impl.util.toModel
-import com.itmo.microservices.demo.order.api.service.OrderService
+import java.util.UUID
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 

@@ -1,18 +1,19 @@
 package com.itmo.microservices.demo.order.impl.service
 
 import com.itmo.microservices.demo.items.api.service.WarehouseService
-import com.itmo.microservices.demo.items.impl.util.toEntity
 import com.itmo.microservices.demo.lib.common.order.dto.OrderDto
-import com.itmo.microservices.demo.order.api.model.OrderItemDto
+import com.itmo.microservices.demo.lib.common.order.dto.OrderItemDto
 import com.itmo.microservices.demo.lib.common.order.dto.OrderStatusEnum
 import com.itmo.microservices.demo.order.api.service.OrderService
 import com.itmo.microservices.demo.lib.common.order.entity.OrderEntity
+import com.itmo.microservices.demo.lib.common.order.mapper.toEntity
 import com.itmo.microservices.demo.lib.common.order.repository.OrderItemRepository
 import com.itmo.microservices.demo.lib.common.order.mapper.toModel
 import com.itmo.microservices.demo.lib.common.order.repository.OrderRepository
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import java.util.*
+import org.webjars.NotFoundException
 
 @Service
 class DefaultOrderService(
@@ -21,12 +22,12 @@ class DefaultOrderService(
     private val itemService: WarehouseService
     ): OrderService {
 
-    override fun getOrder(order_id: UUID): OrderDto {
-        val optionalOrder = orderRepository.findById(order_id)
-        if (optionalOrder.isEmpty) {
-            throw NotFoundException("Order with Order ID $order_id not found")
+    override fun getOrder(orderId: UUID): OrderDto {
+        val optionalOrder = orderRepository.findById(orderId)
+        if (!optionalOrder.isPresent) {
+            throw NotFoundException("Order with Order ID $orderId not found")
         }
-        return orderRepository.findById(order_id).get().toModel(orderItemRepository)
+        return orderRepository.findById(orderId).get().toModel(orderItemRepository)
     }
 
     override fun createOrder(user: UserDetails): OrderDto {
