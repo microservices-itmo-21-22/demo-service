@@ -1,11 +1,11 @@
 package com.itmo.microservices.demo.orders.api.controller
 
-import com.itmo.microservices.demo.ShoppingCartService.api.service.CartService
 import com.itmo.microservices.demo.delivery.api.model.DeliveryModel
 import com.itmo.microservices.demo.delivery.api.service.DeliveryService
 import com.itmo.microservices.demo.orders.api.model.OrderModel
 import com.itmo.microservices.demo.orders.api.model.PaymentModel
 import com.itmo.microservices.demo.orders.api.service.OrderService
+import com.itmo.microservices.demo.shoppingCartService.api.service.CartService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -19,8 +19,8 @@ import javax.transaction.NotSupportedException
 
 @RestController
 class OrderController(private val orderService: OrderService,
-                        private val shoppingCartService: CartService,
-                        private val deliveryService: DeliveryService) {
+                      private val shoppingCartService: CartService,
+                      private val deliveryService: DeliveryService) {
 
     @PostMapping("/orders")
     @Operation(
