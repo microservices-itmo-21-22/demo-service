@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/")
 class DeliveryController(private val deliveryService: DeliveryService) {
 
     @GetMapping("/delivery/{deliveryId}")
@@ -83,6 +83,23 @@ class DeliveryController(private val deliveryService: DeliveryService) {
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun deleteOrder(@PathVariable deliveryId : UUID) = deliveryService.deleteDelivery(deliveryId)
+
+    @GetMapping("/delivery/slots?number={number}")
+    @Operation(
+        summary = "Get delivery by id",
+        responses = [
+            ApiResponse(
+                description = "OK",
+                responseCode = "200"),
+            ApiResponse(
+                description = "Unauthorized",
+                responseCode = "403",
+                content = [io.swagger.v3.oas.annotations.media.Content()]
+            )
+        ],
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    fun getDeliverySlots(@PathVariable number : Int) : List<Int> = deliveryService.getDeliverySlots(number)
 
 
 }
