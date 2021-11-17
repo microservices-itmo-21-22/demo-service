@@ -10,6 +10,4 @@ interface DeliveryService {
     fun addDelivery(delivery: DeliveryModel)
     fun deleteDelivery(deliveryId: UUID)
     fun finalizeDelivery(deliveryId : UUID)
-    fun getDeliverySlots(number: Int): List<Int>
-
 }

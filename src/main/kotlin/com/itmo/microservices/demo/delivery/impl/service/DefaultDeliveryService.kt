@@ -52,14 +52,4 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
         eventBus.post(DeliveryDeletedEvent(delivery.toModel()))
         eventLogger.info(DeliveryServiceNotableEvents.I_DELIVERY_DELIVERED, delivery)
     }
-
-    override fun getDeliverySlots(number: Int): List<Int> {
-        if (number <= 0) {
-            throw IllegalArgumentException("Number of slots supposed to be more than 0, not $number")
-        }
-        //access API
-        //dummy
-        val temp :  List<Int> = listOf(0,1,2)
-        return temp
-    }
 }
