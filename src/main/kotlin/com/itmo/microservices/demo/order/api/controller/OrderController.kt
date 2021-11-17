@@ -1,6 +1,6 @@
 package com.itmo.microservices.demo.order.api.controller
 
-import com.itmo.microservices.demo.order.api.model.OrderDto
+import com.itmo.microservices.demo.lib.common.order.dto.OrderDto
 import com.itmo.microservices.demo.order.api.service.OrderService
 import com.itmo.microservices.demo.payment.api.model.PaymentSubmissionDto
 import com.itmo.microservices.demo.payment.api.service.PaymentService

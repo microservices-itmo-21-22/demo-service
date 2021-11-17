@@ -2,18 +2,16 @@ package com.itmo.microservices.demo.order.impl.service
 
 import com.itmo.microservices.demo.items.api.service.WarehouseService
 import com.itmo.microservices.demo.items.impl.util.toEntity
-import com.itmo.microservices.demo.order.api.model.OrderDto
+import com.itmo.microservices.demo.lib.common.order.dto.OrderDto
 import com.itmo.microservices.demo.order.api.model.OrderItemDto
-import com.itmo.microservices.demo.order.api.model.OrderStatus
+import com.itmo.microservices.demo.lib.common.order.dto.OrderStatusEnum
 import com.itmo.microservices.demo.order.api.service.OrderService
-import com.itmo.microservices.demo.order.impl.entities.OrderEntity
-import com.itmo.microservices.demo.order.impl.repository.OrderItemRepository
-import com.itmo.microservices.demo.order.impl.util.toModel
-import com.itmo.microservices.demo.tasks.impl.repository.OrderRepository
+import com.itmo.microservices.demo.lib.common.order.entity.OrderEntity
+import com.itmo.microservices.demo.lib.common.order.repository.OrderItemRepository
+import com.itmo.microservices.demo.lib.common.order.mapper.toModel
+import com.itmo.microservices.demo.lib.common.order.repository.OrderRepository
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
-import org.webjars.NotFoundException
-
 import java.util.*
 
 @Service
@@ -41,7 +39,7 @@ class DefaultOrderService(
     override fun submitOrder(user: UserDetails, orderId: UUID): OrderDto {
         val order = orderRepository.getById(orderId)
         // TODO add check delivery status from delivery service
-        order.status = OrderStatus.SHIPPING
+        order.status = OrderStatusEnum.SHIPPING
         return orderRepository.save(order).toModel(orderItemRepository)
     }
 
