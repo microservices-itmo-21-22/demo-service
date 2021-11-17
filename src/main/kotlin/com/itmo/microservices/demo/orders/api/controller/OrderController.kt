@@ -5,6 +5,7 @@ import com.itmo.microservices.demo.delivery.api.service.DeliveryService
 import com.itmo.microservices.demo.orders.api.model.OrderModel
 import com.itmo.microservices.demo.orders.api.model.PaymentModel
 import com.itmo.microservices.demo.orders.api.service.OrderService
+import com.itmo.microservices.demo.shoppingCartService.api.dto.ShoppingCartDTO
 import com.itmo.microservices.demo.shoppingCartService.api.service.CartService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -33,7 +34,7 @@ class OrderController(private val orderService: OrderService,
             ],
             security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getOrders(@RequestBody order : OrderModel, @AuthenticationPrincipal user: UserDetails) = orderService.getOrdersByUsername(user.username)
+    fun getOrders(@AuthenticationPrincipal user: UserDetails) = shoppingCartService.makeCart()
 
     @PutMapping("/orders/{order_id}/items/{item_id}?amount={amount}")
     @Operation(

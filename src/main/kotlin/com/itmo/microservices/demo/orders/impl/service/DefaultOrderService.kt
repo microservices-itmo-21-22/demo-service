@@ -67,7 +67,8 @@ class DefaultOrderService(private val orderRepository: OrderRepository,
             throw AccessDeniedException("Cannot delete order that was not created by you")
         eventBus.post(OrderDeletedEvent(order.toModel()))
         eventLogger.info(OrderServiceNotableEvents.I_ORDER_DELETED, order)
-        orderRepository.deleteById(orderId)
+        order.status = 4
+        orderRepository.save(order)
     }
 
     override fun assignPayment(orderId: UUID, payment : PaymentModel) {
@@ -84,6 +85,6 @@ class DefaultOrderService(private val orderRepository: OrderRepository,
 
     fun getUserIdByName(userName: String): UUID {
         // TODO
-        return UUID.fromString("123")
+        return UUID.fromString("00000000-0000-0000-0000-000000000000")
     }
 }
