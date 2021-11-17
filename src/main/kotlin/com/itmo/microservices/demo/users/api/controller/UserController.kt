@@ -5,6 +5,8 @@ import com.itmo.microservices.demo.users.api.model.AuthenticationRequest
 import com.itmo.microservices.demo.users.api.model.AuthenticationResult
 import com.itmo.microservices.demo.users.api.model.RegistrationRequest
 import com.itmo.microservices.demo.users.api.service.UserService
+import com.itmo.microservices.demo.users.impl.entity.AppUser
+import com.itmo.microservices.demo.users.impl.util.toModel
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -14,12 +16,13 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.*
+import java.util.*
+import javax.websocket.server.PathParam
 
 @RestController
-@RequestMapping("/users")
 class UserController(private val userService: UserService) {
 
-    @PostMapping
+    @PostMapping("/users")
     @Operation(
         summary = "Register new user",
         responses = [
@@ -27,9 +30,20 @@ class UserController(private val userService: UserService) {
             ApiResponse(description = "Bad request", responseCode = "400", content = [Content()])
         ]
     )
-    fun register(@RequestBody request: RegistrationRequest) = userService.registerUser(request)
+    fun register(@RequestBody request: RegistrationRequest): AppUserModel? = userService.registerUser(request)
 
-    @GetMapping("/me")
+    @GetMapping("/users/{user_id}")
+    @Operation(
+        summary = "Get user by id",
+        responses = [
+            ApiResponse(description = "OK", responseCode = "200"),
+            ApiResponse(description = "User not found", responseCode = "404", content = [Content()])
+        ],
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    fun getUserById(@PathVariable("user_id") userId: UUID): AppUser? = userService.getUser(userId)
+
+    @GetMapping("/users/me")
     @Operation(
         summary = "Get current user info",
         responses = [
@@ -41,7 +55,7 @@ class UserController(private val userService: UserService) {
     fun getAccountData(@Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails): AppUserModel =
             userService.getAccountData(user)
 
-    @DeleteMapping("/me")
+    @DeleteMapping("/users/me")
     @Operation(
         summary = "Delete current user",
         responses = [
@@ -53,7 +67,7 @@ class UserController(private val userService: UserService) {
     fun deleteCurrentUser(@Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails) =
             userService.deleteUser(user)
 
-    @PostMapping("/auth")
+    @PostMapping("/authentication")
     @Operation(
         summary = "Authenticate",
         responses = [
@@ -65,7 +79,7 @@ class UserController(private val userService: UserService) {
     fun authenticate(@RequestBody request: AuthenticationRequest): AuthenticationResult =
         userService.authenticate(request);
 
-    @PostMapping("/refresh")
+    @PostMapping("/authentication/refresh")
     @Operation(
         summary = "Refresh authentication",
         responses = [

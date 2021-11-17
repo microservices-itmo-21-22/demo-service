@@ -11,6 +11,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -19,22 +21,18 @@ import static org.mockito.Mockito.when;
 
 @SuppressWarnings("UnstableApiUsage")
 public class UserAuthenticationTest {
-    UserRepository userRepository;
     UserService userService;
-    AppUser appUser;
 
     @BeforeEach
     public void setUp() {
-        appUser = new AppUser(
-                "username",
+        var appUser = new AppUser(
                 "name",
-                "surname",
-                "email",
                 "password"
         );
+        appUser.setId(UUID.randomUUID());
 
-        userRepository = mock(UserRepository.class);
-        when(userRepository.findByUsername("username")).thenReturn(appUser);
+        var userRepository = mock(UserRepository.class);
+        when(userRepository.findByUsername("name")).thenReturn(appUser);
 
         var passwordEncoder = mock(PasswordEncoder.class);
         when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
@@ -50,7 +48,7 @@ public class UserAuthenticationTest {
 
     @Test
     public void authenticateTest() {
-        var authenticateResult = userService.authenticate(new AuthenticationRequest("username", "password"));
+        var authenticateResult = userService.authenticate(new AuthenticationRequest("name", "password"));
 
         assertEquals("token", authenticateResult.getAccessToken());
         assertEquals("refreshToken", authenticateResult.getRefreshToken());

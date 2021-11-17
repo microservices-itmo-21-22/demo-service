@@ -14,12 +14,15 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.UUID;
+
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 @SuppressWarnings("UnstableApiUsage")
 @RunWith(MockitoJUnitRunner.class)
 public class SaveAndGetUserInformationTest {
     private AppUser appUser;
+    private UUID globalUUID;
 
     @InjectMocks
     DefaultUserService userService;
@@ -36,14 +39,14 @@ public class SaveAndGetUserInformationTest {
     @Before
     public void setUp() {
         appUser = new AppUser(
-                "username",
                 "name",
-                "surname",
-                "email",
                 "password"
         );
 
-        when(repository.findByUsername("username")).thenReturn(appUser);
+        globalUUID = UUID.randomUUID();
+        appUser.setId(globalUUID);
+
+        when(repository.findByUsername("name")).thenReturn(appUser);
         when(repository.save(any())).thenReturn(appUser);
 
         when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
@@ -51,37 +54,29 @@ public class SaveAndGetUserInformationTest {
 
     }
 
-    private final RegistrationRequest request = new RegistrationRequest("username", "name", "surname", "email", "password");
+    private final RegistrationRequest request = new RegistrationRequest("name", "password");
 
     @org.junit.Test
     public void registerTest() {
         userService.registerUser(request);
         AppUserModel user = new AppUserModel(
-                "username",
+                globalUUID,
                 "name",
-                "surname",
-                "email",
                 "password"
         );
-        Assert.assertEquals(user.getName(), userService.getUser("username").getName());
-        Assert.assertEquals(user.getSurname(), userService.getUser("username").getSurname());
-        Assert.assertEquals(user.getEmail(), userService.getUser("username").getEmail());
-        Assert.assertEquals(user.getPassword(), userService.getUser("username").getPassword());
+        Assert.assertEquals(user.getName(), userService.getUser("name").getUsername());
+        Assert.assertEquals(user.getPassword(), userService.getUser("name").getPassword());
     }
 
     @org.junit.Test
     public void findUserTest() {
         AppUserModel user = new AppUserModel(
-                "username",
+                globalUUID,
                 "name",
-                "surname",
-                "email",
                 "password"
         );
-        Assert.assertEquals(user.getName(), userService.getUser("username").getName());
-        Assert.assertEquals(user.getSurname(), userService.getUser("username").getSurname());
-        Assert.assertEquals(user.getEmail(), userService.getUser("username").getEmail());
-        Assert.assertEquals(user.getPassword(), userService.getUser("username").getPassword());
-        Assert.assertEquals(null, userService.getUser("anotherusername"));
+        Assert.assertEquals(user.getName(), userService.getUser("name").getUsername());
+        Assert.assertEquals(user.getPassword(), userService.getUser("name").getPassword());
+        Assert.assertNull(userService.getUser("anothername"));
     }
 }

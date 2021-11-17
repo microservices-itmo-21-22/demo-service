@@ -28,12 +28,12 @@ public class PaymentServiceImpl implements PaymentService {
     private final UserService userService;
 
     @Override
-    public List<UserAccountFinancialLogRecordDto> getFinlog(String username, UUID orderId) throws UserNotFoundException {
-        var user = userService.getUser(username);
+    public List<UserAccountFinancialLogRecordDto> getFinlog(String name, UUID orderId) throws UserNotFoundException {
+        var user = userService.getUser(name);
 
         if (user == null) {
-            throw new UserNotFoundException(String.format("%s user with username: '%s' not found",
-                    PaymentServiceConstants.PAYMENT_LOG_MARKER, username));
+            throw new UserNotFoundException(String.format("%s user with name: '%s' not found",
+                    PaymentServiceConstants.PAYMENT_LOG_MARKER, name));
         }
 
         userAccountFinancialLogRecordRepository.save(

@@ -13,14 +13,13 @@ import com.itmo.microservices.demo.users.api.model.AppUserModel
 import com.itmo.microservices.demo.users.api.model.AuthenticationRequest
 import com.itmo.microservices.demo.users.api.model.AuthenticationResult
 import com.itmo.microservices.demo.users.api.model.RegistrationRequest
-import com.itmo.microservices.demo.users.impl.logging.UserServiceNotableEvents
 import com.itmo.microservices.demo.users.impl.repository.UserRepository
 import com.itmo.microservices.demo.users.impl.util.toModel
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import javax.validation.constraints.NotNull
+import java.util.*
 
 @Suppress("UnstableApiUsage")
 @Service
@@ -33,16 +32,19 @@ class DefaultUserService(private val userRepository: UserRepository,
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
 
-    override fun getUserModel(username: String): AppUserModel? = this
-            .getUser(username)?.toModel()
+    override fun getUserModel(name: String): AppUserModel? = this
+            .getUser(name)?.toModel()
 
-    override fun getUser(username: String): AppUser? = userRepository
-            .findByUsername(username)
+    override fun getUser(name: String): AppUser? = userRepository
+            .findByUsername(name)
 
-    override fun registerUser(request: RegistrationRequest) {
+    override fun getUser(id: UUID): AppUser? = userRepository.findById(id)
+
+    override fun registerUser(request: RegistrationRequest): AppUserModel? {
         val userEntity = userRepository.save(request.toEntity())
         eventBus.post(UserCreatedEvent(userEntity.toModel()))
         //eventLogger.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.username)
+        return userEntity.toModel()
     }
 
     override fun getAccountData(requester: UserDetails): AppUserModel =
@@ -61,16 +63,14 @@ class DefaultUserService(private val userRepository: UserRepository,
     }
 
     fun RegistrationRequest.toEntity(): AppUser =
-        AppUser(username = this.username,
-            name = this.name,
-            surname = this.surname,
-            email = this.email,
+        AppUser(
+            username = this.name,
             password = passwordEncoder.encode(this.password)
         )
 
     override fun authenticate(request: AuthenticationRequest): AuthenticationResult {
-        val user = getUserModel(request.username)
-            ?: throw NotFoundException("User with username ${request.username} not found")
+        val user = getUserModel(request.name)
+            ?: throw NotFoundException("User with name ${request.name} not found")
 
         if (!passwordEncoder.matches(request.password, user.password))
             throw AccessDeniedException("Invalid password")

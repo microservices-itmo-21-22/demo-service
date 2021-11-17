@@ -18,21 +18,17 @@ import java.util.UUID;
 @Setter
 @ToString
 @Entity
-public class UserAccountFinancialLogRecord {
+public final class UserAccountFinancialLogRecord {
 
     @Id
-    @Type(type = "uuid-char")
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
+    @GeneratedValue
+    @Column(columnDefinition = "uuid", updatable = false)
     private UUID id;
-    @Type(type = "uuid-char")
-    private UUID userId; // стоит ли джойнить юзера?
-    @Type(type = "uuid-char")
+    @Column(columnDefinition = "uuid")
+    private UUID userId;
+    @Column(columnDefinition = "uuid")
     private UUID orderId; //TODO:: replace with related  entity
-    @Type(type = "uuid-char")
+    @Column(columnDefinition = "uuid")
     private UUID paymentTransactionId; //TODO:: replace with related entity
 
     @Enumerated(EnumType.STRING)

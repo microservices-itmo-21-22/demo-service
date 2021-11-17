@@ -1,7 +1,7 @@
 package com.itmo.microservices.demo.lib.common.order.entity
 
 import com.itmo.microservices.demo.lib.common.order.dto.OrderStatusEnum
-import com.itmo.microservices.demo.payment.impl.entities.UserAccountFinancialLogRecord
+import com.itmo.microservices.demo.payment.impl.model.UserAccountFinancialLogRecord
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Type
 import java.time.LocalDateTime
@@ -12,15 +12,11 @@ import javax.persistence.*
 @Table(name = "orders")
 class OrderEntity {
     @Id
-    @Type(type = "uuid-char")
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-        name = "UUID",
-        strategy = "org.hibernate.id.UUIDGenerator"
-    )
+    @GeneratedValue
+    @Column(columnDefinition = "uuid", updatable = false)
     var id: UUID? = null
 
-    @Type(type = "uuid-char")
+    @Column(columnDefinition = "uuid")
     var userId: UUID? = null
 
     var timeCreated: LocalDateTime = LocalDateTime.now()

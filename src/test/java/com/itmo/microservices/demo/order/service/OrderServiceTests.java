@@ -1,43 +1,61 @@
-package java.com.itmo.microservices.demo.order.service;
+package com.itmo.microservices.demo.order.service;
 
+import com.itmo.microservices.demo.items.impl.service.DefaultWarehouseService;
 import com.itmo.microservices.demo.order.api.model.OrderDto;
+import com.itmo.microservices.demo.order.api.model.OrderStatus;
 import com.itmo.microservices.demo.order.api.service.OrderService;
+import com.itmo.microservices.demo.order.impl.entities.OrderEntity;
 import com.itmo.microservices.demo.order.impl.repository.OrderItemRepository;
+import com.itmo.microservices.demo.order.impl.service.DefaultOrderService;
 import com.itmo.microservices.demo.tasks.impl.repository.OrderRepository;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
 public class OrderServiceTests {
-	@Mock
+
 	OrderRepository orderRepository;
 
-	@Mock
 	OrderItemRepository orderItemRepository;
 
-	@InjectMocks
 	OrderService orderService;
 
-	@Test
-	public void testGetOrder() {
-		UUID uuid = new UUID(0L, 0L);
-		assertThat(orderService.getOrder(uuid)).isEqualTo(null);
+	OrderEntity orderEntity;
+
+	@BeforeEach
+	public void init() {
+		orderEntity = new OrderEntity(
+				UUID.randomUUID(),
+				UUID.randomUUID(),
+				LocalDateTime.now(),
+				OrderStatus.COLLECTING,
+				new ArrayList<>(),
+				30,
+				new ArrayList<>()
+		);
+
+		orderRepository = mock(OrderRepository.class);
+		when(orderRepository.findById(any()))
+				.thenReturn(Optional.ofNullable(orderEntity));
+
+		orderItemRepository = mock(OrderItemRepository.class);
+
+		orderService = new DefaultOrderService(orderRepository, orderItemRepository, mock(DefaultWarehouseService.class));
 	}
 
 	@Test
-	public void testCreateOrder() {
-		UUID uuid = new UUID(0L, 0L);
-		OrderDto orderDto = orderService.createOrder(new User("username", "password", new ArrayList<>()));
-		assertThat(orderDto).isNotEqualTo(null);
+	public void testGetOrder() {
+		OrderDto result = orderService.getOrder(Objects.requireNonNull(orderEntity.getId()));
+		assertEquals(OrderStatus.COLLECTING, result.getStatus());
 	}
 }
