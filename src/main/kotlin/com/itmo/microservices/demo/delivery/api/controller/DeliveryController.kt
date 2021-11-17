@@ -32,6 +32,23 @@ class DeliveryController(private val deliveryService: DeliveryService) {
     )
     fun getDelivery(@PathVariable deliveryId : UUID) : DeliveryModel = deliveryService.getDelivery(deliveryId)
 
+    @GetMapping("/delivery/order={orderId}")
+    @Operation(
+        summary = "Get delivery by id of the order",
+        responses = [
+            ApiResponse(
+                description = "OK",
+                responseCode = "200"),
+            ApiResponse(
+                description = "Unauthorized",
+                responseCode = "403",
+                content = [io.swagger.v3.oas.annotations.media.Content()]
+            )
+        ],
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    fun getDeliveryByOrder(@PathVariable orderId : UUID) : List<DeliveryModel> = deliveryService.getDeliveryByOrder(orderId)
+
     @GetMapping("/delivery/{deliveryId}/done")
     @Operation(
         summary = "finish new delivery",

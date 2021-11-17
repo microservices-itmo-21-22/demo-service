@@ -9,7 +9,7 @@ interface StockItemService {
     fun createStockItem(stockItem: StockItemModel)
     fun getStockItemById(stockItemId: UUID) : StockItemModel
     fun addStockItem(stockItemId: UUID, number: Int)
-    fun reserveStockItem(stockItemId: UUID, number: Int)
+    fun reserveStockItem(stockItemId: UUID, number: Int) : Boolean
     fun deleteStockItemById(stockItemId: UUID)
     fun changeStockItem(stockItemId: UUID, stockItem: StockItemModel)
 }

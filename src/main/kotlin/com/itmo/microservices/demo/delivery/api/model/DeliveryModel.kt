@@ -7,5 +7,6 @@ import java.util.*
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class DeliveryModel(
     val id: UUID?,
+    val orderId: UUID?,
     val address: String?,
     val date: Date?)
