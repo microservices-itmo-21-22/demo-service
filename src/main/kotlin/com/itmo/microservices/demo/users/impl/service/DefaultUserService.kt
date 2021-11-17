@@ -17,6 +17,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Suppress("UnstableApiUsage")
 @Service
@@ -28,8 +29,8 @@ class DefaultUserService(private val userRepository: UserRepository,
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
 
-    override fun findUser(username: String): AppUserModel? = userRepository
-            .findByIdOrNull(username)?.toModel()
+    override fun findUser(id: UUID): AppUserModel? = userRepository
+            .findByIdOrNull(id)?.toModel()
 
     override fun registerUser(request: RegistrationRequest) {
         val userEntity = userRepository.save(request.toEntity())
@@ -44,6 +45,7 @@ class DefaultUserService(private val userRepository: UserRepository,
     override fun deleteUser(user: UserDetails) {
         runCatching {
             userRepository.deleteById(user.username)
+
         }.onSuccess {
             eventBus.post(UserDeletedEvent(user.username))
             eventLogger.info(UserServiceNotableEvents.I_USER_DELETED, user.username)
@@ -53,10 +55,12 @@ class DefaultUserService(private val userRepository: UserRepository,
     }
 
     fun RegistrationRequest.toEntity(): AppUser =
-        AppUser(username = this.username,
-            name = this.name,
-            surname = this.surname,
+        AppUser(id = this.id,
+            ipaddress = this.ipaddress,
+            username = this.username,
             email = this.email,
-            password = passwordEncoder.encode(this.password)
+            password = passwordEncoder.encode(this.password),
+            phone = this.phone,
+            lastBasketId = UUID.fromString("0-0-0-0-0")
         )
 }
