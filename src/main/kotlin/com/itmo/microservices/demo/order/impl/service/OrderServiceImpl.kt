@@ -14,14 +14,17 @@ import com.itmo.microservices.demo.order.api.model.OrderStatus
 import com.itmo.microservices.demo.order.api.service.OrderService
 import com.itmo.microservices.demo.order.impl.entity.Amount
 import com.itmo.microservices.demo.order.impl.entity.OrderEntity
+import com.itmo.microservices.demo.order.impl.entity.PaymentSubmission
 import com.itmo.microservices.demo.order.impl.exception.BadRequestException
 import com.itmo.microservices.demo.order.impl.logging.OrderServiceNotableEvents
 import com.itmo.microservices.demo.order.impl.repository.ItemRepository
 import com.itmo.microservices.demo.order.impl.repository.OrderRepository
 import com.itmo.microservices.demo.order.impl.util.toModel
+import com.itmo.microservices.demo.payments.api.model.PaymentSubmissionDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -38,9 +41,10 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
 
-   override fun createOrder(): OrderDto {
+   override fun createOrder(user: UserDetails): OrderDto {
        val order = OrderEntity(
-               System.currentTimeMillis().toLong(),
+               user.username,
+               Date().time,
                OrderStatus.COLLECTING,
                mutableMapOf(),
                null,
@@ -83,7 +87,7 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
 
     override fun setDeliveryTime(orderId: UUID, slotinSec: Int): BookingDto {
         val order = orderRepository.findByIdOrNull(orderId) ?: throw NotFoundException("Order $orderId not found")
-        order.deliveryDuration = slotinSec.toInt()
+        order.deliveryDuration = slotinSec
         orderRepository.save(order)
         return BookingDto(UUID.randomUUID(), setOf())
     }

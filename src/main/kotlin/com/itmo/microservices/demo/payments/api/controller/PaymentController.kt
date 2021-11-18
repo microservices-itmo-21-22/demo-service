@@ -51,18 +51,17 @@ class PaymentController(private val paymentService: PaymentService) {
     ) =
         paymentService.refund(paymentId, userDetails)
 
-    @PostMapping
+    @PostMapping("/{orderId}/payment")
     @Operation(
-        summary = "Pay",
-        responses = [
-            ApiResponse(description = "OK", responseCode = "200"),
-            ApiResponse(description = "Bad request", responseCode = "400", content = [Content()]),
-            ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()])
-        ],
-        security = [SecurityRequirement(name = "bearerAuth")]
+            summary = "Оплата заказа",
+            responses = [
+                ApiResponse(description = "OK", responseCode = "200"),
+                ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()]),
+                ApiResponse(description = "Not found", responseCode = "404", content = [Content()])
+            ],
+            security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun pay(
-        @Parameter(hidden = true) @AuthenticationPrincipal userDetails: UserDetails
-    ) =
-        paymentService.pay(userDetails)
+    fun pay(@PathVariable orderId: UUID, @Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
+            paymentService.pay(orderId)
+
 }

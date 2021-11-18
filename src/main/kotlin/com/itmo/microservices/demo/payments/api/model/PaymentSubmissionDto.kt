@@ -5,6 +5,6 @@ import java.util.*
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class PaymentSubmissionDto(
-    val timestamp: Long?,
-    val transactionId: UUID?
+    val transactionId: UUID?,
+    val timestamp: Long?
 )

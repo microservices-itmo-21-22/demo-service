@@ -5,10 +5,14 @@ import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.common.exception.AccessDeniedException
 import com.itmo.microservices.demo.common.exception.NotFoundException
+import com.itmo.microservices.demo.order.api.model.OrderStatus
 import com.itmo.microservices.demo.payments.api.messaging.PaymentProccessedEvent
 import com.itmo.microservices.demo.payments.api.model.PaymentModel
+import com.itmo.microservices.demo.payments.api.model.PaymentSubmissionDto
 import com.itmo.microservices.demo.payments.api.service.PaymentService
+import com.itmo.microservices.demo.payments.impl.entity.OrderEntity
 import com.itmo.microservices.demo.payments.impl.entity.Payment
+import com.itmo.microservices.demo.payments.impl.repository.OrderRepository
 import com.itmo.microservices.demo.payments.impl.repository.PaymentRepository
 import com.itmo.microservices.demo.payments.impl.util.toEntity
 import com.itmo.microservices.demo.payments.impl.util.toModel
@@ -23,7 +27,17 @@ import java.util.*
 
 @Suppress("UnstableApiUsage")
 @Service
-class DefaultPaymentService(private val paymentRepository: PaymentRepository) : PaymentService {
+class DefaultPaymentService(private val paymentRepository: PaymentRepository,
+                            private val orderRepository: OrderRepository) : PaymentService {
+
+    private fun createOrderMock() = OrderEntity(
+            null,
+            Date().time,
+            OrderStatus.COMPLETED,
+            mutableMapOf(),
+            10,
+            listOf()
+    )
 
     override fun getUserTransactionsInfo(userDetails: UserDetails): List<PaymentModel> =
         paymentRepository
@@ -36,13 +50,11 @@ class DefaultPaymentService(private val paymentRepository: PaymentRepository) : 
         paymentRepository.save(payment)
     }
 
-    override fun pay(userDetails: UserDetails): PaymentModel{
-        val currentDate = Date()
-        val entity = Payment().also {
-            it.date = currentDate
-            it.username = userDetails.username
-        }
-        paymentRepository.save(entity)
-        return entity.toModel()
+    override fun pay(orderId: UUID): PaymentSubmissionDto {
+        val order = orderRepository.findByIdOrNull(orderId) ?: throw NotFoundException("Order $orderId not found")
+        order.status = OrderStatus.PAID
+        orderRepository.save(order)
+        return PaymentSubmissionDto(UUID.randomUUID(), Date().time)
     }
+
 }

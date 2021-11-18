@@ -18,7 +18,7 @@ class OrderController(private var orderService: OrderService) {
 
     @GetMapping
     @Operation(
-            summary = "Get all orders",
+            summary = "Получить все заказы",
             responses = [
                 ApiResponse(description = "OK", responseCode = "200"),
                 ApiResponse(description = "Bad request", responseCode = "400", content = [Content()])
@@ -51,7 +51,7 @@ class OrderController(private var orderService: OrderService) {
             security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun createOrder(@Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
-        orderService.createOrder()
+        orderService.createOrder(author)
 
     @PutMapping("/{orderId}/items/{itemId}?amount={amount}")
     @Operation(
@@ -103,7 +103,8 @@ class OrderController(private var orderService: OrderService) {
             ],
             security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun deleteBusketById(@PathVariable orderId: UUID) =
+    fun deleteBusketById(@PathVariable orderId: UUID,
+                         @Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
             orderService.deleteOrderById(orderId)
 
 }

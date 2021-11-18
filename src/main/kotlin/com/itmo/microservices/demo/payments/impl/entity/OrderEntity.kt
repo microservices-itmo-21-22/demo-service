@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.order.impl.entity
+package com.itmo.microservices.demo.payments.impl.entity
 
 
 import com.itmo.microservices.demo.order.api.model.OrderStatus

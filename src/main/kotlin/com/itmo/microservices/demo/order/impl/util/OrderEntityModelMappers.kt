@@ -16,7 +16,8 @@ fun OrderEntity.toModel(): OrderDto = OrderDto(
     paymentHistory = this.paymentHistory?.map { it.toModel() }
 )
 
-fun OrderDto.toEntity(): OrderEntity = OrderEntity(
+fun OrderDto.toEntity(username: String?): OrderEntity = OrderEntity(
+        username,
         this.timeCreated,
         this.status,
         this.itemsMap?.mapValues { Amount(it.value) }?.toMutableMap(),
