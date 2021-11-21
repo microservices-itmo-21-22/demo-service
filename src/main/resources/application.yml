@@ -27,6 +27,11 @@ logstash:
 
 management:
   metrics:
+    web:
+      server:
+        request:
+          autotime:
+            percentiles: 0.95
     export:
       prometheus:
         enabled: true
