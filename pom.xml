@@ -12,7 +12,7 @@
 
     <groupId>com.itmo.microservices</groupId>
     <artifactId>bombardier</artifactId>
-    <version>0.1.3-SNAPSHOT</version>
+    <version>0.1.1-SNAPSHOT</version>
     <name>bombardier</name>
     <description>Demo project for microservices course 21-22</description>
 
