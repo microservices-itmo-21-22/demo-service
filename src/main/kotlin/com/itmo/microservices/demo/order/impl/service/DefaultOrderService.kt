@@ -10,6 +10,7 @@ import com.itmo.microservices.demo.lib.common.order.mapper.toEntity
 import com.itmo.microservices.demo.lib.common.order.repository.OrderItemRepository
 import com.itmo.microservices.demo.lib.common.order.mapper.toModel
 import com.itmo.microservices.demo.lib.common.order.repository.OrderRepository
+import com.itmo.microservices.demo.users.api.service.UserService
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import java.util.*
@@ -19,8 +20,10 @@ import org.webjars.NotFoundException
 class DefaultOrderService(
     private val orderRepository: OrderRepository,
     private val orderItemRepository: OrderItemRepository,
-    private val itemService: WarehouseService
+    private val itemService: WarehouseService,
+    private val userService: UserService
     ): OrderService {
+
 
     override fun getOrder(orderId: UUID): OrderDto {
         val optionalOrder = orderRepository.findById(orderId)
@@ -31,9 +34,9 @@ class DefaultOrderService(
     }
 
     override fun createOrder(user: UserDetails): OrderDto {
-        //create base order
         val orderEntity = OrderEntity()
-        //save base order, convert it to dto and return it
+        val accountData = userService.getAccountData(user)
+        orderEntity.userId = accountData.id
         return orderRepository.save(orderEntity).toModel(orderItemRepository)
     }
 

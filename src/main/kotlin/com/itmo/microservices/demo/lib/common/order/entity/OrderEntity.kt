@@ -1,9 +1,7 @@
 package com.itmo.microservices.demo.lib.common.order.entity
 
 import com.itmo.microservices.demo.lib.common.order.dto.OrderStatusEnum
-import com.itmo.microservices.demo.payment.impl.model.UserAccountFinancialLogRecord
-import org.hibernate.annotations.GenericGenerator
-import org.hibernate.annotations.Type
+import com.itmo.microservices.demo.payment.impl.model.PaymentLogRecordEntity
 import java.time.LocalDateTime
 import java.util.*
 import javax.persistence.*
@@ -21,6 +19,7 @@ class OrderEntity {
 
     var timeCreated: LocalDateTime = LocalDateTime.now()
 
+    @Enumerated(EnumType.STRING)
     var status: OrderStatusEnum = OrderStatusEnum.COLLECTING
 
     var deliveryDuration: Int? = 0
@@ -29,7 +28,7 @@ class OrderEntity {
     var itemsMap: List<OrderItemEntity>? = null
 
     @OneToMany
-    var paymentHistory: List<UserAccountFinancialLogRecord>? = null
+    var paymentHistory: MutableList<PaymentLogRecordEntity>? = null
 
     constructor()
 
@@ -40,7 +39,7 @@ class OrderEntity {
         status: OrderStatusEnum,
         itemsMap: List<OrderItemEntity>?,
         deliveryDuration: Int?,
-        paymentHistory: List<UserAccountFinancialLogRecord>?
+        paymentHistory: MutableList<PaymentLogRecordEntity>?
     ) {
         this.id = id
         this.userId = userId
