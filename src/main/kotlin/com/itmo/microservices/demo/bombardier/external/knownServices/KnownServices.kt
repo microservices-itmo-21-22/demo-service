@@ -56,6 +56,7 @@ val KnownServicesStorage = KnownServices(
     ServiceDescriptor("p05", "p05", URL("http://77.234.215.138:30015")),
     ServiceDescriptor("p07", "p07", URL("http://77.234.215.138:30017")),
     ServiceDescriptor("p08", "p08", URL("http://77.234.215.138:30018")),
+    ServiceDescriptor("p09", "p09", URL("http://77.234.215.138:30019")),
     ServiceDescriptor("p10", "p10", URL("http://77.234.215.138:30020")),
     ServiceDescriptor("p11", "p11", URL("http://77.234.215.138:30021")),
     ServiceDescriptor("p12", "p12", URL("http://77.234.215.138:30022")),

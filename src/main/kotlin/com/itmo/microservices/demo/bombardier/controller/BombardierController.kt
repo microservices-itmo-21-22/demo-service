@@ -1,13 +1,8 @@
 package com.itmo.microservices.demo.bombardier.controller
 
 import com.itmo.microservices.demo.bombardier.dto.RunTestRequest
-import com.itmo.microservices.demo.bombardier.external.ExternalServiceSimulator
-import com.itmo.microservices.demo.bombardier.external.storage.ItemStorage
-import com.itmo.microservices.demo.bombardier.external.storage.OrderStorage
-import com.itmo.microservices.demo.bombardier.external.storage.UserStorage
 import com.itmo.microservices.demo.bombardier.flow.TestController
 import com.itmo.microservices.demo.bombardier.flow.TestParameters
-import com.itmo.microservices.demo.bombardier.flow.UserManagement
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse

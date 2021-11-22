@@ -63,7 +63,7 @@ open class ExternalServiceApiCommunicator(private val baseUrl: URL, private val 
                     it.resumeWithException(InvalidExternalServiceResponseException(
                         response.code(),
                         response,
-                        "External service returned non-OK code: ${response.code()}\n\n${response.body()?.string()}"
+                        "${response.request().method()} ${response.request().url()} External service returned non-OK code: ${response.code()}\n\n${response.body()?.string()}"
                     ))
                 }
             })
@@ -115,6 +115,10 @@ open class ExternalServiceApiCommunicator(private val baseUrl: URL, private val 
 
         fun post() {
             post(emptyBody)
+        }
+
+        fun put() {
+            put(emptyBody)
         }
     }
 }

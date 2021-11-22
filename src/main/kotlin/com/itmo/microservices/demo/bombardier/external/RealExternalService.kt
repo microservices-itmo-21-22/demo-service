@@ -75,7 +75,9 @@ class RealExternalService(override val descriptor: ServiceDescriptor, private va
         val badCode = HttpStatus.BAD_REQUEST.value()
 
         val code = try {
-            communicator.executeWithAuth("/orders/$orderId/items/$itemId?amount=$amount", session)
+            communicator.executeWithAuth("/orders/$orderId/items/$itemId?amount=$amount", session) {
+                put()
+            }
         }
         catch (e: InvalidExternalServiceResponseException) {
             if (e.code != badCode) {

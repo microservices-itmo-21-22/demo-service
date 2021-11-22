@@ -95,15 +95,15 @@ data class BookingDto(
 )
 
 data class CatalogItem(
-    val id: UUID = UUID.randomUUID(),
+    val id: UUID,
     val title: String,
-    val description: String = "There should bw the desc",
+    val description: String,
     val price: Int = 100,
     val amount: Int, // number of items allowed for booking
 )
 
 data class OrderItem(
-    val id: UUID = UUID.randomUUID(),
+    val id: UUID,
     val title: String,
     val price: Int = 100
 )

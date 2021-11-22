@@ -16,7 +16,7 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 
-@Component
+//@Component
 class ExternalServiceSimulator(
     private val orderStorage: OrderStorage,
     private val userStorage: UserStorage,

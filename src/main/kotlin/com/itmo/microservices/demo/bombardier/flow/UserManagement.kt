@@ -8,7 +8,7 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.NoSuchElementException
 
-@Component
+//@Component
 class UserManagement(
     private val externalServiceApi: ExternalServiceApi
 ) {
