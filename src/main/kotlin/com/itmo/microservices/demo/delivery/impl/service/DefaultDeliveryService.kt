@@ -14,6 +14,7 @@ import com.itmo.microservices.demo.delivery.impl.util.toEntity
 import com.itmo.microservices.demo.delivery.impl.util.toModel
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.lang.IllegalArgumentException
 import java.util.*
 
 @Service
@@ -51,5 +52,15 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
         //there is nothing, yet
         eventBus.post(DeliveryDeletedEvent(delivery.toModel()))
         eventLogger.info(DeliveryServiceNotableEvents.I_DELIVERY_DELIVERED, delivery)
+    }
+
+    override fun getDeliverySlots(number: Int): List<Int> {
+        if (number <= 0) {
+            throw IllegalArgumentException("Number of slots supposed to be more than 0, not $number")
+        }
+        //access API
+        //dummy
+        val temp :  List<Int> = listOf(0,1,2)
+        return temp
     }
 }

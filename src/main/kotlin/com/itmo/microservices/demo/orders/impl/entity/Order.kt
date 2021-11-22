@@ -1,5 +1,7 @@
 package com.itmo.microservices.demo.orders.impl.entity
 
+import org.hibernate.annotations.GenericGenerator
+import org.hibernate.annotations.Type
 import java.util.*
 import javax.persistence.*
 
@@ -7,6 +9,11 @@ import javax.persistence.*
 @Table(name = "order304")
 class Order {
     @Id
+    @Type(type = "uuid-char")
+    @GenericGenerator(
+        name = "UUID",
+        strategy = "org.hibernate.id.UUIDGenerator"
+    )
     var id : UUID? = null
     var status : Int = 0
     var basketId : UUID? = null

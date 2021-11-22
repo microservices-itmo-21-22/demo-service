@@ -5,9 +5,9 @@ import com.itmo.microservices.demo.orders.api.model.PaymentModel
 import java.util.*
 
 interface OrderService {
-    fun getOrdersByUserId(userName : String) : List<OrderModel>
+    fun getOrdersByUsername(userName : String) : List<OrderModel>
     fun getOrder(orderId : UUID) : OrderModel
-    fun addOrder(order : OrderModel, userName : String)
+    fun createOrderFromBusket(busketId : UUID, username: String) : OrderModel
     fun deleteOrder(orderId : UUID, username : String)
     fun assignPayment(orderId : UUID, payment : PaymentModel)
 }

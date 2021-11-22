@@ -11,6 +11,7 @@ import com.itmo.microservices.demo.orders.api.messaging.PaymentAssignedEvent
 import com.itmo.microservices.demo.orders.api.model.OrderModel
 import com.itmo.microservices.demo.orders.api.model.PaymentModel
 import com.itmo.microservices.demo.orders.api.service.OrderService
+import com.itmo.microservices.demo.orders.impl.entity.Order
 import com.itmo.microservices.demo.orders.impl.logging.OrderServiceNotableEvents
 import com.itmo.microservices.demo.orders.impl.repository.OrderRepository
 import com.itmo.microservices.demo.orders.impl.repository.PaymentRepository
@@ -33,7 +34,7 @@ class DefaultOrderService(private val orderRepository: OrderRepository,
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
 
-    override fun getOrdersByUserId(userName: String): List<OrderModel> {
+    override fun getOrdersByUsername(userName: String): List<OrderModel> {
         val userId = getUserIdByName(userName)
         val orders = orderRepository.findAll()
         val result = mutableListOf<OrderModel>()
@@ -49,11 +50,14 @@ class DefaultOrderService(private val orderRepository: OrderRepository,
         return orderRepository.findByIdOrNull(orderId)?.toModel() ?: throw NotFoundException("Order $orderId not found")
     }
 
-    override fun addOrder(order: OrderModel, userName: String) {
-        val userId = getUserIdByName(userName)
-        orderRepository.save(order.toEntity().also { it.userId = userId })
-        eventBus.post(OrderCreatedEvent(order))
-        eventLogger.info(OrderServiceNotableEvents.I_ORDER_CREATED, order.toEntity())
+    override fun createOrderFromBusket(busketId: UUID, username : String): OrderModel {
+        val userId = getUserIdByName(username)
+        val order = Order(UUID.randomUUID(), 0, busketId, userId, Date());
+        orderRepository.save(order)
+        val orderModel = order.toModel()
+        eventBus.post(OrderCreatedEvent(orderModel))
+        eventLogger.info(OrderServiceNotableEvents.I_ORDER_CREATED, order)
+        return orderModel
     }
 
     override fun deleteOrder(orderId: UUID, userName : String) {
@@ -63,7 +67,8 @@ class DefaultOrderService(private val orderRepository: OrderRepository,
             throw AccessDeniedException("Cannot delete order that was not created by you")
         eventBus.post(OrderDeletedEvent(order.toModel()))
         eventLogger.info(OrderServiceNotableEvents.I_ORDER_DELETED, order)
-        orderRepository.deleteById(orderId)
+        order.status = 4
+        orderRepository.save(order)
     }
 
     override fun assignPayment(orderId: UUID, payment : PaymentModel) {
@@ -80,6 +85,6 @@ class DefaultOrderService(private val orderRepository: OrderRepository,
 
     fun getUserIdByName(userName: String): UUID {
         // TODO
-        return UUID.fromString("123")
+        return UUID.fromString("00000000-0000-0000-0000-000000000000")
     }
 }
