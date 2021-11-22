@@ -14,7 +14,7 @@ fun OrderEntity.toModel(orderItemRepository: OrderItemRepository): OrderDto = Or
     status = this.status,
     deliveryDuration = this.deliveryDuration,
     itemsMap = this.listToMap(orderItemRepository),
-    paymentHistory = null //TODO: bind with payment service
+    paymentHistory = emptyList()
 )
 
 fun OrderEntity.listToMap(orderItemRepository: OrderItemRepository): Map<OrderItemDto, Int>? {
