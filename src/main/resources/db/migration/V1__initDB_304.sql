@@ -64,6 +64,6 @@ CREATE TABLE IF NOT EXISTS delivery304
     id              VARCHAR(255) not null,
     order_id        VARCHAR(255) REFERENCES order304 (id),
     address         VARCHAR(255),
-    date            DATE,
+    slot            INTEGER(255),
     primary key (id)
 );

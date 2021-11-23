@@ -12,4 +12,10 @@ interface DeliveryRepository : JpaRepository<Delivery, UUID>, JpaSpecificationEx
 
     @Query("FROM Delivery WHERE orderId = ?1")
     fun findByOrderId(orderId: UUID): List<Delivery>
+
+    @Query("From Delivery WHERE slot = ?1")
+    fun findBySlot(slotInSec: Int) : Delivery?
+
+    @Query("SELECT DISTINCT slot FROM Delivery")
+    fun getAllSlots() : List<Int>
 }
