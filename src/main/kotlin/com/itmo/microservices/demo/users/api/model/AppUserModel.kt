@@ -8,6 +8,7 @@ import java.util.*
 data class AppUserModel(
         val id: UUID,
         val ipaddress: String,
+        val name : String,
         val username: String,
         val email: String,
         val phone: String,

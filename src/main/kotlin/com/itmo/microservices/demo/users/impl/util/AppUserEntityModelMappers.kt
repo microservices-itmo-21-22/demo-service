@@ -8,6 +8,7 @@ fun AppUser.toModel(): AppUserModel = kotlin.runCatching {
         id = this.id!!,
         ipaddress = this.ipaddress!!,
         username = this.username!!,
+        name = this.name!!,
         email = this.email!!,
         password = this.password!!,
         phone = this.phone!!,
