@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <springProfile name="!dev">
+        <springProperty name="service" source="spring.application.name"/>
+        <springProperty name="logstashUrl" source="logstash.url"/>
+
+        <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                <level>INFO</level>
+            </filter>
+            <destination>${logstashUrl}</destination>
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <customFields>{"service":"${service}"}</customFields>
+            </encoder>
+        </appender>
+
+        <logger name="com.itmo" level="INFO"/>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="LOGSTASH"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="dev">
+        <logger name="com.itmo" level="DEBUG"/>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+</configuration>

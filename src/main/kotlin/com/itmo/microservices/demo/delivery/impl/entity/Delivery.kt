@@ -28,5 +28,4 @@ class Delivery {
         this.address = address
         this.slot = slot
     }
-
 }

@@ -13,5 +13,4 @@ interface DeliveryService {
     fun getDeliverySlots(number: Int): List<Int>
     fun reserveDeliverySlots(deliveryId: UUID, slotInSec: Int)
     fun getDeliveryBySlot(slot: Int) : DeliveryModel
-
 }

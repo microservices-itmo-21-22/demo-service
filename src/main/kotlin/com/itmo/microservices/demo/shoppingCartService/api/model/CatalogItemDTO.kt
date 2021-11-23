@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.shoppingCartService.api.dto
+package com.itmo.microservices.demo.shoppingCartService.api.model
 
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Type
