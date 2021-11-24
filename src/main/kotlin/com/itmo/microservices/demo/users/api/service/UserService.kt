@@ -9,6 +9,6 @@ import java.util.*
 interface UserService {
     fun findUser(id: UUID): AppUserModel?
     fun registerUser(request: RegistrationRequest)
-    fun getAccountData(request: GetAccountDataRequest): AppUserModel
-    fun deleteUser(user: UserDetails)
+    fun getAccountData(id: UUID): AppUserModel
+    /*fun deleteUser(request: GetAccountDataRequest)*/
 }

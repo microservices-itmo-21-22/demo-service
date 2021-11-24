@@ -45,23 +45,23 @@ class DefaultUserService(private val userRepository: UserRepository,
 
 
 
-    override fun getAccountData(request: GetAccountDataRequest): AppUserModel =
-        userRepository.findByIdOrNull(request.id)?.toModel()
+    override fun getAccountData(id: UUID): AppUserModel =
+        userRepository.findByIdOrNull(id)?.toModel()
     ?: throw NotFoundException("Stock Item $id not found")
 
 
 
 
-    override fun deleteUser(user: UserDetails) {
+    /*override fun deleteUser(request: GetAccountDataRequest) {
         runCatching {
-            userRepository.deleteById(UUID.fromString(user.username))
+            userRepository.deleteById(request.id)
         }.onSuccess {
-            eventBus.post(UserDeletedEvent(user.username))
-            eventLogger.info(UserServiceNotableEvents.I_USER_DELETED, user.username)
+            /*eventBus.post(UserDeletedEvent(user.username))
+            eventLogger.info(UserServiceNotableEvents.I_USER_DELETED, user.username)*/
         }.onFailure {
-            throw NotFoundException("User ${user.username} not found", it)
+            throw NotFoundException("User ${request.id} not found", it)
         }
-    }
+    }*/
 
     fun RegistrationRequest.toEntity(): AppUser =
         AppUser(id = this.id,
