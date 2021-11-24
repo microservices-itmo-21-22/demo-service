@@ -30,14 +30,8 @@ class AppUser {
         this.lastBasketId = lastBasketId
     }
 
-    constructor(id: UUID?, ipaddress: String?, username: String?, email: String?, password: String?, phone: String?) {
+    constructor(id: UUID?) {
         this.id = id
-        this.ipaddress = ipaddress
-        this.username = username
-        this.email = email
-        this.password = password
-        this.phone = phone
-        this.lastBasketId = null
     }
 
 

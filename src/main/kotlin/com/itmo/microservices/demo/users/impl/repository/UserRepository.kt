@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface UserRepository : JpaRepository<AppUser, String> {
+interface UserRepository : JpaRepository<AppUser, UUID> {
 }
