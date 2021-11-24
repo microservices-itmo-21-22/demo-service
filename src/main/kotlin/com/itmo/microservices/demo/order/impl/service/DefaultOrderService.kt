@@ -11,6 +11,7 @@ import com.itmo.microservices.demo.lib.common.order.repository.OrderItemReposito
 import com.itmo.microservices.demo.lib.common.order.mapper.toModel
 import com.itmo.microservices.demo.lib.common.order.repository.OrderRepository
 import com.itmo.microservices.demo.users.api.service.UserService
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import java.util.*
@@ -35,7 +36,11 @@ class DefaultOrderService(
 
     override fun createOrder(user: UserDetails): OrderDto {
         val orderEntity = OrderEntity()
-        val accountData = userService.getAccountData(user)
+        var currentUser = user
+        if (currentUser == null) {
+            currentUser = SecurityContextHolder.getContext().authentication.principal as UserDetails
+        }
+        val accountData = userService.getAccountData(currentUser)
         orderEntity.userId = accountData.id
         return orderRepository.save(orderEntity).toModel(orderItemRepository)
     }
