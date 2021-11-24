@@ -11,8 +11,8 @@ import com.itmo.microservices.demo.users.api.messaging.UserDeletedEvent
 import com.itmo.microservices.demo.users.api.service.UserService
 import com.itmo.microservices.demo.users.impl.entity.AppUser
 import com.itmo.microservices.demo.users.api.model.AppUserModel
-import com.itmo.microservices.demo.users.api.model.GetAccountDataRequest
 import com.itmo.microservices.demo.users.api.model.RegistrationRequest
+import com.itmo.microservices.demo.users.api.model.RegistrationResult
 import com.itmo.microservices.demo.users.impl.logging.UserServiceNotableEvents
 import com.itmo.microservices.demo.users.impl.repository.UserRepository
 import com.itmo.microservices.demo.users.impl.util.toModel
@@ -37,16 +37,19 @@ class DefaultUserService(private val userRepository: UserRepository,
             .findByIdOrNull(id)?.toModel()
         ?: throw NotFoundException("User $id not found")
 
-    override fun registerUser(request: RegistrationRequest) {
+    override fun registerUser(request: RegistrationRequest): RegistrationResult {
         val userEntity = userRepository.save(request.toEntity())
         eventBus.post(UserCreatedEvent(userEntity.toModel()))
         eventLogger.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.username)
+        val id = userEntity.id
+        val name = userEntity.name
+        return RegistrationResult(id, name)
     }
 
 
     override fun getAccountData(id: UUID): AppUserModel =
         userRepository.findByIdOrNull(id)?.toModel()
-    ?: throw NotFoundException("Stock Item $id not found")
+    ?: throw NotFoundException("User $id not found")
 
 
 
@@ -72,7 +75,5 @@ class DefaultUserService(private val userRepository: UserRepository,
             phone = this.phone,
             lastBasketId = UUID.fromString("0-0-0-0-0")
         )
-    fun GetAccountDataRequest.toEntity(): AppUser =
-        AppUser(id = this.id
-        )
+
 }

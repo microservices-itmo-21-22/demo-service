@@ -2,4 +2,6 @@ package com.itmo.microservices.demo.users.api.model
 
 import java.util.*
 
-data class GetAccountDataRequest(val id: UUID)
+data class RegistrationResult
+    (val id: UUID?,
+     val name: String?)

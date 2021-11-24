@@ -1,7 +1,6 @@
 package com.itmo.microservices.demo.users.api.controller
 
 import com.itmo.microservices.demo.users.api.model.AppUserModel
-import com.itmo.microservices.demo.users.api.model.GetAccountDataRequest
 import com.itmo.microservices.demo.users.api.model.RegistrationRequest
 import com.itmo.microservices.demo.users.api.service.UserService
 import io.swagger.v3.oas.annotations.Operation
