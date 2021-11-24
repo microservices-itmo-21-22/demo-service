@@ -29,7 +29,7 @@ class OrderController(private val orderService: OrderService,
             ],
             security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getOrders(@AuthenticationPrincipal user: UserDetails) = shoppingCartService.makeCart()
+    fun createOrder(@AuthenticationPrincipal user: UserDetails) = shoppingCartService.makeCart()
 
     @PutMapping("/orders/{order_id}/items/{item_id}")
     @Operation(
@@ -55,7 +55,7 @@ class OrderController(private val orderService: OrderService,
             ],
             security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun book(@PathVariable order_id : UUID, @AuthenticationPrincipal user : UserDetails) = orderService.createOrderFromBusket(order_id, user.username)
+    fun book(@PathVariable order_id : UUID, @AuthenticationPrincipal user : UserDetails) = orderService.createOrderFromBusket(order_id, user)
 
     @PostMapping("/orders/{order_id}/delivery?slot={slot_in_sec}")
     @Operation(
