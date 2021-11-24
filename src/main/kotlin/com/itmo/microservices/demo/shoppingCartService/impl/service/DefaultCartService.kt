@@ -44,7 +44,7 @@ class DefaultCartService(private val shoppingCartRepository: ShoppingCartReposit
         if (catalogItem == null) {
             val stockItem = stockItemRepository.findByIdOrNull(catalogItemId)
             if (stockItem != null){
-                catalogItem = CatalogItem(stockItem.id, stockItem.id, stockItem.totalCount)
+                catalogItem = CatalogItem(stockItem.id, stockItem.id, stockItem.amount)
                 }
             else {
                 return null

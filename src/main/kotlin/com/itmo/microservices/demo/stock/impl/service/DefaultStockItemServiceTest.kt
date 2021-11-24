@@ -1,3 +1,4 @@
+/*
 package com.itmo.microservices.demo.stock.impl.service
 
 import com.google.common.eventbus.EventBus
@@ -55,7 +56,8 @@ internal class DefaultStockItemServiceTest {
         assertEquals(actual, expected)
     }
 
-    /* @Test
+    */
+/* @Test
     fun createStockItem() {
         val service = DefaultStockItemService(repository, eventBus = EventBus())
         //Mockito.`when`(repository.findAll()).thenReturn(mutableListOf(itemMock()))
@@ -66,5 +68,6 @@ internal class DefaultStockItemServiceTest {
         val actual = repository.getById(id)
 
         assertEquals(actual, expected)
-    }*/
-}
+    }*//*
+
+}*/

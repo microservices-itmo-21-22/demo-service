@@ -35,7 +35,7 @@ class DefaultStockItemService(private val stockItemRepository: StockItemReposito
     //number can be negative
     override fun reserveStockItem(stockItemId: UUID, number: Int) : Boolean {
         val stockItem = stockItemRepository.findByIdOrNull(stockItemId) ?: return false
-        val totalCount = stockItem.totalCount
+        val totalCount = stockItem.amount
         if (totalCount != null) {
             if (totalCount < number) {
                 return false
@@ -66,7 +66,7 @@ class DefaultStockItemService(private val stockItemRepository: StockItemReposito
 
     override fun addStockItem(stockItemId: UUID, number: Int) {
             val stockItem = stockItemRepository.findByIdOrNull(stockItemId) ?: return
-            stockItem.setTotalCount(number)
+            stockItem.setAmount(number)
             stockItemRepository.save(stockItem)
             eventBus.post(StockItemCreatedEvent(stockItem.toModel()))
             eventLogger.info(
@@ -78,9 +78,10 @@ class DefaultStockItemService(private val stockItemRepository: StockItemReposito
 
     override fun changeStockItem(stockItemId: UUID, stockItem: StockItemModel) {
         val stockItemFromDb = stockItemRepository.findByIdOrNull(stockItemId) ?: return
-        stockItemFromDb.name = stockItem.name
+        stockItemFromDb.title = stockItem.title
+        stockItemFromDb.description = stockItem.description
         stockItemFromDb.reservedCount = stockItem.reservedCount
-        stockItemFromDb.totalCount = stockItem.totalCount
+        stockItemFromDb.amount = stockItem.amount
         stockItemFromDb.price = stockItem.price
         stockItemFromDb.category = stockItem.category
         stockItemRepository.save(stockItemFromDb)
