@@ -1,3 +1,5 @@
 package com.itmo.microservices.demo.auth.api.model
 
-data class AuthenticationRequest(val username: String, val password: String)
+import java.util.*
+
+data class AuthenticationRequest(val id: UUID, val password: String)

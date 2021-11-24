@@ -11,9 +11,9 @@
     </parent>
 
     <groupId>com.itmo.microservices</groupId>
-    <artifactId>demo-service</artifactId>
+    <artifactId>p04</artifactId>
     <version>0.1.1-SNAPSHOT</version>
-    <name>demo-service</name>
+    <name>p04</name>
     <description>Demo project for microservices course 21-22</description>
 
     <properties>
@@ -21,7 +21,7 @@
         <kotlin.version>1.5.21</kotlin.version>
         <guava.version>30.1.1-jre</guava.version>
         <jjwt.version>0.9.1</jjwt.version>
-        <common-lib.version>0.5.0-SNAPSHOT</common-lib.version>
+        <common-lib.version>0.6.0-SNAPSHOT</common-lib.version>
              
         <buildnumber-maven-plugin.version>1.4</buildnumber-maven-plugin.version>
         <jib-maven-plugin.version>2.8.0</jib-maven-plugin.version>
@@ -33,7 +33,6 @@
             <artifactId>common-lib</artifactId>
             <version>${common-lib.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib-jdk8</artifactId>
@@ -65,7 +64,39 @@
             <scope>compile</scope>
             <optional>true</optional>
         </dependency>
+ <dependency>
+            <groupId>io.mockk</groupId>
+            <artifactId>mockk</artifactId>
+            <version>1.12.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>3.3.3</version>
+            <scope>test</scope>
+        </dependency>
+             <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+        </dependency>
+              <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.0.2</version>
+            <scope>test</scope>
+        </dependency>
 
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.0.2</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
@@ -92,12 +123,33 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
             <version>${jjwt.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-kotlin</artifactId>
+        </dependency>
+
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>5.4.2</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>5.4.2</version>
+                <scope>test</scope>
+            </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
@@ -122,9 +174,26 @@
         </dependency>
 
         <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-test-autoconfigure</artifactId>
         </dependency>
     </dependencies>
 
@@ -164,9 +233,15 @@
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
         <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
         <plugins>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.1</version>
             </plugin>
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
@@ -217,7 +292,6 @@
                     <target>11</target>
                 </configuration>
             </plugin>
-                 
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
