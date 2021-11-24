@@ -21,6 +21,7 @@ class DefaultAuthService(private val userService: UserService,
         val user = userService.findUser(request.id)
                 ?: throw NotFoundException("User with username ${request.id} not found")
 
+
         if (!passwordEncoder.matches(request.password, user.password))
             throw AccessDeniedException("Invalid password")
 

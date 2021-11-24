@@ -6,7 +6,7 @@ import java.util.*
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class StockItemModel(
-    val id: UUID?,
+    val id: UUID,
     val name: String?,
     val price: Double?,
     val totalCount: Int?,

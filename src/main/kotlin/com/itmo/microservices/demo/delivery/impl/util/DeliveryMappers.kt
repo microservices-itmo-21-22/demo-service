@@ -6,13 +6,12 @@ import com.itmo.microservices.demo.delivery.impl.entity.Delivery
 fun DeliveryModel.toEntity() : Delivery = Delivery(
     id = this.id,
     orderId = this.orderId,
-    address = this.address,
-    date = this.date
+    address = this.address
 )
 
 fun Delivery.toModel(): DeliveryModel = DeliveryModel(
     id = this.id,
     orderId = this.orderId,
     address = this.address,
-    date = this.date
+    slot = this.slot
 )

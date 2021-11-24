@@ -13,6 +13,8 @@ import junit.framework.Assert
 import org.junit.Test
 import org.mockito.Mockito
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.userdetails.UserDetails
 import java.util.*
 
 internal class DefaultOrderServiceTests {
@@ -27,6 +29,24 @@ internal class DefaultOrderServiceTests {
         )
     }
 
+    private class userMock : UserDetails {
+        override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
+            TODO("Not yet implemented")
+        }
+
+        override fun getPassword(): String = "string"
+
+        override fun getUsername(): String = "string"
+
+        override fun isAccountNonExpired(): Boolean = true
+
+        override fun isAccountNonLocked(): Boolean = true
+
+        override fun isCredentialsNonExpired(): Boolean = true
+
+        override fun isEnabled(): Boolean = true
+    }
+
     private fun createService() : OrderService {
         return DefaultOrderService(orderRepository, paymentRepository,  EventBus(), Mockito.mock(DefaultUserService::class.java))
     }
@@ -37,7 +57,7 @@ internal class DefaultOrderServiceTests {
         val service = createService()
         Mockito.`when`(orderRepository.findAll()).thenReturn(mutableListOf(orderMock()))
 
-        val actual = service.getOrdersByUsername("user")
+        val actual = service.getOrdersByUsername(userMock())
         val expected = listOf(orderMock().toModel())
         Assert.assertEquals(actual, expected)
     }
@@ -47,7 +67,7 @@ internal class DefaultOrderServiceTests {
         val service = createService()
         val order = orderMock()
         Mockito.`when`(orderRepository.findByIdOrNull(Mockito.any())).thenReturn(order)
-        order.id?.let { service.deleteOrder(it, "user") }
+        order.id?.let { service.deleteOrder(it, userMock()) }
         Assert.assertEquals(4, order.status)
     }
 }
