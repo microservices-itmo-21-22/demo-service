@@ -7,5 +7,4 @@ import java.util.*
 
 @Repository
 interface UserRepository : JpaRepository<AppUser, String> {
-    fun findByIdOrNull(id: UUID): AppUser?
 }

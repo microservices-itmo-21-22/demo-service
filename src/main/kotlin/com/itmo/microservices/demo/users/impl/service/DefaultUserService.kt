@@ -28,9 +28,13 @@ class DefaultUserService(private val userRepository: UserRepository,
 
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
+    override fun findUser(id: UUID): AppUserModel? {
+        TODO("Not yet implemented")
+    }
 
-    override fun findUser(id: UUID): AppUserModel? = userRepository
-            .findByIdOrNull(id)?.toModel()
+    override fun findUser(username: String): AppUserModel? = userRepository
+        .findByIdOrNull(username)?.toModel()
+
 
     override fun registerUser(request: RegistrationRequest) {
         val userEntity = userRepository.save(request.toEntity())
@@ -53,6 +57,8 @@ class DefaultUserService(private val userRepository: UserRepository,
             throw NotFoundException("User ${user.username} not found", it)
         }
     }
+
+
 
     fun RegistrationRequest.toEntity(): AppUser =
         AppUser(id = this.id,
