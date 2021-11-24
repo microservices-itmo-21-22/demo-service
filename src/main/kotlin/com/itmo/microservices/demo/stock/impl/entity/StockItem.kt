@@ -17,7 +17,7 @@ class StockItem {
         strategy = "org.hibernate.id.UUIDGenerator"
     )
     //@GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: UUID? = null
+    var id: UUID = UUID.randomUUID()
     var name: String? = null
     var price: Double? = null
     var totalCount: Int? = null
@@ -26,7 +26,7 @@ class StockItem {
 
     constructor()
 
-    constructor(id: UUID? = null, name: String? = null, price: Double?,
+    constructor(id: UUID, name: String? = null, price: Double?,
                 totalCount: Int?, reservedCount: Int?, category: Category) {
         this.id = id
         this.name = name

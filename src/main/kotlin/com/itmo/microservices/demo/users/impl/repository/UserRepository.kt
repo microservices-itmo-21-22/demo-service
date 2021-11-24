@@ -6,6 +6,5 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface UserRepository : JpaRepository<AppUser, String> {
-    fun findByIdOrNull(id: UUID): AppUser?
+interface UserRepository : JpaRepository<AppUser, UUID> {
 }

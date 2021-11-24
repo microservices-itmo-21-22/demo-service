@@ -31,6 +31,7 @@ class DefaultUserService(private val userRepository: UserRepository,
 
     override fun findUser(id: UUID): AppUserModel? = userRepository
             .findByIdOrNull(id)?.toModel()
+        ?: throw NotFoundException("User $id not found")
 
     override fun registerUser(request: RegistrationRequest) {
         val userEntity = userRepository.save(request.toEntity())
@@ -39,12 +40,12 @@ class DefaultUserService(private val userRepository: UserRepository,
     }
 
     override fun getAccountData(requester: UserDetails): AppUserModel =
-            userRepository.findByIdOrNull(requester.username)?.toModel() ?:
+            userRepository.findByIdOrNull(UUID.fromString(requester.username))?.toModel() ?:
             throw NotFoundException("User ${requester.username} not found")
 
     override fun deleteUser(user: UserDetails) {
         runCatching {
-            userRepository.deleteById(user.username)
+            userRepository.deleteById(UUID.fromString(user.username))
 
         }.onSuccess {
             eventBus.post(UserDeletedEvent(user.username))
@@ -58,6 +59,7 @@ class DefaultUserService(private val userRepository: UserRepository,
         AppUser(id = this.id,
             ipaddress = this.ipaddress,
             username = this.username,
+            name = this.name,
             email = this.email,
             password = passwordEncoder.encode(this.password),
             phone = this.phone,
