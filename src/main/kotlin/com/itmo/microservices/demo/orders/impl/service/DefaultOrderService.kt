@@ -36,7 +36,7 @@ class DefaultOrderService(private val orderRepository: OrderRepository,
     private lateinit var eventLogger: EventLogger
 
     override fun getOrdersByUsername(user: UserDetails): List<OrderModel> {
-        val userId = userService.getAccountData(user).id
+        val userId = getUserIdByUserDetails(user)
         val orders = orderRepository.findAll()
         val result = mutableListOf<OrderModel>()
         for (order in orders) {
@@ -52,7 +52,7 @@ class DefaultOrderService(private val orderRepository: OrderRepository,
     }
 
     override fun createOrderFromBusket(busketId: UUID, user : UserDetails): OrderModel {
-        val userId = userService.getAccountData(user).id
+        val userId = getUserIdByUserDetails(user)
         val order = Order(UUID.randomUUID(), 0, busketId, userId, Date());
         orderRepository.save(order)
         val orderModel = order.toModel()
@@ -62,7 +62,7 @@ class DefaultOrderService(private val orderRepository: OrderRepository,
     }
 
     override fun deleteOrder(orderId: UUID, user : UserDetails) {
-        val userId = userService.getAccountData(user).id
+        val userId = getUserIdByUserDetails(user)
         var order = orderRepository.findByIdOrNull(orderId) ?: throw NotFoundException("Order $orderId not found")
         if(order.userId != userId)
             throw AccessDeniedException("Cannot delete order that was not created by you")
@@ -82,5 +82,9 @@ class DefaultOrderService(private val orderRepository: OrderRepository,
         eventBus.post(PaymentAssignedEvent(payment))
         eventLogger.info(OrderServiceNotableEvents.I_PAYMENT_ASSIGNED, paymentEntity)
         paymentRepository.save(paymentEntity)
+    }
+
+    fun getUserIdByUserDetails(user : UserDetails) : UUID {
+        return UUID.fromString("0-0-0-0-0")
     }
 }
