@@ -31,7 +31,7 @@ class OrderController(private val orderService: OrderService,
     )
     fun getOrders(@AuthenticationPrincipal user: UserDetails) = shoppingCartService.makeCart()
 
-    @PutMapping("/orders/{order_id}/items/{item_id}?amount={amount}")
+    @PutMapping("/orders/{order_id}/items/{item_id}")
     @Operation(
             summary = "Put items to cart",
             responses = [
@@ -42,7 +42,7 @@ class OrderController(private val orderService: OrderService,
             ],
             security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun putItemsToCart(@PathVariable orderId : UUID, @PathVariable itemId : UUID, @AuthenticationPrincipal user : UserDetails) = shoppingCartService.putItemInCart(orderId, itemId)
+    fun putItemsToCart(@PathVariable order_id : UUID, @PathVariable item_id : UUID, @RequestParam(value = "amount") amount : Int = 1, @AuthenticationPrincipal user : UserDetails) = shoppingCartService.putItemInCart(order_id, item_id, amount)
 
     @DeleteMapping("/orders/{order_id}/bookings")
     @Operation(
@@ -55,7 +55,7 @@ class OrderController(private val orderService: OrderService,
             ],
             security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun book(@PathVariable orderId : UUID, @AuthenticationPrincipal user : UserDetails) = orderService.createOrderFromBusket(orderId, user.username)
+    fun book(@PathVariable order_id : UUID, @AuthenticationPrincipal user : UserDetails) = orderService.createOrderFromBusket(order_id, user.username)
 
     @PostMapping("/orders/{order_id}/delivery?slot={slot_in_sec}")
     @Operation(
@@ -69,5 +69,18 @@ class OrderController(private val orderService: OrderService,
             security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun deliver(@RequestBody deliveryModel: DeliveryModel) = deliveryService.addDelivery(deliveryModel)
+
+    @GetMapping("/orders/{order_id}")
+    @Operation(
+        summary = "Returns current order",
+        responses = [
+            ApiResponse(description = "OK", responseCode = "200"),
+            ApiResponse(description = "Bad request", responseCode = "400", content = [Content()]),
+            ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()]),
+            ApiResponse(description = "Service error", responseCode = "500", content = [Content()])
+        ],
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    fun getOrder(@PathVariable order_id: UUID) = shoppingCartService.getCart(order_id)
 
 }

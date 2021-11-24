@@ -18,6 +18,7 @@ internal class DefaultStockItemServiceTest {
     private val id = UUID.randomUUID()
     private fun itemMock(): StockItem {
         return StockItem(
+            id = UUID.randomUUID(),
             name = "chocolate",
             price = 23.33,
             totalCount = 56,

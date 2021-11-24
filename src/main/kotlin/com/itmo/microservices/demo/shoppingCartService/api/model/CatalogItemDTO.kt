@@ -13,12 +13,12 @@ class CatalogItemDTO {
     )
     var id: UUID = UUID.randomUUID()
     var productId: UUID = UUID.randomUUID()
-    var amount: Int = 0
+    var amount: Int? = 0
 
 
     constructor()
 
-    constructor(id: UUID, productId: UUID, amount: Int) {
+    constructor(id: UUID, productId: UUID, amount: Int?) {
         this.id = id;
         this.productId = productId
         this.amount = amount
