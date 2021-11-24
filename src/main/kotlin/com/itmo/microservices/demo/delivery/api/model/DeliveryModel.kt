@@ -9,4 +9,4 @@ data class DeliveryModel(
     val id: UUID?,
     val orderId: UUID?,
     val address: String?,
-    val date: Date?)
+    val slot: Int?)
