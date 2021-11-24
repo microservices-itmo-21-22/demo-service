@@ -1,8 +1,6 @@
 package com.itmo.microservices.demo.order.service;
 
 import com.google.common.eventbus.EventBus;
-import com.itmo.microservices.demo.items.impl.entity.CatalogItemEntity;
-import com.itmo.microservices.demo.items.impl.repository.ItemRepository;
 import com.itmo.microservices.demo.items.impl.service.DefaultWarehouseService;
 import com.itmo.microservices.demo.lib.common.items.entity.CatalogItemEntity;
 import com.itmo.microservices.demo.lib.common.items.repository.ItemRepository;

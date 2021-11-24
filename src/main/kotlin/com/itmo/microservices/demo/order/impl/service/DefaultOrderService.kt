@@ -36,10 +36,11 @@ class DefaultOrderService(
 
     override fun createOrder(user: UserDetails): OrderDto {
         val orderEntity = OrderEntity()
-        if (user == null) {
-            user = SecurityContextHolder.getContext().authentication.principal as UserDetails
+        var currentUser = user
+        if (currentUser == null) {
+            currentUser = SecurityContextHolder.getContext().authentication.principal as UserDetails
         }
-        val accountData = userService.getAccountData(user)
+        val accountData = userService.getAccountData(currentUser)
         orderEntity.userId = accountData.id
         return orderRepository.save(orderEntity).toModel(orderItemRepository)
     }
