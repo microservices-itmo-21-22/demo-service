@@ -42,7 +42,7 @@ class ShoppingCartController (private val CartService: DefaultCartService){
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun putCartItemInCart(@PathVariable cartId: UUID, @PathVariable catalogItemId: UUID) = CartService.putItemInCart(cartId, catalogItemId)
+    fun putCartItemInCart(@PathVariable cartId: UUID, @PathVariable catalogItemId: UUID, amount: Int = 0) = CartService.putItemInCart(cartId, catalogItemId, amount)
 
     @GetMapping("/create_cart")
     @Operation(

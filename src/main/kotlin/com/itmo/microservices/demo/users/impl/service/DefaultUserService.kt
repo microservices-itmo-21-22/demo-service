@@ -44,7 +44,6 @@ class DefaultUserService(private val userRepository: UserRepository,
     }
 
 
-
     override fun getAccountData(id: UUID): AppUserModel =
         userRepository.findByIdOrNull(id)?.toModel()
     ?: throw NotFoundException("Stock Item $id not found")

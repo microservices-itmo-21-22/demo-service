@@ -8,8 +8,7 @@ import javax.persistence.*
 @Table(name="Cart304")
 class ShoppingCart {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    lateinit var id : UUID
+    var id : UUID = UUID.randomUUID()
     var status: String = "ACTIVE"
 
 
