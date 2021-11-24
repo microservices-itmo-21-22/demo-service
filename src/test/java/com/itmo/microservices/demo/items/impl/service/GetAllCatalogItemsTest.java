@@ -2,8 +2,8 @@ package com.itmo.microservices.demo.items.impl.service;
 
 import com.google.common.eventbus.EventBus;
 import com.itmo.microservices.demo.items.api.service.WarehouseService;
-import com.itmo.microservices.demo.items.impl.entity.CatalogItemEntity;
-import com.itmo.microservices.demo.items.impl.repository.ItemRepository;
+import com.itmo.microservices.demo.lib.common.items.entity.CatalogItemEntity;
+import com.itmo.microservices.demo.lib.common.items.repository.ItemRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
