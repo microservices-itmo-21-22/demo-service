@@ -2,11 +2,12 @@ package com.itmo.microservices.demo.payments.impl.entity
 
 
 import com.itmo.microservices.demo.order.api.model.OrderStatus
+import com.itmo.microservices.demo.order.impl.entity.PaymentLogRecordEntity
 import java.util.*
 import javax.persistence.*
 
 @Entity
-class Amount {
+class PaymentsAmount {
 
     @Id
     @GeneratedValue
@@ -24,7 +25,7 @@ class Amount {
 
 
 @Entity
-class OrderEntity {
+class PaymentsOrderEntity {
 
     @Id
     @GeneratedValue
@@ -37,7 +38,7 @@ class OrderEntity {
     var status: OrderStatus? = null
 
     @ManyToMany
-    var itemsMap: MutableMap<UUID, Amount>? = null
+    var itemsMap: MutableMap<UUID, PaymentsAmount>? = null
 
     var deliveryDuration: Int? = null
 
@@ -46,7 +47,7 @@ class OrderEntity {
 
     constructor()
 
-    constructor(username: String?, timeCreated: Long?, status: OrderStatus?, itemsMap: MutableMap<UUID, Amount>?, deliveryDuration: Int?, paymentHistory: List<PaymentLogRecordEntity>?) {
+    constructor(username: String?, timeCreated: Long?, status: OrderStatus?, itemsMap: MutableMap<UUID, PaymentsAmount>?, deliveryDuration: Int?, paymentHistory: List<PaymentLogRecordEntity>?) {
         this.username = username
         this.timeCreated = timeCreated
         this.status = status
