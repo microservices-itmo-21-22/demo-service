@@ -75,6 +75,7 @@ public class AddItemToTheCartTest {
 
         var userService = new DefaultUserService(userRepository, passwordEncoder, eventBus, tokenManager);
 
+        orderItemRepository = mock(OrderItemRepository.class);
         orderService = new DefaultOrderService(orderRepository, orderItemRepository, itemService, userService);
     }
 
