@@ -24,7 +24,9 @@ class DefaultProductsService(private val productsRepository: ProductsRepository,
 
     override fun getAllProducts(available:Boolean): List<Product> {
         eventBus.post(ProductGotEvent("all products got"))
-        eventLogger.info(ProductsServiceNotableEvents.EVENT_PRODUCTS_GOT)
+        if(::eventLogger.isInitialized){
+            eventLogger.info(ProductsServiceNotableEvents.EVENT_PRODUCTS_GOT)
+        }
         return when(available){
             true->productsRepository.findAllByAmountGreaterThan(0)
             false->productsRepository.findAllByAmountLessThan(1)
