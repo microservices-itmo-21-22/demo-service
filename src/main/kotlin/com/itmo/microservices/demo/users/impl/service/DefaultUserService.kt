@@ -40,13 +40,17 @@ class DefaultUserService(private val userRepository: UserRepository,
         if(aUser!=null)throw NotAcceptableStatusException("User already exists")
         val userEntity = userRepository.save(request.toEntity())
         eventBus.post(UserCreatedEvent(userEntity.toModel()))
-        eventLogger.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.name)
+
+        if(::eventLogger.isInitialized){
+            eventLogger.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.name)
+        }
+
         return userEntity.toModel()
     }
 
-    override fun getAccountData(requester: UserDetails,uuid: UUID): AppUserModel =
+    override fun getAccountData(requester: UserDetails?,uuid: UUID): AppUserModel =
             userRepository.findById(uuid)?.toModel() ?:
-            throw NotFoundException("User ${requester.username} not found")
+            throw NotFoundException("User ${requester?.username} not found")
 
     override fun deleteAllUsers() {
         userRepository.deleteAll()
