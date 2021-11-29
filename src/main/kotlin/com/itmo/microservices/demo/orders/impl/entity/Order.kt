@@ -6,7 +6,7 @@ import java.util.*
 import javax.persistence.*
 
 @Entity
-@Table(name = "order304")
+@Table(name = "order")
 class Order {
     @Id
     @Type(type = "uuid-char")
