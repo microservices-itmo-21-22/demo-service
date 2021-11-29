@@ -9,4 +9,5 @@ interface UserService {
     fun findUser(username: String): AppUserModel?
     fun registerUser(request: RegistrationRequest): AppUserModel
     fun getAccountData(requester: UserDetails,uuid: UUID): AppUserModel
+    fun deleteAllUsers()
 }
