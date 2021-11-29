@@ -8,8 +8,7 @@ import com.itmo.microservices.demo.common.logging.CommonNotableEvents
 import com.itmo.microservices.demo.notifications.api.service.NotificationService
 import com.itmo.microservices.demo.payments.api.messaging.PaymentProccessedEvent
 import com.itmo.microservices.demo.products.api.messaging.ProductAddedEvent
-import com.itmo.microservices.demo.products.api.messaging.ProductGotEvent
-import com.itmo.microservices.demo.tasks.api.messaging.TaskAssignedEvent
+
 import com.itmo.microservices.demo.users.api.messaging.UserCreatedEvent
 import org.springframework.stereotype.Component
 import java.util.concurrent.ExecutorService
