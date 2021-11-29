@@ -4,23 +4,18 @@ import com.google.common.eventbus.EventBus
 import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.common.exception.NotFoundException
-import com.itmo.microservices.demo.order.api.messaging.OrderCreatedEvent
-import com.itmo.microservices.demo.order.api.messaging.OrderDeletedEvent
-import com.itmo.microservices.demo.order.api.messaging.OrderGetAllEvent
-import com.itmo.microservices.demo.order.api.messaging.OrderGetEvent
+import com.itmo.microservices.demo.order.api.messaging.*
 import com.itmo.microservices.demo.order.api.model.BookingDto
 import com.itmo.microservices.demo.order.api.model.OrderDto
 import com.itmo.microservices.demo.order.api.model.OrderStatus
 import com.itmo.microservices.demo.order.api.service.OrderService
 import com.itmo.microservices.demo.order.impl.entity.Amount
 import com.itmo.microservices.demo.order.impl.entity.OrderEntity
-import com.itmo.microservices.demo.order.impl.entity.PaymentSubmission
 import com.itmo.microservices.demo.order.impl.exception.BadRequestException
 import com.itmo.microservices.demo.order.impl.logging.OrderServiceNotableEvents
 import com.itmo.microservices.demo.order.impl.repository.ItemRepository
 import com.itmo.microservices.demo.order.impl.repository.OrderRepository
 import com.itmo.microservices.demo.order.impl.util.toModel
-import com.itmo.microservices.demo.payments.api.model.PaymentSubmissionDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
@@ -76,12 +71,22 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
         order.itemsMap?.get(itemId) ?: throw BadRequestException("Item $itemId not found")
         order.itemsMap!![itemId] = Amount(amount)
         orderRepository.save(order)
+        eventBus.post(ItemAddedToOrder(order.toModel()))
+        eventLogger.info(
+            OrderServiceNotableEvents.I_ITEM_ADDED_TO_ORDER,
+            order
+        )
     }
 
     override fun registerOrder(orderId: UUID): BookingDto {
         val order = orderRepository.findByIdOrNull(orderId) ?: throw NotFoundException("Order $orderId not found")
         order.status = OrderStatus.BOOKED
         orderRepository.save(order)
+        eventBus.post(OrderRegistered(order.toModel()))
+        eventLogger.info(
+            OrderServiceNotableEvents.I_ORDER_REGISTERED,
+            order
+        )
         return BookingDto(UUID.randomUUID(), setOf())
     }
 
@@ -89,26 +94,11 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
         val order = orderRepository.findByIdOrNull(orderId) ?: throw NotFoundException("Order $orderId not found")
         order.deliveryDuration = slotinSec
         orderRepository.save(order)
+        eventBus.post(OrderDated(order.toModel()))
+        eventLogger.info(
+            OrderServiceNotableEvents.I_ORDER_DATED,
+            order
+        )
         return BookingDto(UUID.randomUUID(), setOf())
     }
-
-    override fun allOrders(): List<OrderDto> {
-        eventBus.post(OrderGetAllEvent(null))
-        eventLogger.info(
-                OrderServiceNotableEvents.I_ORDER_GOT_ALL,
-                null
-        )
-        return orderRepository.findAll().map { it.toModel() }
-    }
-
-    override fun deleteOrderById(orderId: UUID) {
-        val order = orderRepository.findByIdOrNull(orderId) ?: throw NotFoundException("Busket $orderId not found")
-        orderRepository.delete(order)
-        eventBus.post(OrderDeletedEvent(order.toModel()))
-        eventLogger.info(
-                OrderServiceNotableEvents.I_ORDER_DELETED,
-                order
-        )
-    }
-
 }

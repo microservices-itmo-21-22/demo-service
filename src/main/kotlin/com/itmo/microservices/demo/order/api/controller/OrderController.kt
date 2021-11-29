@@ -15,20 +15,6 @@ import java.util.*
 @RestController
 @RequestMapping("/orders")
 class OrderController(private var orderService: OrderService) {
-
-    @GetMapping
-    @Operation(
-            summary = "Получить все заказы",
-            responses = [
-                ApiResponse(description = "OK", responseCode = "200"),
-                ApiResponse(description = "Bad request", responseCode = "400", content = [Content()])
-            ],
-            security = [SecurityRequirement(name = "bearerAuth")]
-    )
-    fun getOrders(): List<OrderDto> {
-        return orderService.allOrders()
-    }
-
     @GetMapping("/{orderId}")
     @Operation(
             summary = "Получение заказа",
@@ -79,7 +65,7 @@ class OrderController(private var orderService: OrderService) {
                       @Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
         orderService.registerOrder(orderId)
 
-    @PostMapping("/orders/{orderId}/delivery?slot={slotInSec}")
+    @PostMapping("/orders/{orderId}/delivery")
     @Operation(
             summary = "Установление желаемого времени доставки",
             responses = [
@@ -88,23 +74,7 @@ class OrderController(private var orderService: OrderService) {
             ],
             security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun setDeliveryTime(@PathVariable orderId: UUID, @PathVariable slotInSec: Int,
-                        @Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
-            orderService.setDeliveryTime(orderId, slotInSec)
-
-
-    @DeleteMapping("/{orderId}")
-    @Operation(
-            summary = "Delete order by id",
-            responses = [
-                ApiResponse(description = "OK", responseCode = "200"),
-                ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()]),
-                ApiResponse(description = "Not found", responseCode = "404", content = [Content()])
-            ],
-            security = [SecurityRequirement(name = "bearerAuth")]
-    )
-    fun deleteBusketById(@PathVariable orderId: UUID,
-                         @Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
-            orderService.deleteOrderById(orderId)
-
+    fun setDeliveryTime(@PathVariable orderId: UUID, @RequestParam slot: Int) {
+        orderService.setDeliveryTime(orderId, slot)
+    }
 }

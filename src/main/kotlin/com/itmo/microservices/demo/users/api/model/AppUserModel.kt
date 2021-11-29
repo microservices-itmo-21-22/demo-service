@@ -1,7 +1,6 @@
 package com.itmo.microservices.demo.users.api.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.itmo.microservices.demo.order.impl.entity.Busket
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import java.util.*
