@@ -2,9 +2,6 @@ package com.itmo.microservices.demo.payments.api.controller
 
 import com.itmo.microservices.demo.payments.api.model.PaymentModel
 import com.itmo.microservices.demo.payments.api.service.PaymentService
-import com.itmo.microservices.demo.payments.impl.entity.Payment
-import com.itmo.microservices.demo.payments.impl.entity.PaymentAppUser
-import com.itmo.microservices.demo.tasks.api.model.TaskModel
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -19,50 +16,43 @@ import java.util.*
 @RequestMapping("/payment")
 class PaymentController(private val paymentService: PaymentService) {
 
-    @GetMapping
+    @PostMapping("/{orderId}/payment")
     @Operation(
-        summary = "Get all transactions of user by username",
-        responses = [
-            ApiResponse(description = "OK", responseCode = "200"),
-            ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()])
-        ],
-        security = [SecurityRequirement(name = "bearerAuth")]
+            summary = "Оплата заказа",
+            responses = [
+                ApiResponse(description = "OK", responseCode = "200"),
+                ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()]),
+                ApiResponse(description = "Not found", responseCode = "404", content = [Content()])
+            ],
+            security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getUserTransactionsInfo(@Parameter(hidden = true) @AuthenticationPrincipal userDetails: UserDetails): List<PaymentModel> =
-        paymentService.getUserTransactionsInfo(userDetails)
+    fun pay(@PathVariable orderId: UUID, @Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
+            paymentService.pay(orderId)
 
-    @PostMapping("/{paymentId}")
+    @GetMapping("/finlog?orderId={orderId}")
     @Operation(
-        summary = "Refund money",
-        responses = [
-            ApiResponse(description = "OK", responseCode = "200"),
-            ApiResponse(
-                description = "Unauthorized",
-                responseCode = "403",
-                content = [Content()]
-            ),
-            ApiResponse(description = "Payment not found", responseCode = "404", content = [Content()])
-        ],
-        security = [SecurityRequirement(name = "bearerAuth")]
+            summary = "Получение информации о финансовых операциях с аккаунтом пользователя",
+            responses = [
+                ApiResponse(description = "OK", responseCode = "200"),
+                ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()]),
+                ApiResponse(description = "Not found", responseCode = "404", content = [Content()])
+            ],
+            security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun refund(
-        @PathVariable paymentId: UUID,
-        @Parameter(hidden = true) @AuthenticationPrincipal userDetails: UserDetails
-    ) =
-        paymentService.refund(paymentId, userDetails)
+    fun getFinlogByOrderId(@PathVariable orderId: UUID, @Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
+            paymentService.finlog(orderId, author)
 
-    @PostMapping
+    @GetMapping("/finlog")
     @Operation(
-        summary = "Pay",
-        responses = [
-            ApiResponse(description = "OK", responseCode = "200"),
-            ApiResponse(description = "Bad request", responseCode = "400", content = [Content()]),
-            ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()])
-        ],
-        security = [SecurityRequirement(name = "bearerAuth")]
+            summary = "Получение информации о финансовых операциях с аккаунтом пользователя",
+            responses = [
+                ApiResponse(description = "OK", responseCode = "200"),
+                ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()]),
+                ApiResponse(description = "Not found", responseCode = "404", content = [Content()])
+            ],
+            security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun pay(
-        @Parameter(hidden = true) @AuthenticationPrincipal userDetails: UserDetails
-    ) =
-        paymentService.pay(userDetails)
+    fun getFinlog(@Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
+            paymentService.finlog(null, author)
+
 }

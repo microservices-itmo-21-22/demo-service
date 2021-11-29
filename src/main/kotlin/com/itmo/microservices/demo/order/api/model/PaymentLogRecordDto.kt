@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import java.util.*
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class BusketModel (
-        val id: UUID?,
-        val products: List<UUID>,
-        val user: String?,
-        val order: UUID?
+data class PaymentLogRecordDto (
+    val transactionId: UUID?,
+    val timestamp: Long?,
+    val status: PaymentStatus?,
+    val amount: Int?
 )
