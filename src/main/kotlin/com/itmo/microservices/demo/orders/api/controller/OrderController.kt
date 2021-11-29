@@ -68,7 +68,7 @@ class OrderController(private val orderService: OrderService,
             ],
             security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun deliver(@RequestBody deliveryModel: DeliveryModel) = deliveryService.addDelivery(deliveryModel)
+    fun deliver(@PathVariable orderId : UUID, @PathVariable slotInSec : Int) = deliveryService.reserveDeliverySlots(orderId, slotInSec)
 
     @GetMapping("/orders/{order_id}")
     @Operation(
