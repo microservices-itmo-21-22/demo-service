@@ -22,7 +22,8 @@ class UserController(private val userService: UserService) {
         summary = "Register new user",
         responses = [
             ApiResponse(description = "OK", responseCode = "200"),
-            ApiResponse(description = "Bad request", responseCode = "400", content = [Content()])
+            ApiResponse(description = "Bad request", responseCode = "400", content = [Content()]),
+            ApiResponse(description = "Not acceptable:User already exists", responseCode = "406", content = [Content()])
         ]
     )
 
@@ -39,6 +40,7 @@ class UserController(private val userService: UserService) {
     )
     fun getAccountData(@Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails,@PathVariable user_id: String): AppUserModel =
             userService.getAccountData(user,UUID.fromString(user_id))
-
+@DeleteMapping("deleteAllUser")
+fun deleteAllUsers() = userService.deleteAllUsers()
 
 }

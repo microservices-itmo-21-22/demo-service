@@ -17,6 +17,8 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.server.NotAcceptableStatusException
 import java.util.*
 
 @Suppress("UnstableApiUsage")
@@ -34,6 +36,8 @@ class DefaultUserService(private val userRepository: UserRepository,
 
     override fun registerUser(request: RegistrationRequest): AppUserModel {
         //There is no prevention of duplicate user registrations
+        val aUser = findUser(request.name)
+        if(aUser!=null)throw NotAcceptableStatusException("User already exists")
         val userEntity = userRepository.save(request.toEntity())
         eventBus.post(UserCreatedEvent(userEntity.toModel()))
         eventLogger.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.name)
@@ -43,6 +47,10 @@ class DefaultUserService(private val userRepository: UserRepository,
     override fun getAccountData(requester: UserDetails,uuid: UUID): AppUserModel =
             userRepository.findById(uuid)?.toModel() ?:
             throw NotFoundException("User ${requester.username} not found")
+
+    override fun deleteAllUsers() {
+        userRepository.deleteAll()
+    }
 
     fun RegistrationRequest.toEntity(): AppUser =
         AppUser(
