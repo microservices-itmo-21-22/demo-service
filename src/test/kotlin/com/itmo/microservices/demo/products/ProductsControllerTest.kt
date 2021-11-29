@@ -20,40 +20,41 @@ class ProductsControllerTest {
     @Autowired
     private lateinit var mockMvc: MockMvc
 
-    @Test
-    fun addProduct() {
-        var mvcResult: MockHttpServletResponse = mockMvc.perform(
-            MockMvcRequestBuilders.post("/products/add/product")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                 {
-                    "name": "milk",
-                    "description": "so delicious",
-                    "country": "Russia",
-                    "price": 300,
-                    "sale": 400,
-                    "type": "FOOD"
-                 }
-                """.trimIndent())
-                .accept(MediaType.ALL)
-        )
-            .andReturn()
-            .response
-            .apply(::println)
-
-        Assertions.assertEquals(mvcResult.status,200)
-    }
+//    @Test
+//    fun addProduct() {
+//        var mvcResult: MockHttpServletResponse = mockMvc.perform(
+//            MockMvcRequestBuilders.post("/products/add/product")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .content("""
+//                 {
+//                    "name": "milk",
+//                    "description": "so delicious",
+//                    "country": "Russia",
+//                    "price": 300,
+//                    "sale": 400,
+//                    "type": "FOOD"
+//                 }
+//                """.trimIndent())
+//                .accept(MediaType.ALL)
+//        )
+//            .andReturn()
+//            .response
+//            .apply(::println)
+//
+//        Assertions.assertEquals(mvcResult.status,200)
+//    }
 
     @Test
     fun getProductCatalog() {
         var mvcResult: MockHttpServletResponse = mockMvc.perform(
-            MockMvcRequestBuilders.get("/products/catalog")
+            MockMvcRequestBuilders.get("/items?available=true")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.ALL)
         )
             .andReturn()
             .response
             .apply(::println)
+        System.out.println(mvcResult.status)
         Assertions.assertEquals(mvcResult.status,200)
     }
 }
