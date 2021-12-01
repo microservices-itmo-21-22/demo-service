@@ -4,10 +4,8 @@ import com.google.common.eventbus.EventBus
 import com.itmo.microservices.demo.orders.api.service.OrderService
 import com.itmo.microservices.demo.orders.impl.entity.Order
 import com.itmo.microservices.demo.orders.impl.repository.OrderRepository
-import com.itmo.microservices.demo.orders.impl.repository.PaymentRepository
+import com.itmo.microservices.demo.orders.impl.repository.OrderPaymentRepository
 import com.itmo.microservices.demo.orders.impl.util.toModel
-import com.itmo.microservices.demo.stock.impl.util.toModel
-import com.itmo.microservices.demo.users.api.service.UserService
 import com.itmo.microservices.demo.users.impl.service.DefaultUserService
 import junit.framework.Assert
 import org.junit.Test
@@ -20,7 +18,7 @@ import java.util.*
 internal class DefaultOrderServiceTests {
 
     private val orderRepository = Mockito.mock(OrderRepository::class.java)
-    private val paymentRepository = Mockito.mock(PaymentRepository::class.java)
+    private val orderPaymentRepository = Mockito.mock(OrderPaymentRepository::class.java)
 
     private val id = UUID.randomUUID()
     private fun orderMock(): Order {
@@ -48,7 +46,7 @@ internal class DefaultOrderServiceTests {
     }
 
     private fun createService() : OrderService {
-        return DefaultOrderService(orderRepository, paymentRepository,  EventBus(), Mockito.mock(DefaultUserService::class.java))
+        return DefaultOrderService(orderRepository, orderPaymentRepository,  EventBus(), Mockito.mock(DefaultUserService::class.java))
     }
 
     @Test
