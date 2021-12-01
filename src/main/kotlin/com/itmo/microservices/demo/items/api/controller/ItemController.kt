@@ -28,5 +28,20 @@ class ItemController(private val itemService: WarehouseService){
     fun allItems(
         @RequestParam available: Boolean,
         @Parameter(hidden = true) @AuthenticationPrincipal requester: UserDetails
-    ): List<CatalogItem> = itemService.getCatalogItems();
+    ): List<CatalogItem> = itemService.getCatalogItems(available);
+
+    @PostMapping
+    @Operation(
+        summary = "Add new item",
+        responses = [
+            ApiResponse(description = "OK", responseCode = "200"),
+            ApiResponse(description = "Bad request", responseCode = "400", content = [Content()]),
+            ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()])
+        ],
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    fun addNewItem(
+        @RequestBody catalogItem: CatalogItem,
+        @Parameter(hidden = true) @AuthenticationPrincipal requester: UserDetails
+    ) = itemService.addItem(catalogItem)
 }
