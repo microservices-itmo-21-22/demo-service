@@ -8,7 +8,7 @@ import javax.persistence.Table
 
 @Entity
 @Table(name = "payment304")
-data class Payment (
+data class OldPayment (
     @Id
     val orderId : UUID? = null,
     val type : Int = 0,
