@@ -49,12 +49,16 @@ class StockItemController(private val stockItemService: StockItemService) {
         responses = [
             ApiResponse(description = "OK", responseCode = "200"),
             ApiResponse(description = "Bad request", responseCode = "400", content = [Content()]),
-            ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()])
+            ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()]),
+            ApiResponse(description = "Incorrect input", responseCode = "405", content = [Content()])
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun createStockItem(@RequestBody stockItem: StockItemModel) =
-        stockItemService.createStockItem(stockItem)
+    fun createStockItem(@RequestBody stockItem: StockItemModel) {
+        if (!stockItemService.createStockItem(stockItem)) {
+            throw HttpServerErrorException(HttpStatus.METHOD_NOT_ALLOWED, "Cannot create") //405
+        }
+    }
 
     @PutMapping("/{itemId}")
     @Operation(
@@ -88,13 +92,14 @@ class StockItemController(private val stockItemService: StockItemService) {
         responses = [
             ApiResponse(description = "OK", responseCode = "200"),
             ApiResponse(description = "Bad request", responseCode = "400", content = [Content()]),
-            ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()])
+            ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()]),
+            ApiResponse(description = "Incorrect input", responseCode = "405", content = [Content()])
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun reserveStockItem(@PathVariable itemId: UUID, @PathVariable number: Int) {
         if (!stockItemService.reserveStockItem(itemId, number)) {
-            throw HttpServerErrorException(HttpStatus.METHOD_NOT_ALLOWED, "Cannot reserve")
+            throw HttpServerErrorException(HttpStatus.METHOD_NOT_ALLOWED, "Cannot reserve") //405
         }
     }
 
