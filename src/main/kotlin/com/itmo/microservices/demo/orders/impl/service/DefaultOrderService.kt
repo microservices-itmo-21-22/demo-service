@@ -14,11 +14,10 @@ import com.itmo.microservices.demo.orders.api.service.OrderService
 import com.itmo.microservices.demo.orders.impl.entity.Order
 import com.itmo.microservices.demo.orders.impl.logging.OrderServiceNotableEvents
 import com.itmo.microservices.demo.orders.impl.repository.OrderRepository
-import com.itmo.microservices.demo.orders.impl.repository.PaymentRepository
+import com.itmo.microservices.demo.orders.impl.repository.OrderPaymentRepository
 import com.itmo.microservices.demo.orders.impl.util.toEntity
 import com.itmo.microservices.demo.orders.impl.util.toModel
 import com.itmo.microservices.demo.users.api.service.UserService
-import org.hibernate.service.spi.InjectService
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
@@ -28,7 +27,7 @@ import javax.naming.OperationNotSupportedException
 @Suppress("UnstableApiUsage")
 @Service
 class DefaultOrderService(private val orderRepository: OrderRepository,
-                          private val paymentRepository: PaymentRepository,
+                          private val orderPaymentRepository: OrderPaymentRepository,
                           private val eventBus: EventBus,
                           private val userService: UserService) : OrderService {
 
@@ -81,7 +80,7 @@ class DefaultOrderService(private val orderRepository: OrderRepository,
         val paymentEntity = payment.toEntity()
         eventBus.post(PaymentAssignedEvent(payment))
         eventLogger.info(OrderServiceNotableEvents.I_PAYMENT_ASSIGNED, paymentEntity)
-        paymentRepository.save(paymentEntity)
+        orderPaymentRepository.save(paymentEntity)
     }
 
     fun getUserIdByUserDetails(user : UserDetails) : UUID {
