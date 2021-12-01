@@ -27,7 +27,7 @@ class PaymentController(private val paymentService: PaymentService) {
 
     @GetMapping("/orders/{order_id}/payment")
     @Operation(
-            summary = "Get user financial log",
+            summary = "Make payment for order",
             responses = [
                 ApiResponse(description = "OK", responseCode = "200"),
                 ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()])

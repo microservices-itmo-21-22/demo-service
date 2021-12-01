@@ -87,6 +87,7 @@ class DefaultPaymentService(private val paymentRepository: PaymentRepository) : 
 
         val payment = Payment()
 
+        payment.Id = UUID.fromString("0-0-0-0-0")
         payment.orderId = orderId
         payment.transactionId = id
         payment.openTime = submitTime
