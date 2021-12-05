@@ -75,6 +75,9 @@ class OrderPaymentStage : TestStage {
 
                 paymentDetails.finishedAt = System.currentTimeMillis()
                 eventLogger.info(I_PAYMENT_SUCCESS, order.id, paymentDetails.attempt)
+
+                externalServiceApi.simulateDelivery(testCtx().userId!!, testCtx().orderId!!)
+
                 return TestStage.TestContinuationType.CONTINUE
             }
             PaymentStatus.FAILED -> { // todo sukhoa check order status hasn't changed and user ne charged

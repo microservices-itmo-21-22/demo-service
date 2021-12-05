@@ -22,17 +22,10 @@ class OrderDeliveryStage : TestStage {
     override suspend fun run(userManagement: UserManagement, externalServiceApi: ExternalServiceApi): TestStage.TestContinuationType {
         val orderBeforeDelivery = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
 
-        if (orderBeforeDelivery.status !is OrderStatus.OrderPayed) {
-            eventLogger.error(E_INCORRECT_ORDER_STATUS, orderBeforeDelivery.id)
-            return TestStage.TestContinuationType.FAIL
-        }
-
         if (orderBeforeDelivery.deliveryDuration == null) {
             eventLogger.error(E_NULL_DELIVERY_TIME, orderBeforeDelivery.id)
             return TestStage.TestContinuationType.FAIL
         }
-
-        externalServiceApi.simulateDelivery(testCtx().userId!!, testCtx().orderId!!)
 
         ConditionAwaiter.awaitAtMost(orderBeforeDelivery.deliveryDuration.toSeconds() + 5, TimeUnit.SECONDS)
             .condition {
@@ -52,7 +45,7 @@ class OrderDeliveryStage : TestStage {
         val orderAfterDelivery = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
         when (orderAfterDelivery.status) {
             is OrderStatus.OrderDelivered -> {
-                val deliveryLog = externalServiceApi.deliveryLog(testCtx().orderId!!)
+                val deliveryLog = externalServiceApi.deliveryLog(testCtx().userId!!, testCtx().orderId!!)
                 if (deliveryLog.outcome != DeliverySubmissionOutcome.SUCCESS) {
                     eventLogger.error(E_DELIVERY_OUTCOME_FAIL, orderAfterDelivery.id)
                     return TestStage.TestContinuationType.FAIL

@@ -44,10 +44,10 @@ interface ExternalServiceApi {
 
     suspend fun abandonedCardHistory(orderId: UUID): List<AbandonedCardLogRecord>
 
-    suspend fun getBookingHistory(bookingId: UUID): List<BookingLogRecord>
+    suspend fun getBookingHistory(userId: UUID, bookingId: UUID): List<BookingLogRecord>
     //suspend fun getBookingHistory(orderId: UUID): List<BookingLogRecord>
 
-    suspend fun deliveryLog(orderId: UUID): DeliveryInfoRecord
+    suspend fun deliveryLog(userId: UUID, orderId: UUID): DeliveryInfoRecord
 }
 
 class DeliveryInfoRecord(

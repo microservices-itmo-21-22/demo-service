@@ -25,7 +25,7 @@ class OrderFinalizingStage : TestStage {
 
         val orderStateAfterBooking = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
 
-        val bookingRecords = externalServiceApi.getBookingHistory(bookingResult.id)
+        val bookingRecords = externalServiceApi.getBookingHistory(testCtx().userId!!, bookingResult.id)
         for (item in orderStateAfterBooking.itemsMap.keys) {
             if (bookingRecords.none { it.itemId == item.id }) {
                 eventLogger.error(E_BOOKING_LOG_RECORD_NOT_FOUND, bookingResult.id, item.id, testCtx().orderId)

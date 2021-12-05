@@ -120,18 +120,21 @@ class RealExternalService(override val descriptor: ServiceDescriptor, private va
     }
 
     override suspend fun simulateDelivery(userId: UUID, orderId: UUID) {
-        TODO("Remove this method from interface and its usages")
     }
 
     override suspend fun abandonedCardHistory(orderId: UUID): List<AbandonedCardLogRecord> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getBookingHistory(bookingId: UUID): List<BookingLogRecord> {
-        TODO("Not yet implemented")
+    override suspend fun getBookingHistory(userId: UUID, bookingId: UUID): List<BookingLogRecord> {
+        val session = getUserSession(userId)
+
+        return communicator.executeWithAuthAndDeserialize("/_internal/bookingHistory/$bookingId", session)
     }
 
-    override suspend fun deliveryLog(orderId: UUID): DeliveryInfoRecord {
-        TODO("Not yet implemented")
+    override suspend fun deliveryLog(userId: UUID, orderId: UUID): DeliveryInfoRecord {
+        val session = getUserSession(userId)
+
+        return communicator.executeWithAuthAndDeserialize("/_internal/deliveryLog/$orderId", session)
     }
 }
