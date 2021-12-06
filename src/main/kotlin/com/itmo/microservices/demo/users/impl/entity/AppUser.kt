@@ -20,7 +20,13 @@ class AppUser {
     constructor()
 
     constructor(id: UUID?, ipaddress: String?, name: String?,  username: String?, email: String?, password: String?, phone: String?, lastBasketId: UUID?) {
-        this.id = id
+        if (id == null){
+            this.id = UUID.randomUUID()
+        }
+        else
+        {
+            this.id = id
+        }
         this.ipaddress = ipaddress
         this.username = username
         this.name = name
