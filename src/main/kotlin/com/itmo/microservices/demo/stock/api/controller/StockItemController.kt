@@ -43,7 +43,7 @@ class StockItemController(private val stockItemService: StockItemService) {
     fun getStockItemById(@PathVariable itemId: UUID): StockItemModel =
         stockItemService.getStockItemById(itemId)
 
-    @PostMapping
+    @PostMapping("/items")
     @Operation(
         summary = "Create stockItem",
         responses = [
