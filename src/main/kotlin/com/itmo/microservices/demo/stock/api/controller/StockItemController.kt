@@ -16,10 +16,10 @@ import org.springframework.web.client.HttpServerErrorException
 import java.util.*
 
 @RestController
-@RequestMapping("/items")
+@RequestMapping
 class StockItemController(private val stockItemService: StockItemService) {
 
-    @GetMapping
+    @GetMapping("/items?available={available}")
     @Operation(
         summary = "Get all stock items",
         responses = [
@@ -28,9 +28,9 @@ class StockItemController(private val stockItemService: StockItemService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun allStockItems(@RequestParam("available") available : Boolean): List<StockItemModel> = stockItemService.allStockItems()
+    fun allStockItems(@PathVariable available : Boolean): List<StockItemModel> = stockItemService.allStockItems()
 
-    @GetMapping("/{itemId}")
+    @GetMapping("/items/{itemId}")
     @Operation(
         summary = "Get stock item by id",
         responses = [
@@ -60,7 +60,7 @@ class StockItemController(private val stockItemService: StockItemService) {
         }
     }
 
-    @PutMapping("/{itemId}")
+    @PutMapping("/items/{itemId}")
     @Operation(
         summary = "Change stock item",
         responses = [
@@ -73,7 +73,7 @@ class StockItemController(private val stockItemService: StockItemService) {
     ) =
         stockItemService.changeStockItem(itemId, stockItem)
 
-    @PutMapping("/{itemId}/add/{number}")
+    @PutMapping("/items/{itemId}/add/{number}")
     @Operation(
         summary = "Add stock item",
         responses = [
@@ -104,7 +104,7 @@ class StockItemController(private val stockItemService: StockItemService) {
     }
 
 
-    @DeleteMapping("/{itemId}")
+    @DeleteMapping("/items/{itemId}")
     @Operation(
         summary = "Delete stockItem",
         responses = [
