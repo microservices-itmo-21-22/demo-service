@@ -86,7 +86,7 @@ class StockItemController(private val stockItemService: StockItemService) {
     fun addStockItem(@PathVariable itemId: UUID, @PathVariable number: Int) =
         stockItemService.addStockItem(itemId, number)
 
-    @PutMapping("/{itemId}/reserve/{number}")
+    @PutMapping("/items/{itemId}/reserve/{number}")
     @Operation(
         summary = "Reserve stock item",
         responses = [
