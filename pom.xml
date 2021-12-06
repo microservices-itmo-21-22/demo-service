@@ -14,7 +14,7 @@
     <artifactId>bombardier</artifactId>
     <version>0.1.1-SNAPSHOT</version>
     <name>bombardier</name>
-    <description>Demo project for microservices course 21-22</description>
+    <description>Trying to kill your PPO projects</description>
 
     <properties>
         <java.version>11</java.version>
@@ -152,6 +152,23 @@
             <artifactId>okhttp</artifactId>
         </dependency>
 
+
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-kotlin</artifactId>
+            <version>2.9.8</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.9.8</version>
+        </dependency>
     </dependencies>
 
     <scm>

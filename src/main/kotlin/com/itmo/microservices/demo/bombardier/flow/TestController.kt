@@ -1,9 +1,12 @@
 package com.itmo.microservices.demo.bombardier.flow
 
+import com.itmo.microservices.demo.bombardier.exception.BadRequestException
+import com.itmo.microservices.demo.bombardier.external.knownServices.KnownServices
+import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceDescriptor
+import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceWithApiAndAdditional
 import com.itmo.microservices.demo.bombardier.stages.*
 import com.itmo.microservices.demo.bombardier.stages.TestStage.TestContinuationType.CONTINUE
 import com.itmo.microservices.demo.bombardier.stages.TestStage.TestContinuationType.STOP
-import com.itmo.microservices.demo.common.exception.BadRequestException
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -13,12 +16,10 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
-import   com.itmo.microservices.demo.common.metrics.Metrics
+import com.itmo.microservices.demo.common.metrics.Metrics
 
 @Service
 class TestController(
-    private val userManagement: UserManagement,
-    private val serviceApi: ServiceApi,
     choosingUserAccountStage: ChoosingUserAccountStage,
     orderCreationStage: OrderCreationStage,
     orderCollectingStage: OrderCollectingStage,
@@ -40,17 +41,17 @@ class TestController(
     private val coroutineScope = CoroutineScope(executor.asCoroutineDispatcher())
 
     private val testStages = listOf(
-        choosingUserAccountStage.asErrorFree(),
-        orderCreationStage.asErrorFree(),
-        orderCollectingStage.asErrorFree(),
+            choosingUserAccountStage.asErrorFree(),
+            orderCreationStage.asErrorFree(),
+            orderCollectingStage.asErrorFree(),
 //        OrderAbandonedStage(serviceApi).asErrorFree(),
-        orderFinalizingStage.asErrorFree(),
-        orderSettingDeliverySlotsStage.asErrorFree(),
-        orderChangeItemsAfterFinalizationStage,
-        orderPaymentStage.asRetryable().asErrorFree(),
-        orderCollectingStage.asErrorFree(),
-        orderDeliveryStage.asErrorFree()
-    )
+            orderFinalizingStage.asErrorFree(),
+            orderSettingDeliverySlotsStage.asErrorFree(),
+            orderChangeItemsAfterFinalizationStage,
+            orderPaymentStage.asRetryable().asErrorFree(),
+            orderCollectingStage.asErrorFree(),
+            orderDeliveryStage.asErrorFree()
+        )
 
     fun startTestingForService(params: TestParameters) {
         val testingFlowCoroutine = SupervisorJob()
@@ -60,13 +61,16 @@ class TestController(
             throw BadRequestException("There is no such feature launch several flows for the service in parallel :(")
         }
 
+        val descriptor = KnownServices.getInstance().descriptorFromName(params.serviceName)
+        val stuff = KnownServices.getInstance().getStuff(params.serviceName)
+
         runBlocking {
-            userManagement.createUsersPool(params.serviceName, params.numberOfUsers)
+            stuff.userManagement.createUsersPool(params.numberOfUsers)
         }
 
         repeat(params.parallelProcessesNumber) {
-            log.info("Launch coroutine for ${params.serviceName}")
-            launchNewTestFlow(params.serviceName)
+            log.info("Launch coroutine for $descriptor")
+            launchNewTestFlow(descriptor, stuff)
         }
     }
 
@@ -94,7 +98,8 @@ class TestController(
         val testsFinished: AtomicInteger = AtomicInteger(0)
     )
 
-    private fun launchNewTestFlow(serviceName: String) {
+    private fun launchNewTestFlow(descriptor: ServiceDescriptor, stuff: ServiceWithApiAndAdditional) {
+        val serviceName = descriptor.name
         val metrics = metrics.withTags(metrics.serviceLabel, serviceName)
 
         val testingFlow = runningTests[serviceName] ?: return
@@ -115,9 +120,9 @@ class TestController(
 
         coroutineScope.launch(testingFlow.testFlowCoroutine + TestContext(serviceName = serviceName)) {
             val testStartTime = System.currentTimeMillis()
-            testStages.forEachIndexed() { i, stage ->
+            testStages.forEachIndexed { i, stage ->
                 val stageResult = metrics.withTags(metrics.stageLabel, stage.name())
-                    .stageDurationRecord(stage)
+                    .stageDurationRecord(stage, stuff.userManagement, stuff.api)
                 when {
                     i == testStages.size - 1 && !stageResult.iSFailState() || stageResult == STOP -> {
                         metrics.testOkDurationRecord(System.currentTimeMillis() - testStartTime)
@@ -136,7 +141,7 @@ class TestController(
                 log.error("Unexpected fail in test", th)
             }
             log.info("Test ${testingFlow.testsFinished.incrementAndGet()} finished")
-            launchNewTestFlow(serviceName)
+            launchNewTestFlow(descriptor, stuff)
         }
     }
 }
@@ -159,7 +164,7 @@ data class PaymentDetails(
     var failedAt: Long? = null,
     var finishedAt: Long? = null,
     var attempt: Int = 0,
-    var amount: Amount? = null,
+    var amount: Int? = null,
 )
 
 data class TestParameters(

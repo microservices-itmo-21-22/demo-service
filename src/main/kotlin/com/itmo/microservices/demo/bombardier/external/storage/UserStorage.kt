@@ -1,11 +1,13 @@
 package com.itmo.microservices.demo.bombardier.external.storage
 
-import com.itmo.microservices.demo.bombardier.flow.User
+import com.itmo.microservices.demo.bombardier.external.User
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.springframework.stereotype.Component
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+
+class UserNotFoundException(username: String) : Exception(username)
 
 @Component
 class UserStorage {
@@ -29,5 +31,5 @@ class UserStorage {
         }
     }
 
-    suspend fun get(userId: UUID) = users[userId]?.first ?: throw IllegalArgumentException("No such user: $userId")
+    suspend fun get(userId: UUID) = users[userId]?.first ?: throw UserNotFoundException(userId.toString())
 }

@@ -1,7 +1,7 @@
 package com.itmo.microservices.demo.bombardier.external.storage
 
-import com.itmo.microservices.demo.bombardier.flow.BookingLogRecord
-import com.itmo.microservices.demo.bombardier.flow.CatalogItem
+import com.itmo.microservices.demo.bombardier.external.BookingLogRecord
+import com.itmo.microservices.demo.bombardier.external.CatalogItem
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.springframework.stereotype.Component
@@ -9,16 +9,16 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 
-@Component
+//@Component
 class ItemStorage {
     val items: ConcurrentHashMap<UUID, Pair<CatalogItem, Mutex>> = listOf(
-        CatalogItem(title = "Socks", amount = 1),
-        CatalogItem(title = "Book", amount = Int.MAX_VALUE),
-        CatalogItem(title = "Plate", amount = Int.MAX_VALUE),
-        CatalogItem(title = "Table", amount = Int.MAX_VALUE),
-        CatalogItem(title = "Chair", amount = Int.MAX_VALUE),
-        CatalogItem(title = "Watch", amount = Int.MAX_VALUE),
-        CatalogItem(title = "Bed", amount = Int.MAX_VALUE)
+        CatalogItem(id = UUID.randomUUID(), description = "", title = "Socks", amount = 1),
+        CatalogItem(id = UUID.randomUUID(), description = "", title = "Book", amount = Int.MAX_VALUE),
+        CatalogItem(id = UUID.randomUUID(), description = "", title = "Plate", amount = Int.MAX_VALUE),
+        CatalogItem(id = UUID.randomUUID(), description = "", title = "Table", amount = Int.MAX_VALUE),
+        CatalogItem(id = UUID.randomUUID(), description = "", title = "Chair", amount = Int.MAX_VALUE),
+        CatalogItem(id = UUID.randomUUID(), description = "", title = "Watch", amount = Int.MAX_VALUE),
+        CatalogItem(id = UUID.randomUUID(), description = "", title = "Bed", amount = Int.MAX_VALUE)
     ).map { it.id to (it to Mutex()) }.toMap(ConcurrentHashMap<UUID, Pair<CatalogItem, Mutex>>())
 
     val bookingRecords = ConcurrentLinkedQueue<BookingLogRecord>() // todo sukhoa should be moved to separate class

@@ -1,10 +1,10 @@
 package com.itmo.microservices.demo.common.metrics
 
+import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
+import com.itmo.microservices.demo.bombardier.flow.UserManagement
 import com.itmo.microservices.demo.bombardier.stages.TestStage
-import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.Timer
-import kotlinx.coroutines.Job
 import java.util.concurrent.Callable
 import java.util.concurrent.TimeUnit
 
@@ -19,9 +19,13 @@ class Metrics {
         return m
     }
 
-    suspend fun stageDurationRecord(stage: TestStage): TestStage.TestContinuationType {
+    suspend fun stageDurationRecord(
+        stage: TestStage,
+        userManagement: UserManagement,
+        externalServiceApi: ExternalServiceApi
+    ): TestStage.TestContinuationType {
         val startTime = System.currentTimeMillis()
-        val res = stage.run()
+        val res = stage.run(userManagement, externalServiceApi)
         val endTime = System.currentTimeMillis()
         if (res.iSFailState()) {
             Timer.builder(stageDurationFailName).publishPercentiles(0.95).tags(*this.tags.toTypedArray())

@@ -11,5 +11,8 @@ spring:
 #      enabled: true
 #      path: /h2-console
 
+server:
+  port: 8081
+
 security:
   token-lifetime: 30m

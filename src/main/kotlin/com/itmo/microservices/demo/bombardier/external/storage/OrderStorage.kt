@@ -1,6 +1,6 @@
 package com.itmo.microservices.demo.bombardier.external.storage
 
-import com.itmo.microservices.demo.bombardier.flow.Order
+import com.itmo.microservices.demo.bombardier.external.Order
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.springframework.stereotype.Component

@@ -2,6 +2,10 @@ package com.itmo.microservices.demo.bombardier.stages
 
 import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
+import com.itmo.microservices.demo.bombardier.external.DeliverySubmissionOutcome
+import com.itmo.microservices.demo.bombardier.external.FinancialOperationType
+import com.itmo.microservices.demo.bombardier.external.OrderStatus
+import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
 import com.itmo.microservices.demo.bombardier.flow.*
 import com.itmo.microservices.demo.bombardier.logging.OrderCommonNotableEvents
 import com.itmo.microservices.demo.bombardier.logging.OrderDeliveryNotableEvents.*
@@ -11,33 +15,24 @@ import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 @Component
-class OrderDeliveryStage(
-    private val serviceApi: ServiceApi
-) : TestStage {
+class OrderDeliveryStage : TestStage {
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
 
-    override suspend fun run(): TestStage.TestContinuationType {
-        val orderBeforeDelivery = serviceApi.getOrder(testCtx().orderId!!)
+    override suspend fun run(userManagement: UserManagement, externalServiceApi: ExternalServiceApi): TestStage.TestContinuationType {
+        val orderBeforeDelivery = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
 
-        if (orderBeforeDelivery.status !is OrderStatus.OrderPayed) {
+        if (orderBeforeDelivery.deliveryDuration == null) {
             eventLogger.error(E_INCORRECT_ORDER_STATUS, orderBeforeDelivery.id)
             return TestStage.TestContinuationType.FAIL
         }
 
-        if (orderBeforeDelivery.deliveryDuration == null) {
-            eventLogger.error(E_NULL_DELIVERY_TIME, orderBeforeDelivery.id)
-            return TestStage.TestContinuationType.FAIL
-        }
-
-        serviceApi.simulateDelivery(testCtx().orderId!!)
-
         ConditionAwaiter.awaitAtMost(orderBeforeDelivery.deliveryDuration.toSeconds() + 5, TimeUnit.SECONDS)
             .condition {
-                val updatedOrder = serviceApi.getOrder(testCtx().orderId!!)
+                val updatedOrder = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
                 updatedOrder.status is OrderStatus.OrderDelivered ||
                         updatedOrder.status is OrderStatus.OrderRefund &&
-                        serviceApi.userFinancialHistory(
+                        externalServiceApi.userFinancialHistory(
                             testCtx().userId!!,
                             testCtx().orderId!!
                         ).last().type == FinancialOperationType.REFUND
@@ -47,10 +42,10 @@ class OrderDeliveryStage(
                 throw TestStage.TestStageFailedException("Exception instead of silently fail")
             }
             .startWaiting()
-        val orderAfterDelivery = serviceApi.getOrder(testCtx().orderId!!)
+        val orderAfterDelivery = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
         when (orderAfterDelivery.status) {
             is OrderStatus.OrderDelivered -> {
-                val deliveryLog = serviceApi.deliveryLog(testCtx().orderId!!)
+                val deliveryLog = externalServiceApi.deliveryLog(testCtx().userId!!, testCtx().orderId!!)
                 if (deliveryLog.outcome != DeliverySubmissionOutcome.SUCCESS) {
                     eventLogger.error(E_DELIVERY_OUTCOME_FAIL, orderAfterDelivery.id)
                     return TestStage.TestContinuationType.FAIL
@@ -69,7 +64,8 @@ class OrderDeliveryStage(
                 eventLogger.info(I_DELIVERY_SUCCESS, orderAfterDelivery.id)
             }
             is OrderStatus.OrderRefund -> {
-                val userFinancialHistory = serviceApi.userFinancialHistory(testCtx().userId!!, testCtx().orderId!!)
+                val userFinancialHistory =
+                    externalServiceApi.userFinancialHistory(testCtx().userId!!, testCtx().orderId!!)
                 if (userFinancialHistory.filter { it.type == FinancialOperationType.WITHDRAW }.sumOf { it.amount } !=
                     userFinancialHistory.filter { it.type == FinancialOperationType.REFUND }.sumOf { it.amount }) {
                     eventLogger.error(E_WITHDRAW_AND_REFUND_DIFFERENT, orderAfterDelivery.id,
