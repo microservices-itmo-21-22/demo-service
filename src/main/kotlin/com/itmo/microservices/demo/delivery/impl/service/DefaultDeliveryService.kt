@@ -1,9 +1,11 @@
 package com.itmo.microservices.demo.delivery.impl.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.eventbus.EventBus
 import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.common.exception.NotFoundException
+import com.itmo.microservices.demo.delivery.DeliveryExternalService.ExecutorsFactory
 import com.itmo.microservices.demo.delivery.api.messaging.DeliveryCreatedEvent
 import com.itmo.microservices.demo.delivery.api.messaging.DeliveryDeletedEvent
 import com.itmo.microservices.demo.delivery.api.model.DeliveryModel
@@ -17,7 +19,12 @@ import kong.unirest.json.JSONObject
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.lang.RuntimeException
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
 import java.util.*
+import java.util.concurrent.Executors
 
 
 @Service
@@ -26,6 +33,8 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
 
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
+
+    private var httpClient : HttpClient = HttpClient.newBuilder().executor(ExecutorsFactory.executor()).build()
 
     override fun getDelivery(deliveryId: UUID): DeliveryModel {
         return deliveryRepository.findByIdOrNull(deliveryId)?.toModel() ?: throw NotFoundException("Order $deliveryId not found")
@@ -89,18 +98,28 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
 
     fun transaction() : JSONObject{
         var tries = 0
+        val values = mapOf("clientSecret" to "7d65037f-e9af-433e-8e3f-a3da77e019b1")
+        val objectMapper = ObjectMapper()
+        val requestBody = objectMapper.writeValueAsString(values)
+        val request = HttpRequest.newBuilder()
+            .header("Content-Type", "application/json;IEEE754Compatible=true")
+            .uri(URI.create("http://77.234.215.138:30027/transactions/"))
+            .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+            .build()
+
         while(true){
             tries++
             if (tries == 6) throw RuntimeException("Failed to send request")
-
-            var response = Unirest.post("http://77.234.215.138:30027/transactions/")
-                .header("Content-Type", "application/json;IEEE754Compatible=true")
-                .body("{\"clientSecret\": \"7d65037f-e9af-433e-8e3f-a3da77e019b1\"}")
-                .asJson()
-            if (response.status != 200){
+            var future = httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+//            var response = Unirest.post("http://77.234.215.138:30027/transactions/")
+//                .header("Content-Type", "application/json;IEEE754Compatible=true")
+//                .body("{\"clientSecret\": \"7d65037f-e9af-433e-8e3f-a3da77e019b1\"}")
+//                .asJson()
+            var response = future.get()
+            if (response.statusCode() != 200){
                 continue
             }
-            var json = response.body.`object`
+            var json = JSONObject(response.body())
             if (json.get("status").equals("SUCCESS")){
                 return json
             }
