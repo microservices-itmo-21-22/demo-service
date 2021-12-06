@@ -15,5 +15,5 @@ data class AppUserModel(
         val lastBasketId: UUID,
         @JsonIgnore
         val password: String) {
-        fun userDetails(): UserDetails = User(username, password, emptyList())
+        fun userDetails(): UserDetails = User(name, password, emptyList())
 }

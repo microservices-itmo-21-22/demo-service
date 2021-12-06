@@ -38,12 +38,19 @@ class DefaultUserService(private val userRepository: UserRepository,
         ?: throw NotFoundException("User $id not found")
 
     override fun registerUser(request: RegistrationRequest): RegistrationResult {
-        val userEntity = userRepository.save(request.toEntity())
-        eventBus.post(UserCreatedEvent(userEntity.toModel()))
-        eventLogger.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.username)
-        val id = userEntity.id
-        val name = userEntity.name
-        return RegistrationResult(id, name)
+        val user = userRepository.findByName(request.name)
+        if (user != null)
+        {
+            throw NotFoundException("User already exist")
+        }
+        else {
+            val userEntity = userRepository.save(request.toEntity())
+            eventBus.post(UserCreatedEvent(userEntity.toModel()))
+            eventLogger.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.username)
+            val id = userEntity.id
+            val name = userEntity.name
+            return RegistrationResult(id, name)
+        }
     }
 
 
