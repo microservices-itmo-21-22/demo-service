@@ -84,6 +84,7 @@ class OrderFinalizingStage : TestStage {
                     orderStateBeforeFinalizing.status,
                     orderStateAfterBooking.status
                 )
+
                 return TestStage.TestContinuationType.FAIL
             }
         }

@@ -1,12 +1,12 @@
 package com.itmo.microservices.demo.bombardier.flow
 
 import com.itmo.microservices.demo.bombardier.exception.BadRequestException
-import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
 import com.itmo.microservices.demo.bombardier.external.knownServices.KnownServices
 import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceDescriptor
 import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceWithApiAndAdditional
 import com.itmo.microservices.demo.bombardier.stages.*
 import com.itmo.microservices.demo.bombardier.stages.TestStage.TestContinuationType.CONTINUE
+import com.itmo.microservices.demo.bombardier.stages.TestStage.TestContinuationType.STOP
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -16,6 +16,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
+import com.itmo.microservices.demo.common.metrics.Metrics
 
 @Service
 class TestController(
@@ -30,6 +31,7 @@ class TestController(
 ) {
     companion object {
         val log = LoggerFactory.getLogger(TestController::class.java)
+        val metrics = Metrics()
     }
 
     val runningTests = ConcurrentHashMap<String, TestingFlow>()
@@ -98,6 +100,8 @@ class TestController(
 
     private fun launchNewTestFlow(descriptor: ServiceDescriptor, stuff: ServiceWithApiAndAdditional) {
         val serviceName = descriptor.name
+        val metrics = metrics.withTags(metrics.serviceLabel, serviceName)
+
         val testingFlow = runningTests[serviceName] ?: return
 
         if (testingFlow.testParams.numberOfTests != null && testingFlow.testsFinished.get() >= testingFlow.testParams.numberOfTests) {
@@ -115,9 +119,20 @@ class TestController(
         log.info("Starting $testNum test for service $serviceName, parent job is ${testingFlow.testFlowCoroutine}")
 
         coroutineScope.launch(testingFlow.testFlowCoroutine + TestContext(serviceName = serviceName)) {
-            testStages.forEach { stage ->
-                when (stage.run(stuff.userManagement, stuff.api)) {
-                    CONTINUE -> Unit
+            val testStartTime = System.currentTimeMillis()
+            testStages.forEachIndexed { i, stage ->
+                val stageResult = metrics.withTags(metrics.stageLabel, stage.name())
+                    .stageDurationRecord(stage, stuff.userManagement, stuff.api)
+                when {
+                    i == testStages.size - 1 && !stageResult.iSFailState() || stageResult == STOP -> {
+                        metrics.testOkDurationRecord(System.currentTimeMillis() - testStartTime)
+                        return@launch
+                    }
+                    stageResult.iSFailState() -> {
+                        metrics.testFailDurationRecord(System.currentTimeMillis() - testStartTime)
+                        return@launch
+                    }
+                    stageResult == CONTINUE -> Unit
                     else -> return@launch
                 }
             }

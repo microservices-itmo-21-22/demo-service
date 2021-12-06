@@ -10,7 +10,7 @@ import java.time.Duration
 import kotlin.random.Random
 
 @Component
-class OrderSettingDeliverySlotsStage() : TestStage {
+class OrderSettingDeliverySlotsStage : TestStage {
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
 

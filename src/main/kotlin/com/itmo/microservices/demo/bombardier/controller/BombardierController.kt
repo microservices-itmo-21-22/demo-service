@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/test")
 class BombardierController(private val testApi: TestController) {
-
     companion object {
         val logger = LoggerFactory.getLogger(BombardierController::class.java)
     }

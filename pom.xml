@@ -14,7 +14,7 @@
     <artifactId>bombardier</artifactId>
     <version>0.1.1-SNAPSHOT</version>
     <name>bombardier</name>
-    <description>Demo project for microservices course 21-22</description>
+    <description>Trying to kill your PPO projects</description>
 
     <properties>
         <java.version>11</java.version>
@@ -88,6 +88,11 @@
             <version>1.5.2</version>
         </dependency>
         <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>1.5.2</version>
+        </dependency>
+        <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>
             <version>1.6.2</version>
@@ -108,6 +113,11 @@
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
             <version>${jjwt.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-kotlin</artifactId>
         </dependency>
 
         <dependency>
@@ -136,6 +146,12 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+        </dependency>
+
 
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
