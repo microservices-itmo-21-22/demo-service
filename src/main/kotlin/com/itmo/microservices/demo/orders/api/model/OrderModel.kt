@@ -9,5 +9,5 @@ data class OrderModel (
     val basketId: UUID?,
     val date: Date?,
     val userId: UUID?,
-    val status : Int
+    val status : OrderStatus
 )

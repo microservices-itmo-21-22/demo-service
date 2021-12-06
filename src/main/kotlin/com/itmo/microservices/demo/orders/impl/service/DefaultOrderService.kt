@@ -9,6 +9,7 @@ import com.itmo.microservices.demo.orders.api.messaging.OrderCreatedEvent
 import com.itmo.microservices.demo.orders.api.messaging.OrderDeletedEvent
 import com.itmo.microservices.demo.orders.api.messaging.PaymentAssignedEvent
 import com.itmo.microservices.demo.orders.api.model.OrderModel
+import com.itmo.microservices.demo.orders.api.model.OrderStatus
 import com.itmo.microservices.demo.orders.api.model.PaymentModel
 import com.itmo.microservices.demo.orders.api.service.OrderService
 import com.itmo.microservices.demo.orders.impl.entity.Order
@@ -18,6 +19,7 @@ import com.itmo.microservices.demo.orders.impl.repository.OrderPaymentRepository
 import com.itmo.microservices.demo.orders.impl.util.toEntity
 import com.itmo.microservices.demo.orders.impl.util.toModel
 import com.itmo.microservices.demo.users.api.service.UserService
+import org.aspectj.weaver.ast.Or
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
@@ -52,7 +54,7 @@ class DefaultOrderService(private val orderRepository: OrderRepository,
 
     override fun createOrderFromBusket(busketId: UUID, user : UserDetails): OrderModel {
         val userId = getUserIdByUserDetails(user)
-        val order = Order(UUID.randomUUID(), 0, busketId, userId, Date());
+        val order = Order(UUID.randomUUID(), OrderStatus.COLLECTING, busketId, userId, Date());
         orderRepository.save(order)
         val orderModel = order.toModel()
         eventBus.post(OrderCreatedEvent(orderModel))
@@ -67,15 +69,15 @@ class DefaultOrderService(private val orderRepository: OrderRepository,
             throw AccessDeniedException("Cannot delete order that was not created by you")
         eventBus.post(OrderDeletedEvent(order.toModel()))
         eventLogger.info(OrderServiceNotableEvents.I_ORDER_DELETED, order)
-        order.status = 4
+        order.status = OrderStatus.DISCARD
         orderRepository.save(order)
     }
 
     override fun assignPayment(orderId: UUID, payment : PaymentModel) {
         var order = orderRepository.findByIdOrNull(orderId) ?: throw NotFoundException("Order $orderId not found")
-        if(order.status != 0)
+        if(order.status != OrderStatus.PAID)
             throw OperationNotSupportedException("Order has already been paid")
-        order.status = 1
+        order.status = OrderStatus.PAID
         orderRepository.save(order)
         val paymentEntity = payment.toEntity()
         eventBus.post(PaymentAssignedEvent(payment))
