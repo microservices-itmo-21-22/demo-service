@@ -8,5 +8,4 @@ data class ProductModel (
         var description: String?,
         var price: Int?,
         var amount:Int?
-
 )

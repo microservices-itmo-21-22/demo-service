@@ -8,7 +8,7 @@ import java.util.*
 interface OrderService {
     fun getOrderById(orderId: UUID): OrderDto
     fun createOrder(userId: UserDetails): OrderDto
-    fun addItemToOrder(orderId: UUID, itemId: UUID, amount: Int)
+    fun addItemToOrder(orderId: UUID, productId: UUID, amount: Int)
     fun registerOrder(orderId: UUID): BookingDto
     fun setDeliveryTime(orderId: UUID, slotinSec: Int): BookingDto
 }

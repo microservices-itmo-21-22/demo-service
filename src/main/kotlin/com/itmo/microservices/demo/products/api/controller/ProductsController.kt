@@ -26,4 +26,5 @@ class ProductsController(private val productsService: ProductsService) {
     fun getProductCatalog(@AuthenticationPrincipal @RequestParam available:Boolean):List<Product> = productsService.getAllProducts(available)
 
 
+
 }

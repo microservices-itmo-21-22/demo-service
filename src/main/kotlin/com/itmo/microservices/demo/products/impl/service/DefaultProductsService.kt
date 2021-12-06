@@ -11,7 +11,9 @@ import com.itmo.microservices.demo.products.impl.entity.Product
 import com.itmo.microservices.demo.products.impl.logging.ProductsServiceNotableEvents
 import com.itmo.microservices.demo.products.impl.repository.ProductsRepository
 import com.itmo.microservices.demo.products.impl.util.toModel
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.util.*
 import javax.annotation.PostConstruct
 
 @Suppress("UnstableApiUsage")
@@ -32,6 +34,10 @@ class DefaultProductsService(private val productsRepository: ProductsRepository,
             false->productsRepository.findAllByAmountLessThan(1)
         }
     }
+
+    override fun getProduct(id: UUID): Product =
+        productsRepository.findByIdOrNull(id.toString()) ?: throw NullPointerException("Item $id not found")
+
 
     @PostConstruct
     fun addItemsIntoDatabase(){
