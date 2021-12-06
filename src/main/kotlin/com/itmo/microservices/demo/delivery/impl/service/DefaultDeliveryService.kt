@@ -15,7 +15,10 @@ import com.itmo.microservices.demo.delivery.impl.util.toModel
 import kong.unirest.Unirest
 import kong.unirest.json.JSONObject
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.bind.annotation.ResponseStatus
+import java.lang.Exception
 import java.lang.RuntimeException
 import java.util.*
 
@@ -56,9 +59,15 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
         eventLogger.info(DeliveryServiceNotableEvents.I_DELIVERY_DELIVERED, delivery)
     }
 
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "<= 0 number of slots")
+    class InvalidNumberOfSlotsException : IllegalArgumentException()
+
+    @ResponseStatus(value = HttpStatus.SERVICE_UNAVAILABLE, reason = "unable to reach external service")
+    class UnableToReachExternalServiceException : RuntimeException()
+
     override fun getDeliverySlots(number: Int): List<Int> {
         if (number <= 0) {
-            throw IllegalArgumentException("Number of slots supposed to be more than 0, not $number")
+            throw InvalidNumberOfSlotsException()
         }
         //access API, this transaction imitates receiving information about available slots
         val json = transaction()
@@ -91,7 +100,7 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
         var tries = 0
         while(true){
             tries++
-            if (tries == 6) throw RuntimeException("Failed to send request")
+            if (tries == 6) throw UnableToReachExternalServiceException()
 
             var response = Unirest.post("http://77.234.215.138:30027/transactions/")
                 .header("Content-Type", "application/json;IEEE754Compatible=true")
