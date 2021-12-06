@@ -1,6 +1,7 @@
 package com.itmo.microservices.demo.orders.impl.service
 
 import com.google.common.eventbus.EventBus
+import com.itmo.microservices.demo.orders.api.model.OrderStatus
 import com.itmo.microservices.demo.orders.api.service.OrderService
 import com.itmo.microservices.demo.orders.impl.entity.Order
 import com.itmo.microservices.demo.orders.impl.repository.OrderRepository
@@ -23,7 +24,7 @@ internal class DefaultOrderServiceTests {
     private val id = UUID.randomUUID()
     private fun orderMock(): Order {
         return Order(
-            UUID.randomUUID(), 0, UUID.randomUUID(), UUID.fromString("00000000-0000-0000-0000-000000000000"), Date()
+            UUID.randomUUID(), OrderStatus.COLLECTING, UUID.randomUUID(), UUID.fromString("00000000-0000-0000-0000-000000000000"), Date()
         )
     }
 
