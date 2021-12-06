@@ -19,7 +19,7 @@ import java.util.*
 @RequestMapping
 class StockItemController(private val stockItemService: StockItemService) {
 
-    @GetMapping("/items?available={available}")
+    @GetMapping("/items")
     @Operation(
         summary = "Get all stock items",
         responses = [
@@ -28,7 +28,7 @@ class StockItemController(private val stockItemService: StockItemService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun allStockItems(@PathVariable available : Boolean): List<StockItemModel> = stockItemService.allStockItems()
+    fun allStockItems(@RequestParam available : Boolean): List<StockItemModel> = stockItemService.allStockItems()
 
     @GetMapping("/items/{itemId}")
     @Operation(
