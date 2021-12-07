@@ -3,6 +3,7 @@ package com.itmo.microservices.demo.products.impl.service
 import com.google.common.eventbus.EventBus
 import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
+import com.itmo.microservices.demo.common.exception.NotFoundException
 import com.itmo.microservices.demo.products.api.messaging.ProductAddedEvent
 import com.itmo.microservices.demo.products.api.messaging.ProductGotEvent
 import com.itmo.microservices.demo.products.api.model.*
@@ -11,7 +12,9 @@ import com.itmo.microservices.demo.products.impl.entity.Product
 import com.itmo.microservices.demo.products.impl.logging.ProductsServiceNotableEvents
 import com.itmo.microservices.demo.products.impl.repository.ProductsRepository
 import com.itmo.microservices.demo.products.impl.util.toModel
+import com.itmo.microservices.demo.users.impl.util.toModel
 import org.springframework.stereotype.Service
+import java.util.*
 import javax.annotation.PostConstruct
 
 @Suppress("UnstableApiUsage")
@@ -32,6 +35,11 @@ class DefaultProductsService(private val productsRepository: ProductsRepository,
             false->productsRepository.findAllByAmountLessThan(1)
         }
     }
+
+    override fun getProductInfoById(id:String):ProductModel=
+        productsRepository.findById(UUID.fromString(id))?.toModel() ?:
+        throw NotFoundException("Product with id $id not found")
+
 
     @PostConstruct
     fun addItemsIntoDatabase(){

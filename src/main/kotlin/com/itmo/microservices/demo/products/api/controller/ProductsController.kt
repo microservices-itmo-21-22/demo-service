@@ -2,6 +2,7 @@ package com.itmo.microservices.demo.products.api.controller
 
 
 
+import com.itmo.microservices.demo.products.api.model.ProductModel
 import com.itmo.microservices.demo.products.api.service.ProductsService
 import com.itmo.microservices.demo.products.impl.entity.Product
 import io.swagger.v3.oas.annotations.Operation
@@ -25,5 +26,14 @@ class ProductsController(private val productsService: ProductsService) {
     )
     fun getProductCatalog(@AuthenticationPrincipal @RequestParam available:Boolean):List<Product> = productsService.getAllProducts(available)
 
-
+    @RequestMapping("/item",method = [RequestMethod.GET])
+    @Operation(
+        summary = "Get product information by id",
+        responses = [
+            ApiResponse(description = "OK", responseCode = "200"),
+            ApiResponse(description = "Bad request", responseCode = "400", content = [Content()])
+        ],
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    fun getProductInfoById(@AuthenticationPrincipal @RequestParam id:String):ProductModel = productsService.getProductInfoById(id)
 }

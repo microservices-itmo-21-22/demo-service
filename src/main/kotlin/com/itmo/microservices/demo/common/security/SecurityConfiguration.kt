@@ -32,6 +32,7 @@ class SecurityConfiguration(
                 .antMatchers( "/users").permitAll()
                 .antMatchers( "/users/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/items").permitAll()
+                .antMatchers(HttpMethod.GET, "/item").permitAll()
                 .antMatchers(HttpMethod.POST, "/authentication").permitAll()
                 .antMatchers(HttpMethod.POST, "/authentication/refresh").hasAuthority("REFRESH")
                 .antMatchers("/actuator/**").permitAll()
