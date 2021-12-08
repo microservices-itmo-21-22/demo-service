@@ -3,6 +3,7 @@ package com.itmo.microservices.demo.orders.api.controller
 import com.itmo.microservices.demo.delivery.api.model.DeliveryModel
 import com.itmo.microservices.demo.delivery.api.service.DeliveryService
 import com.itmo.microservices.demo.orders.api.service.OrderService
+import com.itmo.microservices.demo.orders.impl.service.DefaultOrderService
 import com.itmo.microservices.demo.shoppingCartService.api.service.CartService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -29,7 +30,7 @@ class OrderController(private val orderService: OrderService,
             ],
             security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun createOrder(@AuthenticationPrincipal user: UserDetails) = shoppingCartService.makeCart()
+    fun createOrder(@AuthenticationPrincipal user: UserDetails) = orderService.createOrder()
 
     @PutMapping("/orders/{order_id}/items/{item_id}")
     @Operation(
@@ -42,7 +43,7 @@ class OrderController(private val orderService: OrderService,
             ],
             security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun putItemsToCart(@PathVariable order_id : UUID, @PathVariable item_id : UUID, @RequestParam(value = "amount") amount : Int = 1, @AuthenticationPrincipal user : UserDetails) = shoppingCartService.putItemInCart(order_id, item_id, amount)
+    fun putItemsToCart(@PathVariable order_id : UUID, @PathVariable item_id : UUID, @RequestParam(value = "amount") amount : Long = 1, @AuthenticationPrincipal user : UserDetails) = orderService.putItemToOrder(order_id, item_id, amount)
 
     @DeleteMapping("/orders/{order_id}/bookings")
     @Operation(
@@ -55,7 +56,7 @@ class OrderController(private val orderService: OrderService,
             ],
             security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun book(@PathVariable order_id : UUID, @AuthenticationPrincipal user : UserDetails) = orderService.createOrderFromBusket(order_id, user)
+    fun book(@PathVariable order_id : UUID, @AuthenticationPrincipal user : UserDetails) = orderService.book(order_id, user)
 
     @PostMapping("/orders/{order_id}/delivery?slot={slot_in_sec}")
     @Operation(
@@ -81,6 +82,6 @@ class OrderController(private val orderService: OrderService,
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getOrder(@PathVariable order_id: UUID) = shoppingCartService.getCart(order_id)
+    fun getOrder(@PathVariable order_id: UUID) = orderService.getOrder(order_id)
 
 }
