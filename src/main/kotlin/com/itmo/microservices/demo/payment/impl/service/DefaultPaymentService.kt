@@ -16,6 +16,10 @@ import kotlin.random.Random
 import kong.unirest.Unirest
 import kong.unirest.json.JSONObject
 import com.itmo.microservices.demo.payment.impl.util.PaymentServiceMeta
+import kong.unirest.HttpResponse
+import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.ResponseStatus
+import java.lang.RuntimeException
 import java.lang.StringBuilder
 
 @Service
@@ -24,31 +28,39 @@ class DefaultPaymentService(private val paymentRepository: PaymentRepository) : 
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
 
+    @ResponseStatus(value = HttpStatus.SERVICE_UNAVAILABLE, reason = "unable to reach external service")
+    class UnableToReachExternalServiceException : RuntimeException()
+
     fun makeTransaction() : JSONObject {
         val url = PaymentServiceMeta.makeTransactionUri()
 
-        val response = Unirest.post(url)
+        val attempts = 3
+        var response = Unirest.post(url)
                 .header("Content-Type", "application/json;IEEE754Compatible=true")
                 .body("{\"clientSecret\": \"7d65037f-e9af-433e-8e3f-a3da77e019b1\"}")
                 .asJson()
+
+        while (attempts > 0 && response.status != 200) {
+            response = Unirest.post(url)
+                    .header("Content-Type", "application/json;IEEE754Compatible=true")
+                    .body("{\"clientSecret\": \"7d65037f-e9af-433e-8e3f-a3da77e019b1\"}")
+                    .asJson()
+
+            val json = response.body.`object`
+
+            if (response.status == 200) {
+                return json
+            }
+        }
 
         val json = response.body.`object`
 
         if (response.status == 200) {
             return json
         }
-
-        val sb = StringBuilder()
-
-        sb.append(response.status.toString())
-                .append(" ")
-                .append(json.get("message").toString())
-                .append(" at timestamp ")
-                .append(json.get("timestamp").toString())
-
-        eventLogger.error(PaymentServiceNotableEvents.I_MAKE_TRANSACTION_FAILURE, sb.toString())
-
-        return JSONObject()
+        else {
+            throw UnableToReachExternalServiceException()
+        }
     }
 
     override fun getFinLog(orderId: UUID): List<UserAccountFinancialLogRecordDto> {
@@ -68,16 +80,12 @@ class DefaultPaymentService(private val paymentRepository: PaymentRepository) : 
 
         val transaction = makeTransaction()
 
-        if (transaction.isEmpty) {
-            return PaymentSubmissionDto(0, UUID.fromString("0-0-0-0-0"))
-        }
-
         val id = UUID.fromString(transaction.get("id").toString())
-        val status = transaction.get("status").toString()
+//        val status = transaction.get("status").toString()
 
-        if (status == "FAILURE") {
-            return PaymentSubmissionDto(0, UUID.fromString("0-0-0-0-0"))
-        }
+//        if (status == "FAILURE") {
+//            return PaymentSubmissionDto(0, UUID.fromString("0-0-0-0-0"))
+//        }
 
         val cost = transaction.get("cost").toString().toInt()
         val submitTime = transaction.get("submitTime").toString().toLong()
