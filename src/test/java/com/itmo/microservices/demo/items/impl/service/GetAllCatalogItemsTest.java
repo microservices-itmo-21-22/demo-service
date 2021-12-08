@@ -49,6 +49,6 @@ public class GetAllCatalogItemsTest {
 
     @Test
     public void GetItems() {
-        assertEquals(2, itemService.getCatalogItems().stream().count());
+        assertEquals(2, itemService.getCatalogItems(true).stream().count());
     }
 }
