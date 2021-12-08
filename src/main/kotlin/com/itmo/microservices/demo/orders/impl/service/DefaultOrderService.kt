@@ -22,6 +22,9 @@ import com.itmo.microservices.demo.orders.impl.util.toBookingDto
 import com.itmo.microservices.demo.orders.impl.util.toDto
 import com.itmo.microservices.demo.orders.impl.util.toEntity
 import com.itmo.microservices.demo.orders.impl.util.toModel
+import com.itmo.microservices.demo.stock.api.service.StockItemService
+import com.itmo.microservices.demo.stock.impl.repository.StockItemRepository
+import com.itmo.microservices.demo.stock.impl.util.toModel
 import com.itmo.microservices.demo.users.api.service.UserService
 import kong.unirest.HttpStatus
 import org.hibernate.service.spi.InjectService
@@ -36,7 +39,9 @@ import javax.naming.OperationNotSupportedException
 @Suppress("UnstableApiUsage")
 @Service
 class DefaultOrderService(private val orderRepository: OrderRepository,
+                          private val stockItemRepository: StockItemRepository,
                           private val paymentRepository: PaymentRepository,
+                          private val StockService: StockItemService,
                           private val eventBus: EventBus,
                           private val userService: UserService) : OrderService {
 
@@ -60,9 +65,30 @@ class DefaultOrderService(private val orderRepository: OrderRepository,
 //    }
 //
     override fun book(orderId : UUID, user : UserDetails): BookingDto{
-        var order = orderRepository.findByIdOrNull(orderId) ?: return Order().toBookingDto()
+        var order = orderRepository.findByIdOrNull(orderId) ?: return Order().toBookingDto(setOf())
+        var failedItems = mutableSetOf<UUID>()
+        for (item in order.itemsMap){
+            var stockItem = stockItemRepository.findByIdOrNull(item.key)
+            if (stockItem == null){
+
+                failedItems.add(item.key)
+            } else if (stockItem.amount!! < item.value){
+
+                failedItems.add(item.key)
+            } else{
+
+                var Am = stockItem.amount
+                if (Am != null) {
+                    StockService.reserveStockItem(item.key, item.value.toInt())
+                }
+                else{
+
+                    failedItems.add(item.key)
+                }
+            }
+        }
         order.status = OrderStatus.BOOKED
-        return order.toBookingDto()
+        return order.toBookingDto(failedItems)
     }
 //
 //    override fun deleteOrder(orderId: UUID, user : UserDetails) {

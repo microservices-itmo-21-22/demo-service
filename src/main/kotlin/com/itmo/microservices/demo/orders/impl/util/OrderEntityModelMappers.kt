@@ -4,6 +4,8 @@ import com.itmo.microservices.demo.orders.api.model.BookingDto
 import com.itmo.microservices.demo.orders.api.model.OrderDto
 import com.itmo.microservices.demo.orders.api.model.OrderModel
 import com.itmo.microservices.demo.orders.impl.entity.Order
+import com.itmo.microservices.demo.stock.impl.entity.StockItem
+import java.util.*
 
 //fun OrderModel.toEntity() = Order(
 //    id = this.id,
@@ -28,7 +30,7 @@ fun Order.toDto() : OrderDto = OrderDto(
     deliveryDuration = this.deliveryDuration,
     paymentHistory = this.paymentHistory
 )
-fun Order.toBookingDto() : BookingDto = BookingDto(
+fun Order.toBookingDto(failed : Set<UUID>) : BookingDto = BookingDto(
     id = this.id,
-    failedItems = setOf()
+    failedItems = failed
 )
