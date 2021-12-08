@@ -34,7 +34,7 @@ class DefaultPaymentService(private val paymentRepository: PaymentRepository) : 
     fun makeTransaction() : JSONObject {
         val url = PaymentServiceMeta.makeTransactionUri()
 
-        val attempts = 3
+        var attempts = 3
         var response = Unirest.post(url)
                 .header("Content-Type", "application/json;IEEE754Compatible=true")
                 .body("{\"clientSecret\": \"7d65037f-e9af-433e-8e3f-a3da77e019b1\"}")
@@ -51,6 +51,8 @@ class DefaultPaymentService(private val paymentRepository: PaymentRepository) : 
             if (response.status == 200) {
                 return json
             }
+
+            attempts -= 1
         }
 
         val json = response.body.`object`
