@@ -1,6 +1,7 @@
 package com.itmo.microservices.demo.users.impl.logging
 
 import com.itmo.microservices.commonlib.logging.NotableEvent
+import java.util.*
 
 enum class UserServiceNotableEvents(private val template: String): NotableEvent {
     I_USER_CREATED("User created: {}"),
@@ -13,4 +14,5 @@ enum class UserServiceNotableEvents(private val template: String): NotableEvent 
     override fun getName(): String {
         return name
     }
+
 }

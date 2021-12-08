@@ -8,9 +8,11 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @RestController
 @RequestMapping("/users")
@@ -26,7 +28,7 @@ class UserController(private val userService: UserService) {
     )
     fun register(@RequestBody request: RegistrationRequest) = userService.registerUser(request)
 
-    @GetMapping("/me")
+    @GetMapping("/{user_id}")
     @Operation(
         summary = "Get current user info",
         responses = [
@@ -35,10 +37,11 @@ class UserController(private val userService: UserService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getAccountData(@Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails): AppUserModel =
-            userService.getAccountData(user)
+    fun getAccountData(@PathVariable user_id: UUID): AppUserModel =
+        userService.getAccountData(user_id)
 
-    @DeleteMapping("/me")
+
+    /*@DeleteMapping("/me")
     @Operation(
         summary = "Delete current user",
         responses = [
@@ -47,6 +50,6 @@ class UserController(private val userService: UserService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun deleteCurrentUser(@Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails) =
-            userService.deleteUser(user)
+    fun deleteCurrentUser(@Parameter(hidden = true) @AuthenticationPrincipal request: GetAccountDataRequest) =
+            userService.deleteUser(request)*/
 }
