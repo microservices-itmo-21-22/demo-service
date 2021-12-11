@@ -5,18 +5,20 @@ import com.itmo.microservices.demo.stock.impl.entity.StockItem
 
 fun StockItemModel.toEntity(): StockItem = StockItem(
     id = this.id,
-    name = this.name,
+    title = this.title,
+    description = this.description,
     price = this.price,
-    totalCount = this.totalCount,
+    amount = this.amount,
     reservedCount = this.reservedCount,
     category = this.category
 )
 
 fun StockItem.toModel(): StockItemModel = StockItemModel(
     id = this.id,
-    name = this.name,
+    title = this.title,
+    description = this.description,
     price = this.price,
-    totalCount = this.totalCount,
+    amount = this.amount,
     reservedCount = this.reservedCount,
     category = this.category
 )

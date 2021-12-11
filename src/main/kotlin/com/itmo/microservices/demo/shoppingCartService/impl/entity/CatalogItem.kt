@@ -11,12 +11,13 @@ class CatalogItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     lateinit var id: UUID
     var productId: UUID = UUID.randomUUID()
-    var amount: Int = 0
+    var amount: Int? = 0
 
 
     constructor()
 
-    constructor(productId: UUID, amount: Int) {
+    constructor(id : UUID, productId: UUID, amount: Int?) {
+        this.id = id
         this.productId = productId
         this.amount = amount
     }

@@ -17,7 +17,10 @@ import com.itmo.microservices.demo.delivery.impl.util.toModel
 import kong.unirest.Unirest
 import kong.unirest.json.JSONObject
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.bind.annotation.ResponseStatus
+import java.lang.Exception
 import java.lang.RuntimeException
 import java.net.URI
 import java.net.http.HttpClient
@@ -65,9 +68,15 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
         eventLogger.info(DeliveryServiceNotableEvents.I_DELIVERY_DELIVERED, delivery)
     }
 
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "<= 0 number of slots")
+    class InvalidNumberOfSlotsException : IllegalArgumentException()
+
+    @ResponseStatus(value = HttpStatus.SERVICE_UNAVAILABLE, reason = "unable to reach external service")
+    class UnableToReachExternalServiceException : RuntimeException()
+
     override fun getDeliverySlots(number: Int): List<Int> {
         if (number <= 0) {
-            throw IllegalArgumentException("Number of slots supposed to be more than 0, not $number")
+            throw InvalidNumberOfSlotsException()
         }
         //access API, this transaction imitates receiving information about available slots
         val json = transaction()
@@ -111,10 +120,7 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
             tries++
             if (tries == 6) throw RuntimeException("Failed to send request")
             var future = httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-//            var response = Unirest.post("http://77.234.215.138:30027/transactions/")
-//                .header("Content-Type", "application/json;IEEE754Compatible=true")
-//                .body("{\"clientSecret\": \"7d65037f-e9af-433e-8e3f-a3da77e019b1\"}")
-//                .asJson()
+
             var response = future.get()
             if (response.statusCode() != 200){
                 continue

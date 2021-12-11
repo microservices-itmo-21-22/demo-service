@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS stock304
+/*CREATE TABLE IF NOT EXISTS stock
 (
     id              VARCHAR(255) not null,
     name            VARCHAR(255),
@@ -66,4 +66,4 @@ CREATE TABLE IF NOT EXISTS delivery304
     address         VARCHAR(255),
     slot            INTEGER(255),
     primary key (id)
-);
+);*/

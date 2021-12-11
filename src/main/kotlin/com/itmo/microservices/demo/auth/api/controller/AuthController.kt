@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/authentication")
+//@RequestMapping("/authentication")
 class AuthController(private val authService: AuthService) {
 
-    @PostMapping
+    @PostMapping("/authentication")
     @Operation(
         summary = "Authenticate",
         responses = [
@@ -29,9 +29,9 @@ class AuthController(private val authService: AuthService) {
     fun authenticate(@RequestBody request: AuthenticationRequest): AuthenticationResult =
             authService.authenticate(request)
 
-    @PostMapping("/refresh")
+    @PostMapping("/authentication/refresh")
     @Operation(
-        summary = "Refresh authentication",
+        summary = "Refresh authentication"  ,
         responses = [
             ApiResponse(description = "OK", responseCode = "200"),
             ApiResponse(description = "Authentication error", responseCode = "403", content = [Content()])

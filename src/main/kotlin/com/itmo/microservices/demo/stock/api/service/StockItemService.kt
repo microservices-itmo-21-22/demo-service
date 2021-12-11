@@ -6,7 +6,7 @@ import java.util.*
 
 interface StockItemService {
     fun allStockItems(): List<StockItemModel>
-    fun createStockItem(stockItem: StockItemModel)
+    fun createStockItem(stockItem: StockItemModel) : Boolean
     fun getStockItemById(stockItemId: UUID) : StockItemModel
     fun addStockItem(stockItemId: UUID, number: Int)
     fun reserveStockItem(stockItemId: UUID, number: Int) : Boolean

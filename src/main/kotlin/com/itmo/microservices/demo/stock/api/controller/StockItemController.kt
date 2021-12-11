@@ -16,10 +16,10 @@ import org.springframework.web.client.HttpServerErrorException
 import java.util.*
 
 @RestController
-@RequestMapping("/items")
+@RequestMapping
 class StockItemController(private val stockItemService: StockItemService) {
 
-    @GetMapping
+    @GetMapping("/items")
     @Operation(
         summary = "Get all stock items",
         responses = [
@@ -28,9 +28,9 @@ class StockItemController(private val stockItemService: StockItemService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun allStockItems(@RequestParam("available") available : Boolean): List<StockItemModel> = stockItemService.allStockItems()
+    fun allStockItems(@RequestParam available : Boolean): List<StockItemModel> = stockItemService.allStockItems()
 
-    @GetMapping("/{itemId}")
+    @GetMapping("/items/{itemId}")
     @Operation(
         summary = "Get stock item by id",
         responses = [
@@ -43,20 +43,24 @@ class StockItemController(private val stockItemService: StockItemService) {
     fun getStockItemById(@PathVariable itemId: UUID): StockItemModel =
         stockItemService.getStockItemById(itemId)
 
-    @PostMapping
+    @PostMapping("/items")
     @Operation(
         summary = "Create stockItem",
         responses = [
             ApiResponse(description = "OK", responseCode = "200"),
             ApiResponse(description = "Bad request", responseCode = "400", content = [Content()]),
-            ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()])
+            ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()]),
+            ApiResponse(description = "Incorrect input", responseCode = "405", content = [Content()])
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun createStockItem(@RequestBody stockItem: StockItemModel) =
-        stockItemService.createStockItem(stockItem)
+    fun createStockItem(@RequestBody stockItem: StockItemModel) {
+        if (!stockItemService.createStockItem(stockItem)) {
+            throw HttpServerErrorException(HttpStatus.METHOD_NOT_ALLOWED, "Cannot create") //405
+        }
+    }
 
-    @PutMapping("/{itemId}")
+    @PutMapping("/items/{itemId}")
     @Operation(
         summary = "Change stock item",
         responses = [
@@ -69,7 +73,7 @@ class StockItemController(private val stockItemService: StockItemService) {
     ) =
         stockItemService.changeStockItem(itemId, stockItem)
 
-    @PutMapping("/{itemId}/add/{number}")
+    @PutMapping("/items/{itemId}/add/{number}")
     @Operation(
         summary = "Add stock item",
         responses = [
@@ -82,24 +86,25 @@ class StockItemController(private val stockItemService: StockItemService) {
     fun addStockItem(@PathVariable itemId: UUID, @PathVariable number: Int) =
         stockItemService.addStockItem(itemId, number)
 
-    @PutMapping("/{itemId}/reserve/{number}")
+    @PutMapping("/items/{itemId}/reserve/{number}")
     @Operation(
         summary = "Reserve stock item",
         responses = [
             ApiResponse(description = "OK", responseCode = "200"),
             ApiResponse(description = "Bad request", responseCode = "400", content = [Content()]),
-            ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()])
+            ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()]),
+            ApiResponse(description = "Incorrect input", responseCode = "405", content = [Content()])
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun reserveStockItem(@PathVariable itemId: UUID, @PathVariable number: Int) {
         if (!stockItemService.reserveStockItem(itemId, number)) {
-            throw HttpServerErrorException(HttpStatus.METHOD_NOT_ALLOWED, "Cannot reserve")
+            throw HttpServerErrorException(HttpStatus.METHOD_NOT_ALLOWED, "Cannot reserve") //405
         }
     }
 
 
-    @DeleteMapping("/{itemId}")
+    @DeleteMapping("/items/{itemId}")
     @Operation(
         summary = "Delete stockItem",
         responses = [

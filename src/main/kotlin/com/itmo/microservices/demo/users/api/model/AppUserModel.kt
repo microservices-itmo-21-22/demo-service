@@ -7,12 +7,13 @@ import java.util.*
 
 data class AppUserModel(
         val id: UUID,
-        val ipaddress: String,
-        val username: String,
-        val email: String,
-        val phone: String,
+        val ipaddress: String?,
+        val name : String,
+        val username: String?,
+        val email: String?,
+        val phone: String?,
         val lastBasketId: UUID,
         @JsonIgnore
         val password: String) {
-        fun userDetails(): UserDetails = User(username, password, emptyList())
+        fun userDetails(): UserDetails = User(name, password, emptyList())
 }
