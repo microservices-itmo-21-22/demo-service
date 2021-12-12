@@ -26,7 +26,9 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.time.Duration
 import java.util.*
+import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
 
 
@@ -107,28 +109,43 @@ class DefaultDeliveryService(private val deliveryRepository: DeliveryRepository,
 
     fun transaction() : JSONObject{
         var tries = 0
-        val values = mapOf("clientSecret" to "7d65037f-e9af-433e-8e3f-a3da77e019b1")
+        val values = mapOf("clientSecret" to "832bce51-8cd5-4fda-8cb2-dd605c48069e")
         val objectMapper = ObjectMapper()
         val requestBody = objectMapper.writeValueAsString(values)
         val request = HttpRequest.newBuilder()
             .header("Content-Type", "application/json;IEEE754Compatible=true")
             .uri(URI.create("http://77.234.215.138:30027/transactions/"))
             .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+            .timeout(Duration.ofSeconds(3))
             .build()
 
         while(true){
             tries++
-            if (tries == 6) throw RuntimeException("Failed to send request")
+            if (tries == 6) throw UnableToReachExternalServiceException()
             var future = httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
-
-            var response = future.get()
+//            var response = Unirest.post("http://77.234.215.138:30027/transactions/")
+//                .header("Content-Type", "application/json;IEEE754Compatible=true")
+//                .body("{\"clientSecret\": \"7d65037f-e9af-433e-8e3f-a3da77e019b1\"}")
+//                .asJson()
+            var response : HttpResponse<String>
+            try{
+                response = future.get()
+            }
+            catch (ex: ExecutionException)
+            {
+                Thread.sleep(Math.pow(2.0,tries.toDouble()).toLong() * 500)
+                continue
+            }
             if (response.statusCode() != 200){
+                //wait
+                Thread.sleep(Math.pow(2.0,tries.toDouble()).toLong() * 500)
                 continue
             }
             var json = JSONObject(response.body())
             if (json.get("status").equals("SUCCESS")){
                 return json
             }
+            Thread.sleep(Math.pow(2.0,tries.toDouble()).toLong() * 500)
         }
     }
 }

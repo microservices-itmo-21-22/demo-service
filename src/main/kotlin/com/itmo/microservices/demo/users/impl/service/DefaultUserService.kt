@@ -46,7 +46,7 @@ class DefaultUserService(private val userRepository: UserRepository,
         else {
             val userEntity = userRepository.save(request.toEntity())
             eventBus.post(UserCreatedEvent(userEntity.toModel()))
-            eventLogger.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.username)
+            eventLogger.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.name)
             val id = userEntity.id
             val name = userEntity.name
             return RegistrationResult(id, name)
