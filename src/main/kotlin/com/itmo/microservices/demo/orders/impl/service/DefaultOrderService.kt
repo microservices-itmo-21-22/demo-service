@@ -11,6 +11,7 @@ import com.itmo.microservices.demo.orders.api.messaging.PaymentAssignedEvent
 import com.itmo.microservices.demo.orders.api.model.BookingDto
 import com.itmo.microservices.demo.orders.api.model.OrderDto
 import com.itmo.microservices.demo.orders.api.model.OrderModel
+import com.itmo.microservices.demo.orders.api.model.OrderStatus
 import com.itmo.microservices.demo.orders.api.model.PaymentModel
 import com.itmo.microservices.demo.orders.api.service.OrderService
 import com.itmo.microservices.demo.orders.impl.entity.Order
@@ -20,6 +21,7 @@ import com.itmo.microservices.demo.orders.impl.repository.OrderRepository
 import com.itmo.microservices.demo.orders.impl.repository.PaymentRepository
 import com.itmo.microservices.demo.orders.impl.util.toBookingDto
 import com.itmo.microservices.demo.orders.impl.util.toDto
+import com.itmo.microservices.demo.orders.impl.repository.OrderPaymentRepository
 import com.itmo.microservices.demo.orders.impl.util.toEntity
 import com.itmo.microservices.demo.orders.impl.util.toModel
 import com.itmo.microservices.demo.stock.api.service.StockItemService
@@ -28,6 +30,7 @@ import com.itmo.microservices.demo.stock.impl.util.toModel
 import com.itmo.microservices.demo.users.api.service.UserService
 import kong.unirest.HttpStatus
 import org.hibernate.service.spi.InjectService
+import org.aspectj.weaver.ast.Or
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.userdetails.UserDetails
@@ -73,7 +76,6 @@ class DefaultOrderService(private val orderRepository: OrderRepository,
 
                 failedItems.add(item.key)
             } else if (stockItem.amount!! < item.value){
-
                 failedItems.add(item.key)
             } else{
 
@@ -120,7 +122,6 @@ class DefaultOrderService(private val orderRepository: OrderRepository,
     override fun createOrder() : OrderDto {
         val newOrder = Order()
         orderRepository.save(newOrder)
-
         return newOrder.toDto()
     }
 

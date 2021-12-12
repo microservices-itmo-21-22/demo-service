@@ -18,8 +18,8 @@ class DefaultAuthService(private val userService: UserService,
                          private val passwordEncoder: PasswordEncoder) : AuthService {
 
     override fun authenticate(request: AuthenticationRequest): AuthenticationResult {
-        val user = userService.findUser(request.id)
-                ?: throw NotFoundException("User with username ${request.id} not found")
+        val user = userService.findUser(request.name)
+                ?: throw NotFoundException("User with username ${request.name} not found")
 
 
         if (!passwordEncoder.matches(request.password, user.password))

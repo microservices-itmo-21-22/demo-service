@@ -1,6 +1,7 @@
 package com.itmo.microservices.demo.orders.impl.entity
 
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.itmo.microservices.demo.orders.api.model.OrderStatus
 import org.hibernate.annotations.GenericGenerator
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef

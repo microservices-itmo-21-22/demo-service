@@ -33,17 +33,24 @@ class DefaultUserService(private val userRepository: UserRepository,
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
 
-    override fun findUser(id: UUID): AppUserModel? = userRepository
-            .findByIdOrNull(id)?.toModel()
-        ?: throw NotFoundException("User $id not found")
+    override fun findUser(name: String): AppUserModel? = userRepository
+            .findByName(name)?.toModel()
+        ?: throw NotFoundException("User $name not found")
 
     override fun registerUser(request: RegistrationRequest): RegistrationResult {
-        val userEntity = userRepository.save(request.toEntity())
-        eventBus.post(UserCreatedEvent(userEntity.toModel()))
-        eventLogger.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.username)
-        val id = userEntity.id
-        val name = userEntity.name
-        return RegistrationResult(id, name)
+        val user = userRepository.findByName(request.name)
+        if (user != null)
+        {
+            throw NotFoundException("User already exist")
+        }
+        else {
+            val userEntity = userRepository.save(request.toEntity())
+            eventBus.post(UserCreatedEvent(userEntity.toModel()))
+            eventLogger.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.name)
+            val id = userEntity.id
+            val name = userEntity.name
+            return RegistrationResult(id, name)
+        }
     }
 
 

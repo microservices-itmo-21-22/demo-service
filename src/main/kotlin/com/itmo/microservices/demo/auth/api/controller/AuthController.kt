@@ -29,9 +29,9 @@ class AuthController(private val authService: AuthService) {
     fun authenticate(@RequestBody request: AuthenticationRequest): AuthenticationResult =
             authService.authenticate(request)
 
-    @PostMapping("/auth/refresh")
+    @PostMapping("/authentication/refresh")
     @Operation(
-        summary = "Refresh authentication",
+        summary = "Refresh authentication"  ,
         responses = [
             ApiResponse(description = "OK", responseCode = "200"),
             ApiResponse(description = "Authentication error", responseCode = "403", content = [Content()])

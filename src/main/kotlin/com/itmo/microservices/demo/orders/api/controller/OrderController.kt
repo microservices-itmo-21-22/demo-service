@@ -1,9 +1,16 @@
 package com.itmo.microservices.demo.orders.api.controller
 
+import com.itmo.microservices.demo.common.exception.NotFoundException
 import com.itmo.microservices.demo.delivery.api.model.DeliveryModel
 import com.itmo.microservices.demo.delivery.api.service.DeliveryService
+import com.itmo.microservices.demo.orders.api.model.OrderModel
+import com.itmo.microservices.demo.orders.api.model.OrderModelDTO
+import com.itmo.microservices.demo.orders.api.model.OrderStatus
 import com.itmo.microservices.demo.orders.api.service.OrderService
 import com.itmo.microservices.demo.orders.impl.service.DefaultOrderService
+import com.itmo.microservices.demo.orders.impl.entity.Order
+import com.itmo.microservices.demo.orders.impl.util.toEntity
+import com.itmo.microservices.demo.shoppingCartService.api.model.ShoppingCartDTO
 import com.itmo.microservices.demo.shoppingCartService.api.service.CartService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -12,7 +19,12 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
 import java.util.*
+import kotlin.collections.HashMap
 
 @RestController
 class OrderController(private val orderService: OrderService,
@@ -32,7 +44,7 @@ class OrderController(private val orderService: OrderService,
     )
     fun createOrder(@AuthenticationPrincipal user: UserDetails) = orderService.createOrder()
 
-    @PutMapping("/orders/{order_id}/items/{item_id}")
+    @PutMapping("/orders/{order_id}/items/{item_id}?amount={amount}")
     @Operation(
             summary = "Put items to cart",
             responses = [
@@ -44,6 +56,7 @@ class OrderController(private val orderService: OrderService,
             security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun putItemsToCart(@PathVariable order_id : UUID, @PathVariable item_id : UUID, @RequestParam(value = "amount") amount : Long = 1, @AuthenticationPrincipal user : UserDetails) = orderService.putItemToOrder(order_id, item_id, amount)
+
 
     @DeleteMapping("/orders/{order_id}/bookings")
     @Operation(
