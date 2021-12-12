@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class DefaultAuthService(private val userService: UserService,
@@ -17,8 +18,9 @@ class DefaultAuthService(private val userService: UserService,
                          private val passwordEncoder: PasswordEncoder) : AuthService {
 
     override fun authenticate(request: AuthenticationRequest): AuthenticationResult {
-        val user = userService.findUser(request.username)
-                ?: throw NotFoundException("User with username ${request.username} not found")
+        val user = userService.findUser(request.name)
+                ?: throw NotFoundException("User with username ${request.name} not found")
+
 
         if (!passwordEncoder.matches(request.password, user.password))
             throw AccessDeniedException("Invalid password")

@@ -19,7 +19,7 @@ class StubNotificationService(private val userRepository: NotificationUserReposi
 
     override fun processNewUser(user: AppUserModel) {
         userRepository.save(modelToEntity(user))
-        log.info("User ${user.username} (${user.email}) was created & should be notified (but who cares)")
+        log.info("User ${user.name} (${user.email}) was created & should be notified (but who cares)")
     }
 
     override fun processAssignedTask(task: TaskModel) {
