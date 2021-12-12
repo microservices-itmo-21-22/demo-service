@@ -75,6 +75,8 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
             title = product.title,
             price = product.price
         )
+        itemRepository.save(orderItem)
+        println("Product was received")
         //order.itemsMap?.get(orderItem.id) ?: throw BadRequestException("Item $productId not found")
         order.itemsMap!![orderItem.id!!] = Amount(amount)
         orderRepository.save(order)

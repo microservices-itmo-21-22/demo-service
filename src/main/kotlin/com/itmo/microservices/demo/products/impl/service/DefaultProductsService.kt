@@ -3,6 +3,7 @@ package com.itmo.microservices.demo.products.impl.service
 import com.google.common.eventbus.EventBus
 import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
+import com.itmo.microservices.demo.common.exception.NotFoundException
 import com.itmo.microservices.demo.products.api.messaging.ProductAddedEvent
 import com.itmo.microservices.demo.products.api.messaging.ProductGotEvent
 import com.itmo.microservices.demo.products.api.model.*
@@ -36,7 +37,7 @@ class DefaultProductsService(private val productsRepository: ProductsRepository,
     }
 
     override fun getProduct(id: UUID): Product =
-        productsRepository.findByIdOrNull(id.toString()) ?: throw NullPointerException("Item $id not found")
+        productsRepository.findByIdOrNull(id) ?: throw NotFoundException("Item $id not found")
 
 
     @PostConstruct
