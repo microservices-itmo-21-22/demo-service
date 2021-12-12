@@ -6,8 +6,8 @@ import javax.persistence.Id
 @Entity
 class NotificationUser {
     @Id
-    var username: String? = null
     var name: String? = null
+    var username: String? = null
     // Ignoring surname because we don't need it for notifications
     var email: String? = null
 
