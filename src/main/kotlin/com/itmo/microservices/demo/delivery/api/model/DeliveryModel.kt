@@ -7,6 +7,5 @@ data class DeliveryModel (
     val id: UUID?,
     val date: Date?,
     val address: String?,
-    val cost: Double?,
-    val payment: DeliveryPayment
+    val cost: Double?
 )

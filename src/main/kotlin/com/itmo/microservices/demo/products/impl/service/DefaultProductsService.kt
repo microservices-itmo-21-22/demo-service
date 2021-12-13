@@ -12,7 +12,6 @@ import com.itmo.microservices.demo.products.impl.entity.Product
 import com.itmo.microservices.demo.products.impl.logging.ProductsServiceNotableEvents
 import com.itmo.microservices.demo.products.impl.repository.ProductsRepository
 import com.itmo.microservices.demo.products.impl.util.toModel
-import com.itmo.microservices.demo.users.impl.util.toModel
 import org.springframework.stereotype.Service
 import java.util.*
 import javax.annotation.PostConstruct
@@ -40,6 +39,15 @@ class DefaultProductsService(private val productsRepository: ProductsRepository,
         productsRepository.findById(UUID.fromString(id))?.toModel() ?:
         throw NotFoundException("Product with id $id not found")
 
+    override fun addProduct(request:AddProductrequest): ProductModel {
+    val productEntity = productsRepository.save(request.toEntity())
+    eventBus.post(ProductAddedEvent(productEntity.toModel()))
+        if(::eventLogger.isInitialized){
+            eventLogger.info(ProductsServiceNotableEvents.EVENT_PRODUCT_ADDED,productEntity.title)
+        }
+        return productEntity.toModel()
+    }
+
 
     @PostConstruct
     fun addItemsIntoDatabase(){
@@ -54,5 +62,16 @@ class DefaultProductsService(private val productsRepository: ProductsRepository,
         productsRepository.save(Product("Pear","A pear",70,13))
 
     }
+
+
+
+
+    fun AddProductrequest.toEntity():Product=
+        Product(
+            title= this.title,
+            description = this.description,
+            price = this.price,
+            amount = this.amount
+        )
 
 }

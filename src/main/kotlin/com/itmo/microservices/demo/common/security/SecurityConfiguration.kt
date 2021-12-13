@@ -30,6 +30,8 @@ class SecurityConfiguration(
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers( "/users").permitAll()
+                .antMatchers( "/delivery/**").permitAll()
+                .antMatchers("/_internal/**").permitAll()
                 .antMatchers( "/users/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/items").permitAll()
                 .antMatchers(HttpMethod.GET, "/item").permitAll()
