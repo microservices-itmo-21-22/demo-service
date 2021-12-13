@@ -60,24 +60,17 @@ class PaymentController(private val paymentService: PaymentService) {
     fun getFinlog(@Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
             paymentService.finlog(null, author)
 
-    @GetMapping("Получение данных из внешнего сервиса")
+    @GetMapping("/transactions")
     @Operation(
-            summary = "HTTP-запрос",
-            responses = [
-                ApiResponse(description = "OK", responseCode = "200"),
-                ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()]),
-                ApiResponse(description = "Not found", responseCode = "404", content = [Content()])
-            ],
-            security = [SecurityRequirement(name = "bearerAuth")]
+        summary = "Получение всех транзакций",
+        responses = [
+            ApiResponse(description = "OK", responseCode = "200"),
+            ApiResponse(description = "Unauthorized", responseCode = "403", content = [Content()]),
+            ApiResponse(description = "Not found", responseCode = "404", content = [Content()])
+        ],
+        security = [SecurityRequirement(name = "bearerAuth")]
     )
-
-    fun getData(@Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) {
-        val client = HttpClient.newBuilder().build()
-
-        val request = HttpRequest.newBuilder()
-                .uri(URI.create("")).build()
-
-        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-    }
+    fun getTransactions(@Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
+        paymentService.getTransactions()
 
 }

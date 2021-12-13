@@ -4,9 +4,11 @@ import com.itmo.microservices.commonlib.annotations.InjectEventLogger;
 import com.itmo.microservices.commonlib.logging.EventLogger;
 import com.itmo.microservices.demo.payments.api.model.TransactionDto;
 import com.itmo.microservices.demo.payments.api.model.TransactionStatus;
+import com.itmo.microservices.demo.payments.impl.entity.Transaction;
 import com.itmo.microservices.demo.payments.impl.exception.ExternalServiceException;
 import com.itmo.microservices.demo.payments.impl.exception.TooManyParallelRequestException;
 import com.itmo.microservices.demo.payments.impl.logging.PaymentServiceNotableEvents;
+import com.itmo.microservices.demo.payments.impl.repository.TransactionRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -36,11 +38,16 @@ public class TransactionRequestService {
 
     private final WebClient webClient;
 
-    public TransactionRequestService() {
+    private final TransactionRepository transactionRepository;
+
+    public TransactionRequestService(TransactionRepository transactionRepository) {
+        this.transactionRepository = transactionRepository;
         this.webClient = WebClient.create();
     }
 
     public TransactionDto poll(UUID transactionId) throws InterruptedException {
+        System.out.println("Poll method. "
+                + Thread.currentThread().getName());
         TransactionDto result;
         int delay = 100;
         while (true) {
@@ -53,6 +60,16 @@ public class TransactionRequestService {
                 } else {
                     eventLogger.info(PaymentServiceNotableEvents.I_EXTERNAL_SYSTEM_FAILURE, result);
                 }
+                Transaction transaction = new Transaction(
+                        result.getId(),
+                        result.getStatus(),
+                        result.getSubmitTime(),
+                        result.getCompletedTime(),
+                        result.getCost(),
+                        result.getDelta()
+                );
+                System.out.println(transaction.getStatus());
+                transactionRepository.save(transaction);
                 return result;
             }
             delay *= 2;
