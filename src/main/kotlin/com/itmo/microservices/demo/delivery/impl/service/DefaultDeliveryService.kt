@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.eventbus.EventBus
 import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
+import com.itmo.microservices.demo.delivery.api.model.DeliveryInfoRecordModel
 import com.itmo.microservices.demo.delivery.api.service.DeliveryService
 import com.itmo.microservices.demo.delivery.impl.entity.DeliveryInfoRecord
 import com.itmo.microservices.demo.delivery.impl.entity.DeliverySubmissionOutcome
 import com.itmo.microservices.demo.delivery.impl.repository.DeliveryInfoRecordRepository
+import com.itmo.microservices.demo.delivery.impl.utils.toModel
 import com.itmo.microservices.demo.notifications.impl.service.StubNotificationService
 import com.itmo.microservices.demo.order.api.model.OrderDto
 import org.slf4j.Logger
@@ -100,8 +102,15 @@ class DefaultDeliveryService(
         return list.toList()
     }
 
-    override fun getDeliveryHistoryById(transactionId: String) =
-        deliveryInfoRecordRepository.getAllByTransactionId(UUID.fromString(transactionId))
+    override fun getDeliveryHistoryById(transactionId: String):List<DeliveryInfoRecordModel> {
+       val list =  deliveryInfoRecordRepository.getAllByTransactionId(UUID.fromString(transactionId))
+        var mList = mutableListOf<DeliveryInfoRecordModel>()
+        for(e in list){
+            mList.add(e.toModel())
+        }
+        return mList.toList()
+    }
+
 
     override fun delivery(order: OrderDto) {
         delivery(order, 1)
