@@ -107,7 +107,6 @@ class SendEmailToUser(){
         }
     }
 
-
     fun callExternalSystem(message:String): Runnable {
         return Runnable {
             try{
@@ -128,7 +127,6 @@ class SendEmailToUser(){
             }
         }
     }
-
 
     fun processErrorCode(response: HttpResponse<String>,  message:String){
         val responseJson = JSONObject(response.body())
