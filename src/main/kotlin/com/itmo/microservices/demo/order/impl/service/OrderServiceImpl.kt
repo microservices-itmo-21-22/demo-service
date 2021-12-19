@@ -11,11 +11,13 @@ import com.itmo.microservices.demo.order.api.model.OrderStatus
 import com.itmo.microservices.demo.order.api.service.OrderService
 import com.itmo.microservices.demo.order.impl.entity.Amount
 import com.itmo.microservices.demo.order.impl.entity.OrderEntity
+import com.itmo.microservices.demo.order.impl.entity.OrderItem
 import com.itmo.microservices.demo.order.impl.exception.BadRequestException
 import com.itmo.microservices.demo.order.impl.logging.OrderServiceNotableEvents
 import com.itmo.microservices.demo.order.impl.repository.ItemRepository
 import com.itmo.microservices.demo.order.impl.repository.OrderRepository
 import com.itmo.microservices.demo.order.impl.util.toModel
+import com.itmo.microservices.demo.products.api.service.ProductsService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
@@ -27,6 +29,7 @@ import java.util.*
 @Service
 class OrderServiceImpl(private val orderRepository: OrderRepository,
                        private val itemRepository: ItemRepository,
+                       private val productsService: ProductsService,
                        private val eventBus: EventBus): OrderService {
 
     companion object {
@@ -65,11 +68,17 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
         return order.toModel()
     }
 
-    override fun addItemToOrder(orderId: UUID, itemId: UUID, amount: Int) {
+    override fun addItemToOrder(orderId: UUID, productId: UUID, amount: Int) {
         val order = orderRepository.findByIdOrNull(orderId) ?: throw NotFoundException("Order $orderId not found")
-        itemRepository.findByIdOrNull(itemId) ?: throw NotFoundException("Item $itemId not found")
-        order.itemsMap?.get(itemId) ?: throw BadRequestException("Item $itemId not found")
-        order.itemsMap!![itemId] = Amount(amount)
+        val product = productsService.getProduct(productId)
+        val orderItem = OrderItem(
+            title = product.title,
+            price = product.price
+        )
+        itemRepository.save(orderItem)
+        println("Product was received")
+        //order.itemsMap?.get(orderItem.id) ?: throw BadRequestException("Item $productId not found")
+        order.itemsMap!![orderItem.id!!] = Amount(amount)
         orderRepository.save(order)
         eventBus.post(ItemAddedToOrder(order.toModel()))
         eventLogger.info(
