@@ -4,22 +4,21 @@ import com.google.common.eventbus.EventBus
 import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.common.exception.NotFoundException
-import com.itmo.microservices.demo.order.api.messaging.OrderCreatedEvent
 import com.itmo.microservices.demo.order.api.model.OrderStatus
-import com.itmo.microservices.demo.order.impl.logging.OrderServiceNotableEvents
-import com.itmo.microservices.demo.payments.api.model.FinancialOperationType
-import com.itmo.microservices.demo.payments.api.model.PaymentModel
-import com.itmo.microservices.demo.payments.api.model.PaymentSubmissionDto
-import com.itmo.microservices.demo.payments.api.model.UserAccountFinancialLogRecordDto
-import com.itmo.microservices.demo.payments.api.service.PaymentService
-import com.itmo.microservices.demo.payments.impl.entity.UserAccountFinancialLogRecordEntity
 import com.itmo.microservices.demo.order.impl.repository.OrderRepository
 import com.itmo.microservices.demo.order.impl.service.OrderServiceImpl
-import com.itmo.microservices.demo.order.impl.util.toModel
-import com.itmo.microservices.demo.payments.api.messaging.PaymentProcessedEvent
+import com.itmo.microservices.demo.payments.api.model.FinancialOperationType
+import com.itmo.microservices.demo.payments.api.model.PaymentSubmissionDto
+import com.itmo.microservices.demo.payments.api.model.TransactionDto
+import com.itmo.microservices.demo.payments.api.model.UserAccountFinancialLogRecordDto
+import com.itmo.microservices.demo.payments.api.service.PaymentService
+import com.itmo.microservices.demo.payments.impl.entity.Transaction
+import com.itmo.microservices.demo.payments.impl.entity.UserAccountFinancialLogRecordEntity
 import com.itmo.microservices.demo.payments.impl.logging.PaymentServiceNotableEvents
 import com.itmo.microservices.demo.payments.impl.repository.PaymentRepository
+import com.itmo.microservices.demo.payments.impl.repository.TransactionRepository
 import com.itmo.microservices.demo.payments.impl.repository.UserAccountFinancialLogRecordRepository
+import com.itmo.microservices.demo.payments.impl.util.toEntity
 import com.itmo.microservices.demo.payments.impl.util.toModel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -27,13 +26,21 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import java.util.*
+import java.util.concurrent.CompletableFuture
+import java.util.function.Supplier
+import kotlin.reflect.jvm.internal.impl.builtins.StandardNames.FqNames.number
+
 
 @Suppress("UnstableApiUsage")
 @Service
-class DefaultPaymentService(private val paymentRepository: PaymentRepository,
-                            private val orderRepository: OrderRepository,
-                            private val userAccountFinancialLogRecordRepository: UserAccountFinancialLogRecordRepository,
-                            private val eventBus: EventBus) : PaymentService {
+class DefaultPaymentService(
+    private val paymentRepository: PaymentRepository,
+    private val transactionRepository: TransactionRepository,
+    private val transactionRequestService: TransactionRequestService,
+    private val orderRepository: OrderRepository,
+    private val userAccountFinancialLogRecordRepository: UserAccountFinancialLogRecordRepository,
+    private val eventBus: EventBus
+) : PaymentService {
 
     companion object {
         val log: Logger = LoggerFactory.getLogger(OrderServiceImpl::class.java)
@@ -43,24 +50,35 @@ class DefaultPaymentService(private val paymentRepository: PaymentRepository,
     private lateinit var eventLogger: EventLogger
 
     override fun pay(orderId: UUID): PaymentSubmissionDto {
+        println(
+            "Pay method. "
+                    + Thread.currentThread().getName()
+        );
         val order = orderRepository.findByIdOrNull(orderId) ?: throw NotFoundException("Order $orderId not found")
         order.status = OrderStatus.PAID
         orderRepository.save(order)
-        val amount = order.itemsMap?.map{ (id, amount) -> amount}?.sumOf { it.amount ?: 0 }
+        val amount = order.itemsMap?.map { (id, amount) -> amount }?.sumOf { it.amount ?: 0 }
         val record = UserAccountFinancialLogRecordEntity(
-                UUID.randomUUID(),
-                FinancialOperationType.WITHDRAW,
-                amount,
-                order.id,
-                Date().time
+            UUID.randomUUID(),
+            FinancialOperationType.WITHDRAW,
+            amount,
+            order.id,
+            Date().time
         )
         userAccountFinancialLogRecordRepository.save(record)
-        val paymentSubmission = PaymentSubmissionDto(UUID.randomUUID(), Date().time)
+
+        val transactionResponse = transactionRequestService.postRequest()
+
+        val paymentSubmission = PaymentSubmissionDto(transactionResponse.id, Date().time)
         eventBus.post(paymentSubmission)
         eventLogger.info(
-                PaymentServiceNotableEvents.I_ORDER_PAID,
-                paymentSubmission
+            PaymentServiceNotableEvents.I_ORDER_PAID,
+            paymentSubmission
         )
+        CompletableFuture.supplyAsync(Supplier {
+            transactionRequestService.poll(transactionResponse.id)
+        })
+
         return paymentSubmission
     }
 
@@ -68,17 +86,22 @@ class DefaultPaymentService(private val paymentRepository: PaymentRepository,
         orderId?.let {
             val infoList = userAccountFinancialLogRecordRepository.findAllByOrderId(orderId)
             eventLogger.info(
-                    PaymentServiceNotableEvents.I_PAYMENT_GOT,
-                    infoList
+                PaymentServiceNotableEvents.I_PAYMENT_GOT,
+                infoList
             )
             return infoList.map { it.toModel() }
         }
         val orders = orderRepository.findAllByUsername(author.username)
-        val infoList = orders.mapNotNull { it.id }.flatMap { userAccountFinancialLogRecordRepository.findAllByOrderId(it) }
+        val infoList =
+            orders.mapNotNull { it.id }.flatMap { userAccountFinancialLogRecordRepository.findAllByOrderId(it) }
         eventLogger.info(
-                PaymentServiceNotableEvents.I_PAYMENTS_GOT,
-                infoList
+            PaymentServiceNotableEvents.I_PAYMENTS_GOT,
+            infoList
         )
         return infoList.map { it.toModel() }
     }
+
+    override fun getTransactions(): List<Transaction> =
+        transactionRepository.findAll()
+
 }
