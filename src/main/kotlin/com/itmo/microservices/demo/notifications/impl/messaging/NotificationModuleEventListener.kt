@@ -6,7 +6,7 @@ import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.common.logging.CommonNotableEvents
 import com.itmo.microservices.demo.notifications.api.service.NotificationService
-import com.itmo.microservices.demo.payments.api.messaging.PaymentProccessedEvent
+//import com.itmo.microservices.demo.payments.api.messaging.PaymentProccessedEvent
 import com.itmo.microservices.demo.products.api.messaging.ProductAddedEvent
 
 import com.itmo.microservices.demo.users.api.messaging.UserCreatedEvent
@@ -35,10 +35,10 @@ class NotificationModuleEventListener(private val notificationService: Notificat
         eventLogger.info(CommonNotableEvents.I_LISTENER_RECEIVED_MESSAGE,event)
     }
 
-    @Subscribe
-    @AllowConcurrentEvents
-    fun accept(event: PaymentProccessedEvent)= executor.execute{
-        notificationService.processPayment(event.payment)
-        eventLogger.info(CommonNotableEvents.I_LISTENER_RECEIVED_MESSAGE,event)
-    }
+//    @Subscribe
+//    @AllowConcurrentEvents
+//    fun accept(event: PaymentProccessedEvent)= executor.execute{
+//        notificationService.processPayment(event.payment)
+//        eventLogger.info(CommonNotableEvents.I_LISTENER_RECEIVED_MESSAGE,event)
+//    }
 }
