@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @RestController
 
@@ -37,6 +38,6 @@ class ProductsController(private val productsService: ProductsService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getProductInfoById(@AuthenticationPrincipal @RequestParam id:String):ProductModel = productsService.getProductInfoById(id)
+    fun getProduct(@AuthenticationPrincipal @RequestParam id:String):Product = productsService.getProduct(UUID.fromString(id))
 
 }
