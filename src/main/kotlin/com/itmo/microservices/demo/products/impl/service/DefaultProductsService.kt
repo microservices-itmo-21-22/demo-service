@@ -51,16 +51,9 @@ class DefaultProductsService(private val productsRepository: ProductsRepository,
 
     @PostConstruct
     fun addItemsIntoDatabase(){
-        //Hard code some data into the database
-        //This function will be run after service started
-        productsRepository.save(Product("Pen","A beautiful pen from Russia",10,100))
-        productsRepository.save(Product("Car","A beautiful car from Russia",10000000,0))
-        productsRepository.save(Product("Cake","A cake",20,1000))
-        productsRepository.save(Product("Apple pie","An apple pie",50,0))
-        productsRepository.save(Product("Pumpkin pie","A pumpkin pie",70,500))
-        productsRepository.save(Product("Chicken","A chicken",500,30))
-        productsRepository.save(Product("Pear","A pear",70,13))
-
+        for (i in 1..100000){
+            productsRepository.save(Product("apple_${i}","A pear",100,1000000))
+        }
     }
 
 

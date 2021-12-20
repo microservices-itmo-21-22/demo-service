@@ -35,6 +35,7 @@ import kotlin.time.toJavaDuration
 
 @Service
 class Timer {
+    //Virtual time
     var time: Int = 0
 
     @PostConstruct
@@ -89,7 +90,7 @@ class DefaultDeliveryService(
     var pollingForResult: PollingForResult? = null
 
     var countOrdersWaitingForDeliver = AtomicInteger(0)
-    //Virtual time
+
 
 
     override fun getSlots(number: Int): List<Int> {
