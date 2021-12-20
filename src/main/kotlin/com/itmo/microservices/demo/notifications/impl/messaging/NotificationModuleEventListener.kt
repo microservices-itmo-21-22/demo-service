@@ -28,17 +28,11 @@ class NotificationModuleEventListener(private val notificationService: Notificat
         notificationService.processNewUser(event.user)
         eventLogger.info(CommonNotableEvents.I_LISTENER_RECEIVED_MESSAGE, event)
     }
+
     @Subscribe
     @AllowConcurrentEvents
     fun accept(event:ProductAddedEvent)= executor.execute{
         notificationService.processAddProduct(event.product)
         eventLogger.info(CommonNotableEvents.I_LISTENER_RECEIVED_MESSAGE,event)
     }
-
-//    @Subscribe
-//    @AllowConcurrentEvents
-//    fun accept(event: PaymentProccessedEvent)= executor.execute{
-//        notificationService.processPayment(event.payment)
-//        eventLogger.info(CommonNotableEvents.I_LISTENER_RECEIVED_MESSAGE,event)
-//    }
 }

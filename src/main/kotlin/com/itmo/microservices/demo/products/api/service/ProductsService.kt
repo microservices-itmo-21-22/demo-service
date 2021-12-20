@@ -7,6 +7,5 @@ import java.util.*
 
 interface ProductsService {
     fun getAllProducts(available:Boolean):List<Product>
-
     fun getProduct(id: UUID): Product
 }

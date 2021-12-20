@@ -36,22 +36,36 @@ class DefaultProductsService(private val productsRepository: ProductsRepository,
         }
     }
 
+
+
+    override fun addProduct(request:AddProductrequest): ProductModel {
+    val productEntity = productsRepository.save(request.toEntity())
+    eventBus.post(ProductAddedEvent(productEntity.toModel()))
+        if(::eventLogger.isInitialized){
+            eventLogger.info(ProductsServiceNotableEvents.EVENT_PRODUCT_ADDED,productEntity.title)
+        }
+        return productEntity.toModel()
+    }
+
     override fun getProduct(id: UUID): Product =
         productsRepository.findByIdOrNull(id) ?: throw NotFoundException("Item $id not found")
 
-
     @PostConstruct
     fun addItemsIntoDatabase(){
-        //Hard code some data into the database
-        //This function will be run after service started
-        productsRepository.save(Product("Pen","A beautiful pen from Russia",10,100))
-        productsRepository.save(Product("Car","A beautiful car from Russia",10000000,0))
-        productsRepository.save(Product("Cake","A cake",20,1000))
-        productsRepository.save(Product("Apple pie","An apple pie",50,0))
-        productsRepository.save(Product("Pumpkin pie","A pumpkin pie",70,500))
-        productsRepository.save(Product("Chicken","A chicken",500,30))
-        productsRepository.save(Product("Pear","A pear",70,13))
-
+        for (i in 1..100000){
+            productsRepository.save(Product("apple_${i}","A pear",100,1000000))
+        }
     }
+
+
+
+
+    fun AddProductrequest.toEntity():Product=
+        Product(
+            title= this.title,
+            description = this.description,
+            price = this.price,
+            amount = this.amount
+        )
 
 }

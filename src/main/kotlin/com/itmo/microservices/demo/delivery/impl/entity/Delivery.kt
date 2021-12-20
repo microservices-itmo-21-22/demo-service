@@ -9,8 +9,7 @@ import javax.persistence.OneToOne
 @Entity
 class Delivery {
     @Id
-    @GeneratedValue
-    var id: UUID? = null
+    var id: UUID? = UUID.randomUUID()
     var date: Date? = null
     var address: String? = null
     var cost: Double? = null
