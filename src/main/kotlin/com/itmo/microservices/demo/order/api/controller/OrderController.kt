@@ -39,7 +39,7 @@ class OrderController(private var orderService: OrderService) {
     fun createOrder(@Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
         orderService.createOrder(author)
 
-    @PutMapping("/{orderId}/items/{itemId}?amount={amount}")
+    @PostMapping("/{orderId}/items/{itemId}")
     @Operation(
             summary = "Добавление товара в корзину",
             responses = [
@@ -48,7 +48,7 @@ class OrderController(private var orderService: OrderService) {
             ],
             security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun addItemToOrder(@PathVariable orderId: UUID, @PathVariable itemId: UUID, @PathVariable amount: Int,
+    fun addItemToOrder(@PathVariable orderId: UUID, @PathVariable itemId: UUID, @RequestParam amount: Int,
                        @Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails) =
             orderService.addItemToOrder(orderId, itemId, amount)
 

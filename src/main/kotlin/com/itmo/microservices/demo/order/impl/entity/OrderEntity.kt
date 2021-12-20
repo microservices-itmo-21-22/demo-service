@@ -36,7 +36,7 @@ class OrderEntity {
 
     var status: OrderStatus? = null
 
-    @ManyToMany
+    @ManyToMany(cascade= [CascadeType.ALL])
     var itemsMap: MutableMap<UUID, Amount>? = null
 
     var deliveryDuration: Int? = null

@@ -12,6 +12,7 @@ import com.itmo.microservices.demo.products.impl.entity.Product
 import com.itmo.microservices.demo.products.impl.logging.ProductsServiceNotableEvents
 import com.itmo.microservices.demo.products.impl.repository.ProductsRepository
 import com.itmo.microservices.demo.products.impl.util.toModel
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.*
 import javax.annotation.PostConstruct
@@ -35,9 +36,7 @@ class DefaultProductsService(private val productsRepository: ProductsRepository,
         }
     }
 
-    override fun getProductInfoById(id:String):ProductModel=
-        productsRepository.findById(UUID.fromString(id))?.toModel() ?:
-        throw NotFoundException("Product with id $id not found")
+
 
     override fun addProduct(request:AddProductrequest): ProductModel {
     val productEntity = productsRepository.save(request.toEntity())
@@ -48,6 +47,8 @@ class DefaultProductsService(private val productsRepository: ProductsRepository,
         return productEntity.toModel()
     }
 
+    override fun getProduct(id: UUID): Product =
+        productsRepository.findByIdOrNull(id) ?: throw NotFoundException("Item $id not found")
 
     @PostConstruct
     fun addItemsIntoDatabase(){

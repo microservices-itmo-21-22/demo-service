@@ -39,14 +39,4 @@ class ProductsController(private val productsService: ProductsService) {
     )
     fun getProductInfoById(@AuthenticationPrincipal @RequestParam id:String):ProductModel = productsService.getProductInfoById(id)
 
-    @PostMapping("/_internal/catalogItem")
-    @Operation(
-        summary = "Добавление товаров в каталог",
-        responses = [
-            ApiResponse(description = "OK", responseCode = "200"),
-            ApiResponse(description = "Bad request", responseCode = "400", content = [Content()])
-        ]
-    )
-    @Hidden
-    fun addProduct(@RequestBody request: AddProductrequest) = productsService.addProduct(request)
 }
