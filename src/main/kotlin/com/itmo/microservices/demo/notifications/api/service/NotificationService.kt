@@ -2,10 +2,10 @@ package com.itmo.microservices.demo.notifications.api.service
 
 import com.itmo.microservices.demo.users.api.model.AppUserModel
 import com.itmo.microservices.demo.payments.api.model.PaymentModel
-import com.itmo.microservices.demo.products.api.model.ProductModel
+import com.itmo.microservices.demo.products.api.model.CatalogItemDto
 
 interface NotificationService {
     fun processNewUser(user: AppUserModel)
     fun processPayment(payment:PaymentModel)
-    fun processAddProduct(product:ProductModel)
+    fun processAddProduct(product:CatalogItemDto)
 }

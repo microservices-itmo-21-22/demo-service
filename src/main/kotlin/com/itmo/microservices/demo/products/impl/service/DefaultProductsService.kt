@@ -4,6 +4,8 @@ import com.google.common.eventbus.EventBus
 import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.common.exception.NotFoundException
+import com.itmo.microservices.demo.order.impl.entity.OrderItem
+import com.itmo.microservices.demo.order.impl.repository.ItemRepository
 import com.itmo.microservices.demo.products.api.messaging.ProductAddedEvent
 import com.itmo.microservices.demo.products.api.messaging.ProductGotEvent
 import com.itmo.microservices.demo.products.api.model.*
@@ -11,6 +13,7 @@ import com.itmo.microservices.demo.products.api.service.ProductsService
 import com.itmo.microservices.demo.products.impl.entity.Product
 import com.itmo.microservices.demo.products.impl.logging.ProductsServiceNotableEvents
 import com.itmo.microservices.demo.products.impl.repository.ProductsRepository
+import com.itmo.microservices.demo.products.impl.util.toEntity
 import com.itmo.microservices.demo.products.impl.util.toModel
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -20,6 +23,7 @@ import javax.annotation.PostConstruct
 @Suppress("UnstableApiUsage")
 @Service
 class DefaultProductsService(private val productsRepository: ProductsRepository,
+                             private val itemRepository: ItemRepository,
                              private val eventBus: EventBus):ProductsService{
 
     @InjectEventLogger
@@ -36,14 +40,14 @@ class DefaultProductsService(private val productsRepository: ProductsRepository,
         }
     }
 
-
-
-    override fun addProduct(request:AddProductrequest): ProductModel {
-    val productEntity = productsRepository.save(request.toEntity())
-    eventBus.post(ProductAddedEvent(productEntity.toModel()))
+    override fun addProduct(productRequest: ProductRequest): CatalogItemDto {
+        val productEntity = productsRepository.save(productRequest.toEntity())
+        eventBus.post(ProductAddedEvent(productEntity.toModel()))
         if(::eventLogger.isInitialized){
             eventLogger.info(ProductsServiceNotableEvents.EVENT_PRODUCT_ADDED,productEntity.title)
         }
+        val orderItem = productRequest.toOrderItem()
+        itemRepository.save(orderItem)
         return productEntity.toModel()
     }
 
@@ -57,12 +61,20 @@ class DefaultProductsService(private val productsRepository: ProductsRepository,
         }
     }
 
-    fun AddProductrequest.toEntity():Product=
+    fun ProductRequest.toEntity():Product=
         Product(
             title= this.title,
             description = this.description,
             price = this.price,
             amount = this.amount
         )
+
+    fun ProductRequest.toOrderItem() =
+            OrderItem(
+                    this.title,
+                    this.description,
+                    this.price,
+                    this.amount
+            )
 
 }
