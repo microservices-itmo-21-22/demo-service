@@ -11,7 +11,7 @@ class Product {
     var title: String? = null
     var description: String? = null
     var price: Int? = 100
-    var amount:Int?=null
+    var amount: Int?=null
 
     constructor()
 

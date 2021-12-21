@@ -20,12 +20,12 @@ class ProductsTest {
     }
 
 
-    @Test
-    fun getProductCatalog() {
-        val productsService = DefaultProductsService(productsRepository,eventBus)
-        Mockito.`when`(productsRepository.findAllByAmountGreaterThan(0)).thenReturn(mutableListOf(productsMock()))
-        val actual = productsService.getAllProducts(true).map{it.toString()}
-        val expected = listOf(productsMock().toString())
-        Assertions.assertEquals(actual, expected)
-    }
+//    @Test
+//    fun getProductCatalog() {
+//        val productsService = DefaultProductsService(productsRepository, eventBus)
+//        Mockito.`when`(productsRepository.findAllByAmountGreaterThan(0)).thenReturn(mutableListOf(productsMock()))
+//        val actual = productsService.getAllProducts(true).map{it.toString()}
+//        val expected = listOf(productsMock().toString())
+//        Assertions.assertEquals(actual, expected)
+//    }
 }

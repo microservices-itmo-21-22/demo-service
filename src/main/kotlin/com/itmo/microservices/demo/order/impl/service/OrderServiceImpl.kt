@@ -73,7 +73,9 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
         val product = productsService.getProduct(productId)
         val orderItem = OrderItem(
             title = product.title,
-            price = product.price
+            description = product.description,
+            price = product.price,
+            amount = product.amount
         )
         itemRepository.save(orderItem)
         println("Product was received")
