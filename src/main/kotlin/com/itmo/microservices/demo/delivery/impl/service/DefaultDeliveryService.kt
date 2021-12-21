@@ -95,11 +95,12 @@ class DefaultDeliveryService(
 
     override fun getSlots(number: Int): List<Int> {
         var list = mutableListOf<Int>()
-        var startTime: Int = timer.get_time() + 500 + 3 * countOrdersWaitingForDeliver.get()
+        var startTime: Int = timer.get_time() + 30 + 3 * countOrdersWaitingForDeliver.get()
         for (i: Int in 1..number) {
             list.add(startTime)
             startTime += 3
         }
+        log.info("return list of slot")
         return list.toList()
     }
 
@@ -119,6 +120,9 @@ class DefaultDeliveryService(
 
     override fun delivery(order: OrderDto, times: Int) {
         if (order.deliveryDuration!! < this.timer.get_time()) {
+            log.info("order.deliveryDuration "+order.deliveryDuration)
+            log.info("this.timer.get_time() "+this.timer.get_time())
+            log.info("a delivery EXPIRED")
             val timeStamp = System.currentTimeMillis()
             deliveryInfoRecordRepository.save(
                 DeliveryInfoRecord(
@@ -132,11 +136,14 @@ class DefaultDeliveryService(
             )
         } else {
             try {
+                log.info("send delivery requesting")
                 val response = httpClient.send(getPostHeaders(postBody), HttpResponse.BodyHandlers.ofString())
                 val responseJson = JSONObject(response.body())
                 if (response.statusCode() == 200) {
                     val id = responseJson.getString("id")
+                    log.info("delivery processing , maybe fail")
                     pollingForResult?.getDeliveryResult(order, responseJson, 1)
+
                 } else {
                     Thread.sleep(3000)
                     delivery(order)
@@ -178,29 +185,20 @@ class PollingForResult(
     var schedulePool: ScheduledExecutorService = Executors.newScheduledThreadPool(2)
 
     fun getDeliveryResult(order: OrderDto, responseJson_post: JSONObject, times: Int) {
-        if (order.deliveryDuration!! < timer.get_time()) {
-            deliveryInfoRecordRepository.save(
-                DeliveryInfoRecord(
-                    DeliverySubmissionOutcome.EXPIRED,
-                    System.currentTimeMillis(),
-                    times,
-                    responseJson_post.getLong("submitTime"),
-                    order.id!!,
-                    responseJson_post.getLong("submitTime")
-                )
-            )
-        }
         if (times > 3) {
             return
         }
         schedulePool.schedule(
             {
+                log.info("getting status from external system")
                 val response_poll = httpClient.send(
                     getGetHeaders(responseJson_post.getString("id")),
                     HttpResponse.BodyHandlers.ofString()
                 )
                 val responseJson_poll = JSONObject(response_poll.body())
+                log.info("getting response from 3th system")
                 if (responseJson_poll.getString("status") == "SUCCESS") {
+                    log.info("delivery success")
                     deliveryInfoRecordRepository.save(
                         DeliveryInfoRecord(
                             DeliverySubmissionOutcome.SUCCESS,
@@ -212,6 +210,7 @@ class PollingForResult(
                         )
                     )
                 } else {
+                    log.info("delivery fail")
                     deliveryInfoRecordRepository.save(
                         DeliveryInfoRecord(
                             DeliverySubmissionOutcome.FAILURE,
@@ -224,7 +223,7 @@ class PollingForResult(
                     )
                 }
 
-            }, ((order.deliveryDuration - timer.get_time()) / 3).toLong(), TimeUnit.SECONDS
+            }, (10).toLong(), TimeUnit.SECONDS
         )
     }
 

@@ -52,4 +52,16 @@ class DeliveryController (private val deliveryService: DeliveryService){
     fun delivery(@RequestBody request:OrderDto)=deliveryService.delivery(request)
 
 
+    @PostMapping("/_internal/delivery/{times}")
+    @Operation(
+        summary = "Send order info to delivery system",
+        responses = [
+            ApiResponse(description = "OK", responseCode = "200"),
+            ApiResponse(description = "Bad request", responseCode = "400", content = [Content()])
+        ],
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    fun delivery(@RequestBody request:OrderDto, @PathVariable times:Int)=deliveryService.delivery(request,times)
+
+
 }
