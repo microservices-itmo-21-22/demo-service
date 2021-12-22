@@ -4,6 +4,7 @@ import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
 import com.itmo.microservices.demo.bombardier.external.RealExternalService
 import com.itmo.microservices.demo.bombardier.external.storage.UserStorage
 import com.itmo.microservices.demo.bombardier.flow.UserManagement
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ResponseStatus
 import java.lang.Exception
@@ -15,6 +16,7 @@ class ServiceDescriptorNotFoundException(name: String) : Exception("Descriptor f
 class ServiceDescriptor(val name: String, val teamName: String, private val url: URL, private val internalAddress: URL) {
     fun getServiceAddress(): URL {
         val isInternal = !System.getProperty("is.local", "false").toBoolean()
+        LoggerFactory.getLogger(ServiceDescriptor::class.java).info(isInternal)
         return if (isInternal) internalAddress else url
     }
 }
