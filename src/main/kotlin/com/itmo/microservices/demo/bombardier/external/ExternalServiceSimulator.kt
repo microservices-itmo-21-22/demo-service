@@ -26,7 +26,7 @@ class ExternalServiceSimulator(
         val log = LoggerFactory.getLogger(ExternalServiceSimulator::class.java)
     }
 
-    override val descriptor = ServiceDescriptor("Simulator", "Support", URL("https://2ch.hk"))
+    override val descriptor = ServiceDescriptor("Simulator", "Support", URL("https://youtube.com/watch?v=dQw4w9WgXcQ"), URL("https://pornhub.com"))
 
     private val financialLog = ConcurrentHashMap<UUID, MutableList<UserAccountFinancialLogRecord>>()
     private val deliveryLog = ConcurrentHashMap<UUID, DeliveryInfoRecord>()

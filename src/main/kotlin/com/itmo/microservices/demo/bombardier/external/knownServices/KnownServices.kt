@@ -12,7 +12,12 @@ import java.net.URL
 @ResponseStatus(HttpStatus.NOT_FOUND)
 class ServiceDescriptorNotFoundException(name: String) : Exception("Descriptor for service $name was not found")
 
-data class ServiceDescriptor(val name: String, val teamName: String, val url: URL) // name is unique
+class ServiceDescriptor(val name: String, val teamName: String, private val url: URL, private val internalAddress: URL) {
+    fun getServiceAddress(): URL {
+        val isInternal = !System.getProperty("is.local", "false").toBoolean()
+        return if (isInternal) internalAddress else url
+    }
+}
 
 data class ServiceWithApiAndAdditional(val api: ExternalServiceApi, val userManagement: UserManagement)
 
@@ -32,10 +37,6 @@ class KnownServices(vararg descriptors: ServiceDescriptor) {
         storage.add(descriptor)
     }
 
-    fun add(name: String, teamName: String, url: URL) {
-        add(ServiceDescriptor(name, teamName, url))
-    }
-
     fun descriptorFromName(name: String): ServiceDescriptor {
         return storage.firstOrNull { it.name == name } ?: throw ServiceDescriptorNotFoundException(name)
     }
@@ -50,15 +51,15 @@ class KnownServices(vararg descriptors: ServiceDescriptor) {
 }
 
 val KnownServicesStorage = KnownServices(
-    ServiceDescriptor("p02", "p02", URL("http://77.234.215.138:30012")),
-    ServiceDescriptor("p03", "p03", URL("http://77.234.215.138:30013")),
-    ServiceDescriptor("p04", "p04", URL("http://77.234.215.138:30014")),
-    ServiceDescriptor("p05", "p05", URL("http://77.234.215.138:30015")),
-    ServiceDescriptor("p07", "p07", URL("http://77.234.215.138:30017")),
-    ServiceDescriptor("p08", "p08", URL("http://77.234.215.138:30018")),
-    ServiceDescriptor("p09", "p09", URL("http://77.234.215.138:30019")),
-    ServiceDescriptor("p10", "p10", URL("http://77.234.215.138:30020")),
-    ServiceDescriptor("p11", "p11", URL("http://77.234.215.138:30021")),
-    ServiceDescriptor("p12", "p12", URL("http://77.234.215.138:30022")),
-    ServiceDescriptor("p81", "p81", URL("http://77.234.215.138:30023")),
+    //ServiceDescriptor("p02", "p02", URL("http://77.234.215.138:30012"), URL("http://p02")),
+    ServiceDescriptor("p03", "p03", URL("http://77.234.215.138:30013"), URL("http://p03")),
+    ServiceDescriptor("p04", "p04", URL("http://77.234.215.138:30014"), URL("http://p04")),
+    ServiceDescriptor("p05", "p05", URL("http://77.234.215.138:30015"), URL("http://p05")),
+    ServiceDescriptor("p07", "p07", URL("http://77.234.215.138:30017"), URL("http://p07")),
+    ServiceDescriptor("p08", "p08", URL("http://77.234.215.138:30018"), URL("http://p08")),
+    ServiceDescriptor("p09", "p09", URL("http://77.234.215.138:30019"), URL("http://p09")),
+    ServiceDescriptor("p10", "p10", URL("http://77.234.215.138:30020"), URL("http://p10")),
+    ServiceDescriptor("p11", "p11", URL("http://77.234.215.138:30021"), URL("http://p11")),
+    ServiceDescriptor("p12", "p12", URL("http://77.234.215.138:30022"), URL("http://p12")),
+    ServiceDescriptor("p81", "p81", URL("http://77.234.215.138:30023"), URL("http://p81")),
 )

@@ -14,7 +14,7 @@ class UserNotAuthenticatedException(username: String) : Exception(username)
 
 class RealExternalService(override val descriptor: ServiceDescriptor, private val userStorage: UserStorage) : ExternalServiceApi {
     private val executorService = ForkJoinPool()
-    private val communicator = UserAwareExternalServiceApiCommunicator(descriptor.url, executorService)
+    private val communicator = UserAwareExternalServiceApiCommunicator(descriptor.getServiceAddress(), executorService)
 
     suspend fun getUserSession(id: UUID): ExternalServiceToken {
         val username = getUser(id).name
