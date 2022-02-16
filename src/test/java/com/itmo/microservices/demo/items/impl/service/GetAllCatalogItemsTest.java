@@ -27,14 +27,14 @@ public class GetAllCatalogItemsTest {
                 UUID.randomUUID(),
                 "test1",
                 "this is a test",
-                "10",
+                10,
                 1
         );
         catalogItemEntity2 = new CatalogItemEntity(
                 UUID.randomUUID(),
                 "test2",
                 "this is a test",
-                "11",
+                11,
                 5
         );
 
@@ -49,6 +49,6 @@ public class GetAllCatalogItemsTest {
 
     @Test
     public void GetItems() {
-        assertEquals(2, itemService.getCatalogItems().stream().count());
+        assertEquals(2, itemService.getCatalogItems(true).stream().count());
     }
 }

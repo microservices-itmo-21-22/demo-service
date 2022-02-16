@@ -11,7 +11,7 @@ class OrderItemEntity {
     @Column(columnDefinition = "uuid", updatable = false)
     var id: UUID? = null
     var title: String? = null
-    var price: String? = null
+    var price: Int? = null
     var amount: Int? = null
     @ManyToOne
     var orderEntity: OrderEntity? = null
@@ -21,7 +21,7 @@ class OrderItemEntity {
     constructor(
         id: UUID?,
         title: String?,
-        price: String?,
+        price: Int?,
         amount: Int?,
         orderEntity: OrderEntity?
     ) {

@@ -4,9 +4,10 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import java.util.*
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class CatalogItem(
+data class CatalogItemDto(
+        val id: UUID?,
         val title: String,
         val description: String,
-        val price: String = "100",
+        val price: Int = 100,
         val amount: Int
 )

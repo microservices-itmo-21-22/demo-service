@@ -9,7 +9,6 @@ import java.time.ZoneOffset
 
 fun OrderEntity.toModel(orderItemRepository: OrderItemRepository): OrderDto = OrderDto(
     id = this.id,
-    userId = this.userId,
     timeCreated = this.timeCreated.toEpochSecond(ZoneOffset.UTC),
     status = this.status,
     deliveryDuration = this.deliveryDuration,

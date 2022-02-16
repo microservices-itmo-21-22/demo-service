@@ -9,7 +9,6 @@ import java.util.*
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class OrderDto(
     var id: UUID?,
-    var userId: UUID?,
     var timeCreated: Long = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC),
     var status: OrderStatusEnum = OrderStatusEnum.COLLECTING,
     var itemsMap: Map<OrderItemDto, Int>?,
