@@ -41,7 +41,7 @@ public class AddItemToTheCartTest {
                 catalogItemEntityUUID,
                 "test1",
                 "this is a test",
-                "10",
+                10,
                 5
         );
 
@@ -89,6 +89,6 @@ public class AddItemToTheCartTest {
 
         assertEquals(2, receivedOrderItemEntity.getAmount());
         assertEquals("test1", receivedOrderItemEntity.getTitle());
-        assertEquals("10", receivedOrderItemEntity.getPrice());
+        assertEquals(10, receivedOrderItemEntity.getPrice());
     }
 }
