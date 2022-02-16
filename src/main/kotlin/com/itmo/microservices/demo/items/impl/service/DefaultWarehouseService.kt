@@ -3,7 +3,7 @@ package com.itmo.microservices.demo.items.impl.service
 import com.google.common.eventbus.EventBus
 import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
-import com.itmo.microservices.demo.items.api.model.CatalogItem
+import com.itmo.microservices.demo.items.api.model.CatalogItemDto
 import com.itmo.microservices.demo.items.api.service.WarehouseService
 import com.itmo.microservices.demo.items.impl.util.toEntity
 import com.itmo.microservices.demo.lib.common.items.repository.ItemRepository
@@ -21,15 +21,17 @@ class DefaultWarehouseService(private val itemRepository: ItemRepository,
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
 
-    override fun getCatalogItems(available: Boolean): List<CatalogItem> =
+    override fun getCatalogItems(available: Boolean): List<CatalogItemDto> =
         itemRepository.findAll()
         .filter { if (available) it.amount > 0 else true }
         .map { it.toModel() }
 
-    override fun getItem(itemId: UUID): CatalogItem?
+    override fun getItem(itemId: UUID): CatalogItemDto?
         = itemRepository.findByIdOrNull(itemId)?.toModel();
 
-    override fun addItem(catalogItem: CatalogItem) {
-       itemRepository.save(catalogItem.toEntity());
+    override fun addItem(catalogItemDto: CatalogItemDto) : CatalogItemDto {
+        var insertedEntity = itemRepository.save(catalogItemDto.toEntity());
+
+        return insertedEntity.toModel();
     }
 }

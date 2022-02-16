@@ -5,5 +5,5 @@ import java.util.*
 data class OrderItemDto (
     val id: UUID?,
     val title: String?,
-    val price: String?
+    val price: Int?
 )
