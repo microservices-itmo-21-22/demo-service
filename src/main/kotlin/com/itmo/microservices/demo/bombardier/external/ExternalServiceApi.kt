@@ -37,7 +37,7 @@ interface ExternalServiceApi {
 
     suspend fun bookOrder(userId: UUID, orderId: UUID): BookingDto //синхронный
     suspend fun getDeliverySlots(userId: UUID, number: Int): List<Duration> // todo sukhoa in future we should get the Dto with slots. Slot has it's lifetime and should be active within it.
-    suspend fun setDeliveryTime(userId: UUID, orderId: UUID, slot: Duration): BookingDto
+    suspend fun setDeliveryTime(userId: UUID, orderId: UUID, slot: Duration)
     suspend fun payOrder(userId: UUID, orderId: UUID): PaymentSubmissionDto
 
     suspend fun simulateDelivery(userId: UUID, orderId: UUID)

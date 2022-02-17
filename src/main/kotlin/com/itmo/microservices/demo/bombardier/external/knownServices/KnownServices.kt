@@ -16,7 +16,6 @@ class ServiceDescriptorNotFoundException(name: String) : Exception("Descriptor f
 class ServiceDescriptor(val name: String, val teamName: String, private val url: URL, private val internalAddress: URL) {
     fun getServiceAddress(): URL {
         val isInternal = !System.getProperty("is.local", "false").toBoolean()
-        LoggerFactory.getLogger(ServiceDescriptor::class.java).info(isInternal.toString())
         return if (isInternal) internalAddress else url
     }
 }

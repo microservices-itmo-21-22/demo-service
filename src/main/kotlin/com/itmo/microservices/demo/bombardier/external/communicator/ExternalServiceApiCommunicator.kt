@@ -5,14 +5,39 @@ import org.springframework.boot.configurationprocessor.json.JSONObject
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import java.io.IOException
-import java.lang.IllegalStateException
 import java.net.URL
 import java.util.concurrent.ExecutorService
+import java.util.logging.Level
+import java.util.logging.Logger
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
+class CachedResponseBody internal constructor(_body: ResponseBody) {
+    private val string: String
+    init {
+        string = _body.string()
+    }
+    fun string() = string
+}
+
+class TrimmedResponse private constructor(private val body: CachedResponseBody, private val code: Int, private val req: Request) {
+    companion object {
+        fun fromResponse(resp: Response): TrimmedResponse {
+            return TrimmedResponse(CachedResponseBody(resp.body()!!), resp.code(), resp.request()).apply {
+                resp.close()
+            }
+        }
+    }
+    fun body() = body
+    fun code() = code
+    fun request() = req
+}
+
 open class ExternalServiceApiCommunicator(private val baseUrl: URL, private val executor: ExecutorService) {
+    init {
+        Logger.getLogger(OkHttpClient::class.java.name).level = Level.FINE
+    }
     companion object {
         private val JSON = MediaType.parse("application/json; charset=utf-8")
         fun JSONObject.toRequestBody() = RequestBody.create(JSON, this.toString())
@@ -30,7 +55,7 @@ open class ExternalServiceApiCommunicator(private val baseUrl: URL, private val 
         )
 
     }.run {
-        val resp = body()!!.string()
+        val resp = body().string()
         mapper.readValue(resp, TokenResponse::class.java).toExternalServiceToken(baseUrl)
     }
 
@@ -38,12 +63,12 @@ open class ExternalServiceApiCommunicator(private val baseUrl: URL, private val 
         assert(!token.isRefreshTokenExpired())
         header(HttpHeaders.AUTHORIZATION, "Bearer ${token.refreshToken}")
     }.run {
-        mapper.readValue(body()!!.string(), TokenResponse::class.java).toExternalServiceToken(baseUrl)
+        mapper.readValue(body().string(), TokenResponse::class.java).toExternalServiceToken(baseUrl)
     }
 
     suspend fun execute(url: String) = execute(url) {}
 
-    suspend fun execute(url: String, builderContext: CustomRequestBuilder.() -> Unit): Response {
+    suspend fun execute(url: String, builderContext: CustomRequestBuilder.() -> Unit): TrimmedResponse {
         val requestBuilder = CustomRequestBuilder(baseUrl).apply {
             _url(url)
             builderContext(this)
@@ -57,7 +82,7 @@ open class ExternalServiceApiCommunicator(private val baseUrl: URL, private val 
 
                 override fun onResponse(call: Call, response: Response) {
                     if (HttpStatus.Series.resolve(response.code()) == HttpStatus.Series.SUCCESSFUL) {
-                        it.resume(response)
+                        it.resume(TrimmedResponse.fromResponse(response))
                         return
                     }
                     it.resumeWithException(InvalidExternalServiceResponseException(
@@ -72,7 +97,7 @@ open class ExternalServiceApiCommunicator(private val baseUrl: URL, private val 
 
     suspend fun executeWithAuth(url: String, credentials: ExternalServiceToken) = executeWithAuth(url, credentials) {}
 
-    suspend fun executeWithAuth(url: String, credentials: ExternalServiceToken, builderContext: CustomRequestBuilder.() -> Unit): Response {
+    suspend fun executeWithAuth(url: String, credentials: ExternalServiceToken, builderContext: CustomRequestBuilder.() -> Unit): TrimmedResponse {
         if (credentials.isTokenExpired()) {
             reauthenticate(credentials)
         }

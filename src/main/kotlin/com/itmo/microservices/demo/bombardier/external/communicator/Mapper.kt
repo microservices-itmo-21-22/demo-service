@@ -20,7 +20,7 @@ class BombardierMappingException(content: String, clazz: Class<*>, originalExcep
         ${clazz.name}
         
         with fields
-        ${clazz.declaredFields.map { "${it.name}: ${it.type.name}" }.joinToString("\n")}
+        ${clazz.declaredFields.map { "${it.name}: ${it.type.name}" }.joinToString("\n\t")}
         
         Original exception message
         ${originalException.message}

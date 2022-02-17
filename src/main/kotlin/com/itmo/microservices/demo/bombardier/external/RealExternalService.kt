@@ -6,7 +6,6 @@ import com.itmo.microservices.demo.bombardier.external.communicator.UserAwareExt
 import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceDescriptor
 import com.itmo.microservices.demo.bombardier.external.storage.UserStorage
 import org.springframework.http.HttpStatus
-import java.net.URL
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.ForkJoinPool
@@ -103,10 +102,10 @@ class RealExternalService(override val descriptor: ServiceDescriptor, private va
         return communicator.executeWithAuthAndDeserialize("/delivery/slots?number=$number", session)
     }
 
-    override suspend fun setDeliveryTime(userId: UUID, orderId: UUID, slot: Duration): BookingDto {
+    override suspend fun setDeliveryTime(userId: UUID, orderId: UUID, slot: Duration) {
         val session = getUserSession(userId)
 
-        return communicator.executeWithAuthAndDeserialize("/orders/$orderId/delivery?slot=${slot.seconds}", session) {
+        communicator.executeWithAuth("/orders/$orderId/delivery?slot=${slot.seconds}", session) {
             post()
         }
     }

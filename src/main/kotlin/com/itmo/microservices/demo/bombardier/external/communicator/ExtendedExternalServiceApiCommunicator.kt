@@ -14,13 +14,12 @@ open class ExtendedExternalServiceApiCommunicator(baseUrl: URL, ex: ExecutorServ
     suspend inline fun <reified T> executeWithDeserialize(url: String, noinline builderContext: CustomRequestBuilder.() -> Unit): T {
         val res = execute(url, builderContext)
         return try {
-            readValueBombardier(res.body()!!.string())
+            readValueBombardier(res.body().string())
         }
         catch (t: BombardierMappingException) {
             throw t.exceptionWithUrl("${res.request().method()} ${res.request().url()}")
         }
     }
-
 
     suspend inline fun <reified T> executeWithAuthAndDeserialize(
         url: String,
@@ -29,7 +28,7 @@ open class ExtendedExternalServiceApiCommunicator(baseUrl: URL, ex: ExecutorServ
     ): T {
         val res = executeWithAuth(url, credentials, builderContext)
         return try {
-            readValueBombardier(res.body()!!.string())
+            readValueBombardier(res.body().string())
         }
         catch (t: BombardierMappingException) {
             throw t.exceptionWithUrl("${res.request().method()} ${res.request().url()}")

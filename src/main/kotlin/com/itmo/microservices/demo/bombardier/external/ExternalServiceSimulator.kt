@@ -9,7 +9,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
 import java.net.URL
 import java.time.Duration
 import java.util.*
@@ -66,12 +65,10 @@ class ExternalServiceSimulator(
         }
     }
 
-    override suspend fun setDeliveryTime(userId: UUID, orderId: UUID, slot: Duration): BookingDto {
+    override suspend fun setDeliveryTime(userId: UUID, orderId: UUID, slot: Duration) {
         orderStorage.getAndUpdate(orderId) { order ->
             order.copy(deliveryDuration = slot)
         }
-
-        return BookingDto(UUID.randomUUID()) // TODO: might be a better idea to return here something more useful
     }
 
     override suspend fun payOrder(userId: UUID, orderId: UUID): PaymentSubmissionDto {
