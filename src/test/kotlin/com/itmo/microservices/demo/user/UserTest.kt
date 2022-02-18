@@ -26,13 +26,13 @@ class UserTest {
     private val password:String = "stringpwd"
 
     private fun usersMock():AppUser{
-        return AppUser(userName,password).also { it.id=usersId }
+        return AppUser(userName,password).also { it.id = usersId }
     }
     @Test
     fun getAccountDataTest() {
         val usersService = DefaultUserService(usersRepository,passwordEncoder,eventBus)
         Mockito.`when`(usersRepository.findById(usersId)).thenReturn(usersMock())
-        val actual = usersService.getAccountData(null,usersId)
+        val actual = usersService.getAccountData(null, usersId)
         val expected = usersMock().toModel()
         Assertions.assertEquals(actual, expected)
     }

@@ -7,7 +7,7 @@ import java.util.*
 
 
 @Repository
-interface ProductsRepository:JpaRepository<Product, UUID>{
-    fun findAllByAmountGreaterThan(amount:Int):List<Product>
-    fun findAllByAmountLessThan(amount:Int):List<Product>
+interface ProductsRepository: JpaRepository<Product, UUID>{
+    fun findAllByAmountGreaterThan(amount:Int): List<Product>
+    fun findAllByAmountLessThan(amount:Int): List<Product>
 }
