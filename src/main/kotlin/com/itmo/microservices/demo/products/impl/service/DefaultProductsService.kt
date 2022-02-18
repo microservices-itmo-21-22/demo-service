@@ -46,20 +46,14 @@ class DefaultProductsService(private val productsRepository: ProductsRepository,
         if(::eventLogger.isInitialized){
             eventLogger.info(ProductsServiceNotableEvents.EVENT_PRODUCT_ADDED,productEntity.title)
         }
-        val orderItem = productRequest.toOrderItem()
-        itemRepository.save(orderItem)
+//        val orderItem = productRequest.toOrderItem()
+//        orderItem.id = productEntity.id
+//        itemRepository.save(orderItem)
         return productEntity.toModel()
     }
 
     override fun getProduct(id: UUID): Product =
         productsRepository.findByIdOrNull(id) ?: throw NotFoundException("Item $id not found")
-
-    @PostConstruct
-    fun addItemsIntoDatabase() {
-        for (i in 1..100000) {
-            productsRepository.save(Product("apple_${i}","A pear",100,1000000))
-        }
-    }
 
     override fun removeProduct(id: UUID, amountToRemove: Int): Boolean {
         val product = productsRepository.findByIdOrNull(id) ?: throw NotFoundException("Item $id not found")
@@ -79,7 +73,7 @@ class DefaultProductsService(private val productsRepository: ProductsRepository,
             amount = this.amount
         )
 
-    fun ProductRequest.toOrderItem() =
+    fun ProductRequest.toOrderItem(): OrderItem =
             OrderItem(
                     this.title,
                     this.description,

@@ -8,7 +8,6 @@ import javax.persistence.Id
 @Entity
 class OrderItem {
     @Id
-    @GeneratedValue
     var id: UUID? = null
     var title: String? = null
     var description: String? = null

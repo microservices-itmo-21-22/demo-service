@@ -75,6 +75,7 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
             throw Exception("Can't remove $amount items from the warehouse")
         }
         println("Find by orderId: $productId")
+        println(itemRepository.findAll())
         var orderItem = itemRepository.findByIdOrNull(productId)
         if (orderItem == null) {
             println("Null")
@@ -83,8 +84,9 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
                     title = product.title,
                     description = product.description,
                     price = product.price,
-                    amount = product.amount
+                    amount = amount
             )
+            orderItem.id = productId
         } else {
             println("Not null")
             orderItem.amount = orderItem.amount?.plus(amount)
@@ -92,7 +94,7 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
         itemRepository.save(orderItem)
         println("Product was received")
         //order.itemsMap?.get(orderItem.id) ?: throw BadRequestException("Item $productId not found")
-        order.itemsMap!![orderItem.id!!] = Amount(amount)
+        order.itemsMap!![orderItem.id!!] = Amount(orderItem.amount)
         orderRepository.save(order)
         eventBus.post(ItemAddedToOrder(order.toModel()))
         eventLogger.info(
