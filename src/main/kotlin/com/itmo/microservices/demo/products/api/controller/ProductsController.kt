@@ -32,17 +32,6 @@ class ProductsController(private val productsService: ProductsService) {
                           @Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails?): List<Product>
     = productsService.getAllProducts(available, author)
 
-    @RequestMapping("/item",method = [RequestMethod.GET])
-    @Operation(
-        summary = "Get product information by id",
-        responses = [
-            ApiResponse(description = "OK", responseCode = "200"),
-            ApiResponse(description = "Bad request", responseCode = "400", content = [Content()])
-        ],
-        security = [SecurityRequirement(name = "bearerAuth")]
-    )
-    fun getProduct(@AuthenticationPrincipal @RequestParam id:String):Product = productsService.getProduct(UUID.fromString(id))
-
     @PostMapping("/_internal/catalogItem")
     @Operation(
             summary = "Add product",

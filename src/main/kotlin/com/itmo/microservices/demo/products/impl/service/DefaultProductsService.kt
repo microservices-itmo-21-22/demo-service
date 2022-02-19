@@ -19,7 +19,6 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import java.util.*
-import javax.annotation.PostConstruct
 
 @Suppress("UnstableApiUsage")
 @Service
@@ -38,7 +37,7 @@ class DefaultProductsService(private val productsRepository: ProductsRepository,
             eventLogger.info(ProductsServiceNotableEvents.EVENT_PRODUCTS_GOT)
         }
         return when(available) {
-            true->productsRepository.findAllByAmountGreaterThan(1)
+            true->productsRepository.findAllByAmountGreaterThan(0)
             false->productsRepository.findAllByAmountLessThan(1)
         }
     }
