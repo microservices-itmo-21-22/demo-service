@@ -9,7 +9,6 @@ import com.itmo.microservices.demo.order.impl.repository.OrderRepository
 import com.itmo.microservices.demo.order.impl.service.OrderServiceImpl
 import com.itmo.microservices.demo.payments.api.model.FinancialOperationType
 import com.itmo.microservices.demo.payments.api.model.PaymentSubmissionDto
-import com.itmo.microservices.demo.payments.api.model.TransactionDto
 import com.itmo.microservices.demo.payments.api.model.UserAccountFinancialLogRecordDto
 import com.itmo.microservices.demo.payments.api.service.PaymentService
 import com.itmo.microservices.demo.payments.impl.entity.Transaction
@@ -18,7 +17,6 @@ import com.itmo.microservices.demo.payments.impl.logging.PaymentServiceNotableEv
 import com.itmo.microservices.demo.payments.impl.repository.PaymentRepository
 import com.itmo.microservices.demo.payments.impl.repository.TransactionRepository
 import com.itmo.microservices.demo.payments.impl.repository.UserAccountFinancialLogRecordRepository
-import com.itmo.microservices.demo.payments.impl.util.toEntity
 import com.itmo.microservices.demo.payments.impl.util.toModel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -28,7 +26,6 @@ import org.springframework.stereotype.Service
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.function.Supplier
-import kotlin.reflect.jvm.internal.impl.builtins.StandardNames.FqNames.number
 
 
 @Suppress("UnstableApiUsage")
@@ -69,14 +66,14 @@ class DefaultPaymentService(
 
         val transactionResponse = transactionRequestService.postRequest()
 
-        val paymentSubmission = PaymentSubmissionDto(transactionResponse.id, Date().time)
+        val paymentSubmission = PaymentSubmissionDto(transactionResponse?.id, Date().time)
         eventBus.post(paymentSubmission)
         eventLogger.info(
             PaymentServiceNotableEvents.I_ORDER_PAID,
             paymentSubmission
         )
         CompletableFuture.supplyAsync(Supplier {
-            transactionRequestService.poll(transactionResponse.id)
+            transactionResponse.let { transactionRequestService.poll(it?.id ?: UUID.randomUUID()) }
         })
 
         return paymentSubmission
