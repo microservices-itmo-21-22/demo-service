@@ -28,18 +28,9 @@ class ProductsController(private val productsService: ProductsService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getProductCatalog(@AuthenticationPrincipal @RequestParam available:Boolean):List<Product> = productsService.getAllProducts(available)
-
-    @RequestMapping("/item",method = [RequestMethod.GET])
-    @Operation(
-        summary = "Get product information by id",
-        responses = [
-            ApiResponse(description = "OK", responseCode = "200"),
-            ApiResponse(description = "Bad request", responseCode = "400", content = [Content()])
-        ],
-        security = [SecurityRequirement(name = "bearerAuth")]
-    )
-    fun getProduct(@AuthenticationPrincipal @RequestParam id:String):Product = productsService.getProduct(UUID.fromString(id))
+    fun getProductCatalog(@AuthenticationPrincipal @RequestParam available: Boolean,
+                          @Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails?): List<Product>
+    = productsService.getAllProducts(available, author)
 
     @PostMapping("/_internal/catalogItem")
     @Operation(
@@ -47,11 +38,8 @@ class ProductsController(private val productsService: ProductsService) {
             responses = [
                 ApiResponse(description = "OK", responseCode = "200"),
                 ApiResponse(description = "Bad request", responseCode = "400", content = [Content()])
-            ],
-            security = [SecurityRequirement(name = "bearerAuth")]
+            ]
     )
-    fun addProduct(@Parameter(hidden = true) @AuthenticationPrincipal author: UserDetails, @RequestBody productRequest: ProductRequest): CatalogItemDto =
+    fun addProduct(@RequestBody productRequest: ProductRequest): CatalogItemDto =
             productsService.addProduct(productRequest)
-
-
 }

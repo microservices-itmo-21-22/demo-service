@@ -26,7 +26,6 @@ class UserController(private val userService: UserService) {
             ApiResponse(description = "Not acceptable:User already exists", responseCode = "406", content = [Content()])
         ]
     )
-
     fun register(@RequestBody request: RegistrationRequest) = userService.registerUser(request)
 
     @GetMapping("/{user_id}")
@@ -38,9 +37,6 @@ class UserController(private val userService: UserService) {
         ],
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun getAccountData(@Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails,@PathVariable user_id: String): AppUserModel =
-            userService.getAccountData(user,UUID.fromString(user_id))
-@DeleteMapping("deleteAllUser")
-fun deleteAllUsers() = userService.deleteAllUsers()
-
+    fun getAccountData(@Parameter(hidden = true) @AuthenticationPrincipal user: UserDetails?, @PathVariable user_id: UUID): AppUserModel =
+            userService.getAccountData(user, user_id)
 }
