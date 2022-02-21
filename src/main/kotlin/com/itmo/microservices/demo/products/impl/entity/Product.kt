@@ -10,20 +10,19 @@ class Product {
     var id: UUID? = UUID.randomUUID()
     var title: String? = null
     var description: String? = null
-    var price: Int? = 100
-    var amount: Int?=null
+    var price: Int? = null
+    var amount: Int? = null
 
     constructor()
 
-    constructor(title: String? = null, description: String? = null,  price: Int? = null, amount:Int) {
+    constructor(title: String?, description: String?, price: Int?, amount: Int?) {
         this.title = title
         this.description = description
         this.price = price
-        this.amount=amount
+        this.amount = amount
     }
 
     override fun toString(): String {
         return "Product(id=$id, name=$title, description=$description, price=$price, amount=$amount)"
     }
-
 }

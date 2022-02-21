@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.web.server.NotAcceptableStatusException
+import com.itmo.microservices.demo.common.exception.AccessDeniedException
 import java.util.*
 
 @Suppress("UnstableApiUsage")
@@ -29,34 +30,32 @@ class DefaultUserService(private val userRepository: UserRepository,
     private lateinit var eventLogger: EventLogger
 
     override fun findUser(username: String): AppUserModel? = userRepository
-            .findByName(username)?.toModel()
+        .findByName(username)?.toModel()
 
     override fun registerUser(request: RegistrationRequest): AppUserModel {
         //There is no prevention of duplicate user registrations
         val aUser = findUser(request.name)
-        if(aUser!=null)throw NotAcceptableStatusException("User already exists")
+        if (aUser != null) throw NotAcceptableStatusException("User already exists")
         val userEntity = userRepository.save(request.toEntity())
         eventBus.post(UserCreatedEvent(userEntity.toModel()))
 
-        if(::eventLogger.isInitialized){
+        if(::eventLogger.isInitialized) {
             eventLogger.info(UserServiceNotableEvents.I_USER_CREATED, userEntity.name)
         }
 
         return userEntity.toModel()
     }
 
-    override fun getAccountData(requester: UserDetails?,uuid: UUID): AppUserModel =
-            userRepository.findById(uuid)?.toModel() ?:
-            throw NotFoundException("User ${requester?.username} not found")
+    override fun getAccountData(requester: UserDetails?, userId: UUID): AppUserModel {
+        if (requester == null) { throw AccessDeniedException("Access Denied") }
 
-    override fun deleteAllUsers() {
-        userRepository.deleteAll()
+        return userRepository.findById(userId)?.toModel() ?: throw NotFoundException("User with ${userId} not found")
     }
+
 
     fun RegistrationRequest.toEntity(): AppUser =
         AppUser(
             name = this.name,
-            password = passwordEncoder.encode(this.password),
-
+            password = passwordEncoder.encode(this.password)
         )
 }
