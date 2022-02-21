@@ -18,27 +18,32 @@ class OrderCollectingStage : TestStage {
     override suspend fun run(userManagement: UserManagement, externalServiceApi: ExternalServiceApi): TestStage.TestContinuationType {
         eventLogger.info(I_ADDING_ITEMS, testCtx().orderId)
 
-        val itemIds = mutableSetOf<UUID>()
-        repeat(Random.nextInt(50)) {
-            val itemToAdd = externalServiceApi.getAvailableItems(testCtx().userId!!).random()
+        val itemIds = mutableMapOf<UUID, Int>()
+        val items = externalServiceApi.getAvailableItems(testCtx().userId!!)
+        repeat(Random.nextInt(1, 20)) {
+            val amount = Random.nextInt(1, 20)
+            val itemToAdd = items.random()
                 .also { // todo should not to do on each addition but! we can randomise it
-                    itemIds.add(it.id)
+                    itemIds[it.id] = amount
                 }
 
-            val amount = Random.nextInt(20)
             externalServiceApi.putItemToOrder(testCtx().userId!!, testCtx().orderId!!, itemToAdd.id, amount)
+        }
 
-            val resultAmount = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!).itemsMap
-                .filter { it.key.id == itemToAdd.id }.values
-                .firstOrNull()
-
-            if (resultAmount == null || resultAmount != amount) {
-                eventLogger.error(E_ADD_ITEMS_FAIL, testCtx().orderId, amount, resultAmount)
+        val finalOrder = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
+        val orderMap = finalOrder.itemsMap.mapKeys { it.key.id }
+        itemIds.forEach { (id, count) ->
+            if (!orderMap.containsKey(id)) {
+                eventLogger.error(E_ADD_ITEMS_FAIL, id, count, 0)
+                return TestStage.TestContinuationType.FAIL
+            }
+            if (orderMap[id] != count) {
+                eventLogger.error(E_ADD_ITEMS_FAIL, id, count, orderMap[id])
                 return TestStage.TestContinuationType.FAIL
             }
         }
 
-        val finalNumOfItems = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!).itemsMap.size
+        val finalNumOfItems = finalOrder.itemsMap.size
         if (finalNumOfItems != itemIds.size) {
             eventLogger.error(E_ITEMS_MISMATCH, finalNumOfItems, itemIds.size)
             return TestStage.TestContinuationType.FAIL

@@ -48,7 +48,7 @@ class OrderPaymentStage : TestStage {
 
         when (val status = paymentLogRecord.status) {
             PaymentStatus.SUCCESS -> {
-                ConditionAwaiter.awaitAtMost(5, TimeUnit.SECONDS)
+                ConditionAwaiter.awaitAtMost(10, TimeUnit.SECONDS)
                     .condition {
                         externalServiceApi.getOrder(
                             testCtx().userId!!,
@@ -60,7 +60,7 @@ class OrderPaymentStage : TestStage {
                         throw TestStage.TestStageFailedException("Exception instead of silently fail")
                     }.startWaiting()
 
-                ConditionAwaiter.awaitAtMost(2, TimeUnit.SECONDS)
+                ConditionAwaiter.awaitAtMost(10, TimeUnit.SECONDS)
                     .condition {
                         val userChargedRecord =
                             externalServiceApi.userFinancialHistory(testCtx().userId!!, testCtx().orderId!!)
@@ -79,7 +79,7 @@ class OrderPaymentStage : TestStage {
                 return TestStage.TestContinuationType.CONTINUE
             }
             PaymentStatus.FAILED -> { // todo sukhoa check order status hasn't changed and user ne charged
-                if (paymentDetails.attempt < 5) {
+                if (paymentDetails.attempt < 10) {
                     eventLogger.info(I_PAYMENT_RETRY, order.id, paymentDetails.attempt)
                     return TestStage.TestContinuationType.RETRY
                 } else {

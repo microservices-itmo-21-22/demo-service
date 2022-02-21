@@ -13,8 +13,6 @@ class UserAwareExternalServiceApiCommunicator(descriptor: ServiceDescriptor, ex:
     ) {
     private val usersMap = mutableMapOf<String, ExternalServiceToken>()
 
-    private val logger = LoggerFactory.getLogger(this.javaClass)
-
     private val refresherCoroutine = CoroutineScope(ex.asCoroutineDispatcher()).launch {
         //runSessionRefresher()
     }

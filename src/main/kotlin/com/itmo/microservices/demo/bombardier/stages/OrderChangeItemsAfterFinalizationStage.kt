@@ -26,8 +26,9 @@ class OrderChangeItemsAfterFinalizationStage : TestStage {
 
         eventLogger.info(I_START_CHANGING_ITEMS, testCtx().orderId)
 
-        repeat(Random.nextInt(1, 10)) {
-            val itemToAdd = externalServiceApi.getAvailableItems(testCtx().userId!!).random()
+        val items = externalServiceApi.getAvailableItems(testCtx().userId!!)
+        repeat(Random.nextInt(1, 5)) {
+            val itemToAdd = items.random()
 
             val amount = Random.nextInt(1, 13)
             externalServiceApi.putItemToOrder(testCtx().userId!!, testCtx().orderId!!, itemToAdd.id, amount)

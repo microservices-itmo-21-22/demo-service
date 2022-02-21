@@ -2,11 +2,13 @@ package com.itmo.microservices.demo.bombardier.external.communicator
 
 import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceDescriptor
 import okhttp3.*
+import org.slf4j.LoggerFactory
 import org.springframework.boot.configurationprocessor.json.JSONObject
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import java.io.IOException
 import java.net.URL
+import java.time.Duration
 import java.util.concurrent.ExecutorService
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -37,16 +39,16 @@ class TrimmedResponse private constructor(private val body: CachedResponseBody, 
 }
 
 open class ExternalServiceApiCommunicator(private val descriptor: ServiceDescriptor, private val executor: ExecutorService) {
-    init {
-        Logger.getLogger(OkHttpClient::class.java.name).level = Level.FINE
-    }
     companion object {
+        val logger = LoggerFactory.getLogger(ExternalServiceApiCommunicator::class.java)
+        private val TIMEOUT = Duration.ofSeconds(20)
         private val JSON = MediaType.parse("application/json; charset=utf-8")
         fun JSONObject.toRequestBody() = RequestBody.create(JSON, this.toString())
     }
 
     private val client = OkHttpClient.Builder().run {
         dispatcher(Dispatcher(executor))
+        callTimeout(TIMEOUT)
         build()
     }
 
@@ -68,7 +70,7 @@ open class ExternalServiceApiCommunicator(private val descriptor: ServiceDescrip
         mapper.readValue(body().string(), TokenResponse::class.java).toExternalServiceToken(descriptor.getServiceAddress())
     }
 
-    suspend fun execute(method: String,url: String) = execute(method, url) {}
+    suspend fun execute(method: String, url: String) = execute(method, url) {}
 
     suspend fun execute(method: String, url: String, builderContext: CustomRequestBuilder.() -> Unit): TrimmedResponse {
         val requestBuilder = CustomRequestBuilder(descriptor.getServiceAddress()).apply {
@@ -77,9 +79,11 @@ open class ExternalServiceApiCommunicator(private val descriptor: ServiceDescrip
         }
         val metrics = Metrics().withTags("service", this.descriptor.name, "method", method)
         return suspendCoroutine {
+            val req = requestBuilder.build()
+            logger.info("sending request to ${req.url().url()}")
             val startTime = System.currentTimeMillis()
 
-            client.newCall(requestBuilder.build()).enqueue(object : Callback {
+            client.newCall(req).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
                     it.resumeWithException(e)
                 }
@@ -106,7 +110,7 @@ open class ExternalServiceApiCommunicator(private val descriptor: ServiceDescrip
         }
     }
 
-    suspend fun executeWithAuth(method: String,url: String, credentials: ExternalServiceToken) = executeWithAuth(method, url, credentials) {}
+    suspend fun executeWithAuth(method: String, url: String, credentials: ExternalServiceToken) = executeWithAuth(method, url, credentials) {}
 
     suspend fun executeWithAuth(
         method: String,

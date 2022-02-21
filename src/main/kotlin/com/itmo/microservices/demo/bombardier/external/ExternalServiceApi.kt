@@ -121,6 +121,7 @@ sealed class OrderStatus {
     object OrderDiscarded : OrderStatus()
     object OrderBooked : OrderStatus()
     object OrderRefund: OrderStatus()
+    object OrderCompleted : OrderStatus()
     class OrderPayed(val paymentTime: Long) : OrderStatus()
     class OrderInDelivery(val deliveryStartTime: Long) : OrderStatus()
     class OrderDelivered(val deliveryStartTime: Long, val deliveryFinishTime: Long) : OrderStatus()
@@ -136,6 +137,7 @@ class OrderStatusDeserializer : JsonDeserializer<OrderStatus>() {
             "PAID" -> OrderStatus.OrderPayed(0)
             "SHIPPING" -> OrderStatus.OrderInDelivery(0)
             "REFUND" -> OrderStatus.OrderRefund
+            "COMPLETED" -> OrderStatus.OrderCompleted
             else -> throw Exception("Invalid order status")
         }
     }
@@ -148,13 +150,13 @@ data class Order(
     @JsonDeserialize(using = OrderStatusDeserializer::class)
     val status: OrderStatus = OrderCollecting,
     @JsonDeserialize(keyUsing = OrderKeyDeserializer::class)
-    val itemsMap: Map<OrderItem, Int>,
-    val deliveryDuration: Duration? = null,
+    val itemsMap: Map<OrderItem, Int>, //
+    val deliveryDuration: Duration? = null, //
     val paymentHistory: List<PaymentLogRecord>
 )
 
 class OrderKeyDeserializer : KeyDeserializer() {
-    override fun deserializeKey(p0: String?, p1: DeserializationContext?): Any {
+    override fun deserializeKey(p0: String?, p1: DeserializationContext?): OrderItem {
         return OrderItem(UUID.fromString(p0), "Deserialized order item $p0")
     }
 
