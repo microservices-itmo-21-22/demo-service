@@ -33,41 +33,41 @@ import java.util.*
 
 
 class DeliveryTest{
-    @Autowired
-    lateinit var deliveryService: DeliveryService
-    @Autowired
-    private lateinit var mockMvc: MockMvc
-    
-        var slot = 0
-
-        @Test
-        fun getSlots(){
-            var mvcResult: MockHttpServletResponse =mockMvc.perform(
-            MockMvcRequestBuilders.get("http://127.0.0.1:8080/delivery/slots?number=1")
-                .accept(MediaType.ALL)
-            ).andReturn().response.apply ( ::println )
-            println(mvcResult.status)
-            println(mvcResult.contentAsString)
-            assertEquals(mvcResult.status,200)
-            slot = mvcResult.contentAsString.substring(1,mvcResult.contentAsString.length-1).toInt()
-            println(slot)
-        }
-
-    @Test
-    fun delivery(){
-        var ID =UUID.randomUUID()
-        var order = OrderDto(id= ID, timeCreated = System.currentTimeMillis(),status = null,
-        itemsMap = null, deliveryDuration = 1000,paymentHistory = null)
-        deliveryService.delivery(order)
-        sleep( 1000*30)
-
-        var mvcResult: MockHttpServletResponse =mockMvc.perform(
-            MockMvcRequestBuilders.get("http://127.0.0.1:8080/_internal/deliveryLog/${ID}")
-                .accept(MediaType.ALL)
-        ).andReturn().response.apply ( ::println )
-        println(mvcResult.status)
-        println(mvcResult.contentAsString)
-        assertEquals(mvcResult.status,200)
-
-    }
+//    @Autowired
+//    lateinit var deliveryService: DeliveryService
+//    @Autowired
+//    private lateinit var mockMvc: MockMvc
+//
+//        var slot = 0
+//
+//        @Test
+//        fun getSlots(){
+//            var mvcResult: MockHttpServletResponse =mockMvc.perform(
+//            MockMvcRequestBuilders.get("http://127.0.0.1:8080/delivery/slots?number=1")
+//                .accept(MediaType.ALL)
+//            ).andReturn().response.apply ( ::println )
+//            println(mvcResult.status)
+//            println(mvcResult.contentAsString)
+//            assertEquals(mvcResult.status,200)
+//            slot = mvcResult.contentAsString.substring(1,mvcResult.contentAsString.length-1).toInt()
+//            println(slot)
+//        }
+//
+//    @Test
+//    fun delivery(){
+//        var ID =UUID.randomUUID()
+//        var order = OrderDto(id= ID, timeCreated = System.currentTimeMillis(),status = null,
+//        itemsMap = null, deliveryDuration = 1000,paymentHistory = null)
+//        deliveryService.delivery(order)
+//        sleep( 1000*30)
+//
+//        var mvcResult: MockHttpServletResponse =mockMvc.perform(
+//            MockMvcRequestBuilders.get("http://127.0.0.1:8080/_internal/deliveryLog/${ID}")
+//                .accept(MediaType.ALL)
+//        ).andReturn().response.apply ( ::println )
+//        println(mvcResult.status)
+//        println(mvcResult.contentAsString)
+//        assertEquals(mvcResult.status,200)
+//
+//    }
 }
