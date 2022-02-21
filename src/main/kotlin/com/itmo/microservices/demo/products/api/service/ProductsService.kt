@@ -9,4 +9,5 @@ interface ProductsService {
     fun getAllProducts(available: Boolean, userDetails: UserDetails?): List<Product>
     fun addProduct(request:ProductRequest): CatalogItemDto
     fun getProduct(id: UUID): Product
+    fun removeProduct(id: UUID, amountToRemove: Int): Boolean
 }

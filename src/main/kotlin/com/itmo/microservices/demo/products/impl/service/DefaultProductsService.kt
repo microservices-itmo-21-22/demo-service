@@ -24,7 +24,7 @@ import java.util.*
 @Service
 class DefaultProductsService(private val productsRepository: ProductsRepository,
                              private val itemRepository: ItemRepository,
-                             private val eventBus: EventBus):ProductsService{
+                             private val eventBus: EventBus): ProductsService{
 
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
@@ -48,14 +48,25 @@ class DefaultProductsService(private val productsRepository: ProductsRepository,
         if(::eventLogger.isInitialized){
             eventLogger.info(ProductsServiceNotableEvents.EVENT_PRODUCT_ADDED,productEntity.title)
         }
-        val orderItem = productRequest.toOrderItem()
-        itemRepository.save(orderItem)
+//        val orderItem = productRequest.toOrderItem()
+//        orderItem.id = productEntity.id
+//        itemRepository.save(orderItem)
         return productEntity.toModel()
     }
 
     override fun getProduct(id: UUID): Product =
         productsRepository.findByIdOrNull(id) ?: throw NotFoundException("Item $id not found")
 
+    override fun removeProduct(id: UUID, amountToRemove: Int): Boolean {
+        val product = productsRepository.findByIdOrNull(id) ?: throw NotFoundException("Item $id not found")
+        if (product.amount!! < amountToRemove) {
+            return false
+        }
+        product.amount = product.amount!! - amountToRemove
+        productsRepository.save(product)
+        return true
+    }
+    
     fun ProductRequest.toEntity():Product=
         Product(
             title= this.title,
@@ -64,7 +75,7 @@ class DefaultProductsService(private val productsRepository: ProductsRepository,
             amount = this.amount
         )
 
-    fun ProductRequest.toOrderItem() =
+    fun ProductRequest.toOrderItem(): OrderItem =
             OrderItem(
                     this.title,
                     this.description,
