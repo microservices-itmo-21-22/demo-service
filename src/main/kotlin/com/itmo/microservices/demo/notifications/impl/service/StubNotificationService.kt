@@ -61,13 +61,12 @@ class SendEmailToUser(){
     private val objectMapper = ObjectMapper()
     private val postBody: String = objectMapper.writeValueAsString(postToken)
     @OptIn(ExperimentalTime::class)
-    private val timeout =Duration.seconds(10).toJavaDuration()
+    private val timeout = Duration.seconds(10).toJavaDuration()
     val httpClient: HttpClient = HttpClient.newBuilder().build()
 
     private fun getPostHeaders(body:String): HttpRequest {
         return HttpRequest.newBuilder()
-            .uri(URI.create("http://77.234.215.138:30027/transactions"))
-            .timeout(this.timeout)
+            .uri(URI.create("http://77.234.215.138:30027/transactions/"))
             .header("Content-Type","application/json")
             .POST(HttpRequest.BodyPublishers.ofString(body))
             .build()
@@ -82,7 +81,7 @@ class SendEmailToUser(){
     private var executorService: ExecutorService? = null
 
 
-    fun  sendEmailToUser(message:String) {
+    fun sendEmailToUser(message:String) {
         try{
             executorService?.submit(callExternalSystem(message))
         }catch(e:RejectedExecutionException){

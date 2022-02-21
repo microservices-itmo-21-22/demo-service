@@ -72,7 +72,6 @@ class DefaultDeliveryService(
     private fun getPostHeaders(body: String): HttpRequest {
         return HttpRequest.newBuilder()
             .uri(URI.create("http://77.234.215.138:30027/transactions"))
-            .timeout(this.timeout)
             .header("Content-Type", "application/json")
             .POST(HttpRequest.BodyPublishers.ofString(body))
             .build()
