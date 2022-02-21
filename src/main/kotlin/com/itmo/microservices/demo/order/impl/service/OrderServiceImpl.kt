@@ -51,7 +51,7 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
         log.info("Order ${order.id} was created")
        eventBus.post(OrderCreatedEvent(order.toModel()))
        eventLogger.info(
-               OrderServiceNotableEvents.I_ORDER_CREATED,
+               OrderServiceNotableEvents.ORDER_CREATED,
                order
        )
        return order.toModel()
