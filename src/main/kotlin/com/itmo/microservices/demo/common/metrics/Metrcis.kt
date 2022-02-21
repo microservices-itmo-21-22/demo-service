@@ -50,20 +50,14 @@ class Metrics {
     }
 
 
-    fun externalMethodDurationRecord(f: Callable<okhttp3.Response>): okhttp3.Response {
-        val startTime = System.currentTimeMillis()
-        val resp = f.call()
-        val endTime = System.currentTimeMillis()
+    fun externalMethodDurationRecord(timeMs: Long) {
 
-        Timer.builder("http_external_duration").publishPercentiles(0.95)
-            .tags(*this.tags.toTypedArray(), "code", resp.code().toString())
-            .register(Metrics.globalRegistry).record(endTime - startTime, TimeUnit.MILLISECONDS)
-
-        return resp
+        Timer.builder(externalCallDurationName).publishPercentiles(0.95)
+            .tags(*this.tags.toTypedArray())
+            .register(Metrics.globalRegistry).record(timeMs, TimeUnit.MILLISECONDS)
     }
 
-    private val testOkName = "test_counter_ok"
-    private val testFailName = "test_counter_fail"
+    private val externalCallDurationName = "http_external_duration"
     private val stageDurationOkName = "stage_duration_ok"
     private val stageDurationFailName = "stage_duration_fail"
     private val testDurationOkName = "test_duration_ok"

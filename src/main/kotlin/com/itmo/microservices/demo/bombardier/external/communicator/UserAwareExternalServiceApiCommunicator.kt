@@ -1,15 +1,16 @@
 package com.itmo.microservices.demo.bombardier.external.communicator
 
+import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceDescriptor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import java.net.URL
-import java.util.*
 import java.util.concurrent.ExecutorService
 
-class UserAwareExternalServiceApiCommunicator(baseUrl: URL, ex: ExecutorService) : ExtendedExternalServiceApiCommunicator(baseUrl, ex) {
+class UserAwareExternalServiceApiCommunicator(descriptor: ServiceDescriptor, ex: ExecutorService) :
+    ExtendedExternalServiceApiCommunicator(
+        descriptor, ex
+    ) {
     private val usersMap = mutableMapOf<String, ExternalServiceToken>()
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
@@ -46,8 +47,7 @@ class UserAwareExternalServiceApiCommunicator(baseUrl: URL, ex: ExecutorService)
                     try {
                         val newToken = reauthenticate(token)
                         usersMap[username] = newToken
-                    }
-                    catch (t: Throwable) {
+                    } catch (t: Throwable) {
                         logger.error("Failed to refresh acc $username with token $token", t)
                         return currentRetries + 1
                     }
