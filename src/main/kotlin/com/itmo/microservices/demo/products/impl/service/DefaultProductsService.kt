@@ -5,8 +5,8 @@ import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.common.exception.AccessDeniedException
 import com.itmo.microservices.demo.common.exception.NotFoundException
+import com.itmo.microservices.demo.common.metrics.DemoServiceMetricsCollector
 import com.itmo.microservices.demo.order.impl.entity.OrderItem
-import com.itmo.microservices.demo.order.impl.repository.ItemRepository
 import com.itmo.microservices.demo.products.api.messaging.ProductAddedEvent
 import com.itmo.microservices.demo.products.api.messaging.ProductGotEvent
 import com.itmo.microservices.demo.products.api.model.*
@@ -15,24 +15,30 @@ import com.itmo.microservices.demo.products.impl.entity.Product
 import com.itmo.microservices.demo.products.impl.logging.ProductsServiceNotableEvents
 import com.itmo.microservices.demo.products.impl.repository.ProductsRepository
 import com.itmo.microservices.demo.products.impl.util.toModel
+import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
+import io.prometheus.client.Counter
+import org.springframework.beans.factory.annotation.Autowired
 import java.util.*
 
 @Suppress("UnstableApiUsage")
 @Service
 class DefaultProductsService(private val productsRepository: ProductsRepository,
-                             private val itemRepository: ItemRepository,
                              private val eventBus: EventBus): ProductsService{
 
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
 
+    @Autowired
+    private lateinit var metricsCollector: DemoServiceMetricsCollector
+
     override fun getAllProducts(available: Boolean, userDetails: UserDetails?): List<Product> {
         if (userDetails == null) { throw AccessDeniedException("Access Denied") }
 
         eventBus.post(ProductGotEvent("All products got"))
+        metricsCollector.counter.inc()
         if(::eventLogger.isInitialized){
             eventLogger.info(ProductsServiceNotableEvents.EVENT_PRODUCTS_GOT)
         }
@@ -48,9 +54,6 @@ class DefaultProductsService(private val productsRepository: ProductsRepository,
         if(::eventLogger.isInitialized){
             eventLogger.info(ProductsServiceNotableEvents.EVENT_PRODUCT_ADDED,productEntity.title)
         }
-//        val orderItem = productRequest.toOrderItem()
-//        orderItem.id = productEntity.id
-//        itemRepository.save(orderItem)
         return productEntity.toModel()
     }
 
