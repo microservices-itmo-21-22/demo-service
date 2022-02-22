@@ -12,10 +12,13 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
     constructor() : this(SERVICE_NAME)
 
     lateinit var productsServiceGetItemsCounter: Counter
+    lateinit var shipping_orders_total: Counter
+
 
     @Autowired
     fun setMetrics(meterRegistry: MeterRegistry) {
         productsServiceGetItemsCounter = meterRegistry.counter("products.service.get.items.counter")
+        shipping_orders_total = meterRegistry.counter("shipping.orders.total")
     }
 
     companion object {
