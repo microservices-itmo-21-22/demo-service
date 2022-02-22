@@ -66,7 +66,7 @@ class DefaultDeliveryService(
 ) : DeliveryService {
 
     @Autowired
-    private lateinit var shipping_orders_total: DemoServiceMetricsCollector
+    private lateinit var metricsCollector: DemoServiceMetricsCollector
 
     private val postToken = mapOf("clientSecret" to "8ddfb4e8-7f83-4c33-b7ac-8504f7c99205")
     private val objectMapper = ObjectMapper()
@@ -126,7 +126,7 @@ class DefaultDeliveryService(
 
     override fun delivery(order: OrderDto, times: Int) {
         if (order.deliveryDuration!! < this.timer.get_time()) {
-            shipping_orders_total.productsServiceGetItemsCounter.increment() 
+            metricsCollector.shippingOrdersTotal.increment()
             log.info("order.deliveryDuration "+order.deliveryDuration)
             log.info("this.timer.get_time() "+this.timer.get_time())
             log.info("a delivery EXPIRED")
