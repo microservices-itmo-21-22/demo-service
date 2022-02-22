@@ -4,6 +4,7 @@ import com.google.common.eventbus.EventBus
 import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.common.exception.NotFoundException
+import com.itmo.microservices.demo.common.metrics.DemoServiceMetricsCollector
 import com.itmo.microservices.demo.order.api.messaging.*
 import com.itmo.microservices.demo.order.api.model.BookingDto
 import com.itmo.microservices.demo.order.api.model.OrderDto
@@ -19,6 +20,7 @@ import com.itmo.microservices.demo.order.impl.util.toModel
 import com.itmo.microservices.demo.products.api.service.ProductsService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
@@ -38,6 +40,9 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
 
+    @Autowired
+    private lateinit var metricsCollector: DemoServiceMetricsCollector
+
    override fun createOrder(user: UserDetails): OrderDto {
        val order = OrderEntity(
                user.username,
@@ -47,9 +52,10 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
                null,
                listOf()
        )
-        orderRepository.save(order)
-        log.info("Order ${order.id} was created")
+       orderRepository.save(order)
+       log.info("Order ${order.id} was created")
        eventBus.post(OrderCreatedEvent(order.toModel()))
+       metricsCollector.orderCreatedCounter.increment()
        eventLogger.info(
                OrderServiceNotableEvents.ORDER_CREATED,
                order
@@ -74,11 +80,8 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
         if (!result) {
             throw Exception("Can't remove $amount items from the warehouse")
         }
-        println("Find by orderId: $productId")
-        println(itemRepository.findAll())
         var orderItem = itemRepository.findByIdOrNull(productId)
         if (orderItem == null) {
-            println("Null")
             orderItem = OrderItem(
                     id = productId,
                     title = product.title,
@@ -88,15 +91,13 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
             )
             orderItem.id = productId
         } else {
-            println("Not null")
             orderItem.amount = orderItem.amount?.plus(amount)
         }
         itemRepository.save(orderItem)
-        println("Product was received")
-        //order.itemsMap?.get(orderItem.id) ?: throw BadRequestException("Item $productId not found")
         order.itemsMap!![orderItem.id!!] = Amount(orderItem.amount)
         orderRepository.save(order)
         eventBus.post(ItemAddedToOrder(order.toModel()))
+        metricsCollector.itemAddedCounter.increment()
         eventLogger.info(
             OrderServiceNotableEvents.I_ITEM_ADDED_TO_ORDER,
             order
@@ -120,6 +121,7 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
         order.deliveryDuration = slotinSec
         orderRepository.save(order)
         eventBus.post(OrderDated(order.toModel()))
+        metricsCollector.timeslotSetCounter.increment()
         eventLogger.info(
             OrderServiceNotableEvents.I_ORDER_DATED,
             order

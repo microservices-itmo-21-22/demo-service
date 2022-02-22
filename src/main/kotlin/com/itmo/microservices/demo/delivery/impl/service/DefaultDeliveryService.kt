@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.eventbus.EventBus
 import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
+import com.itmo.microservices.demo.common.metrics.DemoServiceMetricsCollector
 import com.itmo.microservices.demo.delivery.api.model.DeliveryInfoRecordModel
 import com.itmo.microservices.demo.delivery.api.service.DeliveryService
 import com.itmo.microservices.demo.delivery.impl.entity.DeliveryInfoRecord
@@ -88,9 +89,10 @@ class DefaultDeliveryService(
     @Autowired
     var pollingForResult: PollingForResult? = null
 
+    @Autowired
+    private lateinit var metricsCollector: DemoServiceMetricsCollector
+
     var countOrdersWaitingForDeliver = AtomicInteger(0)
-
-
 
     override fun getSlots(number: Int): List<Int> {
         var list = mutableListOf<Int>()
@@ -118,6 +120,7 @@ class DefaultDeliveryService(
     }
 
     override fun delivery(order: OrderDto, times: Int) {
+        metricsCollector.shippingOrdersCounter.increment()
         if (order.deliveryDuration!! < this.timer.get_time()) {
             log.info("order.deliveryDuration "+order.deliveryDuration)
             log.info("this.timer.get_time() "+this.timer.get_time())
@@ -139,10 +142,8 @@ class DefaultDeliveryService(
                 val response = httpClient.send(getPostHeaders(postBody), HttpResponse.BodyHandlers.ofString())
                 val responseJson = JSONObject(response.body())
                 if (response.statusCode() == 200) {
-                    val id = responseJson.getString("id")
                     log.info("delivery processing , maybe fail")
                     pollingForResult?.getDeliveryResult(order, responseJson, 1)
-
                 } else {
                     Thread.sleep(3000)
                     delivery(order)
