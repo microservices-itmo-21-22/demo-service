@@ -4,6 +4,7 @@ import com.google.common.eventbus.EventBus
 import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.common.exception.NotFoundException
+import com.itmo.microservices.demo.common.metrics.DemoServiceMetricsCollector
 import com.itmo.microservices.demo.order.api.messaging.*
 import com.itmo.microservices.demo.order.api.model.BookingDto
 import com.itmo.microservices.demo.order.api.model.OrderDto
@@ -17,8 +18,10 @@ import com.itmo.microservices.demo.order.impl.repository.ItemRepository
 import com.itmo.microservices.demo.order.impl.repository.OrderRepository
 import com.itmo.microservices.demo.order.impl.util.toModel
 import com.itmo.microservices.demo.products.api.service.ProductsService
+import io.micrometer.core.instrument.Tag
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
@@ -38,7 +41,11 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
 
+    @Autowired
+    private lateinit var metricsCollector: DemoServiceMetricsCollector
+
    override fun createOrder(user: UserDetails): OrderDto {
+       metricsCollector.itemAdded.increment()
        val order = OrderEntity(
                user.username,
                Date().time,
@@ -104,6 +111,8 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
     }
 
     override fun registerOrder(orderId: UUID): BookingDto {
+        //metricsCollector.itemBookRequest.id.tags[0].value = "SUCCESS"
+        metricsCollector.itemBookRequest.increment()
         val order = orderRepository.findByIdOrNull(orderId) ?: throw NotFoundException("Order $orderId not found")
         order.status = OrderStatus.BOOKED
         orderRepository.save(order)

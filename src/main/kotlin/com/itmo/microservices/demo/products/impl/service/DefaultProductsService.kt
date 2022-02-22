@@ -36,7 +36,7 @@ class DefaultProductsService(private val productsRepository: ProductsRepository,
         if (userDetails == null) { throw AccessDeniedException("Access Denied") }
 
         eventBus.post(ProductGotEvent("All products got"))
-        metricsCollector.productsServiceGetItemsCounter.increment()
+        metricsCollector.catalogShown.increment()
         if(::eventLogger.isInitialized){
             eventLogger.info(ProductsServiceNotableEvents.EVENT_PRODUCTS_GOT)
         }
