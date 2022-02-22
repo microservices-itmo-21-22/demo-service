@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.eventbus.EventBus
 import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
+import com.itmo.microservices.demo.common.metrics.DemoServiceMetricsCollector
 import com.itmo.microservices.demo.delivery.api.model.DeliveryInfoRecordModel
 import com.itmo.microservices.demo.delivery.api.service.DeliveryService
 import com.itmo.microservices.demo.delivery.impl.entity.DeliveryInfoRecord
@@ -38,6 +39,8 @@ class Timer {
     //Virtual time
     var time: Int = 0
 
+
+
     @PostConstruct
     fun timerStart() {
         val executor: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
@@ -56,10 +59,14 @@ class Timer {
 @Suppress("UnstableApiUsage")
 @Service
 class DefaultDeliveryService(
+
     private val deliveryInfoRecordRepository: DeliveryInfoRecordRepository,
     private val eventBus: EventBus,
     private val timer: Timer
 ) : DeliveryService {
+
+    @Autowired
+    private lateinit var shipping_orders_total: DemoServiceMetricsCollector
 
     private val postToken = mapOf("clientSecret" to "8ddfb4e8-7f83-4c33-b7ac-8504f7c99205")
     private val objectMapper = ObjectMapper()
@@ -119,6 +126,7 @@ class DefaultDeliveryService(
 
     override fun delivery(order: OrderDto, times: Int) {
         if (order.deliveryDuration!! < this.timer.get_time()) {
+            shipping_orders_total.productsServiceGetItemsCounter.increment() 
             log.info("order.deliveryDuration "+order.deliveryDuration)
             log.info("this.timer.get_time() "+this.timer.get_time())
             log.info("a delivery EXPIRED")
