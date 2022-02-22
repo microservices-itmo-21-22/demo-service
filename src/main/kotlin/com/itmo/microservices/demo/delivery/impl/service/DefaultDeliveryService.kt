@@ -101,6 +101,7 @@ class DefaultDeliveryService(
 
     override fun getSlots(number: Int): List<Int> {
         var list = mutableListOf<Int>()
+        metricsCollector.currentShippingOrders.set(2)
         var startTime: Int = timer.get_time() + 30 + 3 * countOrdersWaitingForDeliver.get()
         for (i: Int in 1..number) {
             list.add(startTime)

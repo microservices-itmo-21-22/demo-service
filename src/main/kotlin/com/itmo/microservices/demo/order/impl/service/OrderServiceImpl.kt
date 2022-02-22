@@ -26,6 +26,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 
 @Service
@@ -79,6 +80,7 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
         val product = productsService.getProduct(productId)
         val result = productsService.removeProduct(productId, amount)
         if (!result) {
+            metricsCollector.itemBookRequestFailed.increment()
             throw Exception("Can't remove $amount items from the warehouse")
         }
         println("Find by orderId: $productId")
@@ -103,6 +105,7 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
         //order.itemsMap?.get(orderItem.id) ?: throw BadRequestException("Item $productId not found")
         order.itemsMap!![orderItem.id!!] = Amount(orderItem.amount)
         orderRepository.save(order)
+        metricsCollector.itemBookRequestSuccess.increment()
         eventBus.post(ItemAddedToOrder(order.toModel()))
         eventLogger.info(
             OrderServiceNotableEvents.I_ITEM_ADDED_TO_ORDER,
@@ -111,16 +114,21 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
     }
 
     override fun registerOrder(orderId: UUID): BookingDto {
-        //metricsCollector.itemBookRequest.id.tags[0].value = "SUCCESS"
-        metricsCollector.itemBookRequest.increment()
-        val order = orderRepository.findByIdOrNull(orderId) ?: throw NotFoundException("Order $orderId not found")
+        val startTime = System.nanoTime()
+        val order = orderRepository.findByIdOrNull(orderId)
+        if (order == null) {
+            metricsCollector.finalizationAttemptFailed.increment()
+            throw NotFoundException("Order $orderId not found")
+        }
         order.status = OrderStatus.BOOKED
         orderRepository.save(order)
+        metricsCollector.finalizationAttemptSuccess.increment()
         eventBus.post(OrderRegistered(order.toModel()))
         eventLogger.info(
             OrderServiceNotableEvents.I_ORDER_REGISTERED,
             order
         )
+        metricsCollector.finalizationDuration.record(System.nanoTime() - startTime, TimeUnit.NANOSECONDS)
         return BookingDto(UUID.randomUUID(), setOf())
     }
 
