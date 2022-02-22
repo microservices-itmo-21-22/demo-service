@@ -20,7 +20,8 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
         productsServiceGetItemsCounter = meterRegistry.counter("products.service.get.items.counter")
         shipping_orders_total = meterRegistry.counter("shipping.orders.total")
     }
-
+//
+    //
     companion object {
         const val SERVICE_NAME = "demo_service"
     }
