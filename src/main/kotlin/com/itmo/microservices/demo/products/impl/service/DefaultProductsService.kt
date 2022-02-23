@@ -15,10 +15,12 @@ import com.itmo.microservices.demo.products.impl.entity.Product
 import com.itmo.microservices.demo.products.impl.logging.ProductsServiceNotableEvents
 import com.itmo.microservices.demo.products.impl.repository.ProductsRepository
 import com.itmo.microservices.demo.products.impl.util.toModel
-import org.springframework.beans.factory.annotation.Autowired
+import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
+import io.prometheus.client.Counter
+import org.springframework.beans.factory.annotation.Autowired
 import java.util.*
 
 @Suppress("UnstableApiUsage")
@@ -36,7 +38,7 @@ class DefaultProductsService(private val productsRepository: ProductsRepository,
         if (userDetails == null) { throw AccessDeniedException("Access Denied") }
 
         eventBus.post(ProductGotEvent("All products got"))
-        metricsCollector.catalogShown.increment()
+        metricsCollector.catalogShownCounter.increment()
         if(::eventLogger.isInitialized){
             eventLogger.info(ProductsServiceNotableEvents.EVENT_PRODUCTS_GOT)
         }

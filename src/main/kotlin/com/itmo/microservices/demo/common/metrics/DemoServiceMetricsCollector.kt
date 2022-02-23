@@ -3,6 +3,9 @@ package com.itmo.microservices.demo.common.metrics
 import com.itmo.microservices.commonlib.metrics.CommonMetricsCollector
 import io.micrometer.core.instrument.*
 import org.springframework.beans.factory.annotation.Autowired
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.MeterRegistry
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -10,6 +13,11 @@ import java.util.concurrent.atomic.AtomicInteger
 class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(serviceName) {
     constructor() : this(SERVICE_NAME)
 
+    lateinit var catalogShownCounter: Counter
+    lateinit var itemAddedCounter: Counter
+    lateinit var orderCreatedCounter: Counter
+    lateinit var shippingOrdersCounter: Counter
+    lateinit var timeslotSetCounter: Counter
     lateinit var catalogShown: Counter
     lateinit var itemAdded: Counter
     lateinit var orderCreated: Counter
@@ -21,9 +29,13 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
     lateinit var currentShippingOrders: AtomicInteger
     lateinit var shippingOrdersTotal: Counter
 
-
     @Autowired
     fun setMetrics(meterRegistry: MeterRegistry) {
+        catalogShownCounter = meterRegistry.counter("catalog_shown")
+        itemAddedCounter = meterRegistry.counter("item_added")
+        orderCreatedCounter = meterRegistry.counter("order_created")
+        shippingOrdersCounter = meterRegistry.counter("shipping_orders_total")
+        timeslotSetCounter = meterRegistry.counter("timeslot_set_request_count")
         //Количество просмотров каталога продукции
         catalogShown = meterRegistry.counter("catalog.shown", listOf(Tag.of("serviceName", "p07")))
         //Количество добавлений товара (товаров) в заказ
