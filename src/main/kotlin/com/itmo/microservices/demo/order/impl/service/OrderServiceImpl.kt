@@ -101,6 +101,9 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
         metricsCollector.itemBookRequestSuccessCounter.increment()
         eventBus.post(ItemAddedToOrder(order.toModel()))
         metricsCollector.itemAddedCounter.increment()
+        if (order.status == OrderStatus.BOOKED) {
+            metricsCollector.addToFinilizedOrderRequestCounter.increment()
+        }
         eventLogger.info(
             OrderServiceNotableEvents.I_ITEM_ADDED_TO_ORDER,
             order

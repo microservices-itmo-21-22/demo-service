@@ -23,6 +23,8 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
     lateinit var currentShippingOrdersGauge: AtomicInteger
     lateinit var shippingOrdersTotalCounter: Counter
     lateinit var timeslotSetCounter: Counter
+    lateinit var addToFinilizedOrderRequestCounter: Counter
+    lateinit var currentAbandonedOrderNumGauge: AtomicInteger
 
     @Autowired
     fun setMetrics(meterRegistry: MeterRegistry) {
@@ -46,6 +48,10 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
         shippingOrdersTotalCounter = meterRegistry.counter("shipping_orders_total")
         //Время доставки выставлено (выбран таймслот) - количество запросов
         timeslotSetCounter = meterRegistry.counter("timeslot_set_request_count")
+        //Количество запросов на изменение заказа (добавление товара) после финализации!
+        addToFinilizedOrderRequestCounter = meterRegistry.counter("add_to_finilized_order_request")
+        //Количество “брошенных” (не финализированные) корзин - тех, которые были задетектированы и пока не были удалены или восстановлены
+        currentAbandonedOrderNumGauge = meterRegistry.gauge("current_abandoned_order_num", AtomicInteger())!!
     }
 
     companion object {
