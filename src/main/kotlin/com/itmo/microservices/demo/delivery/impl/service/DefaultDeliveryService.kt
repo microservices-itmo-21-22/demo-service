@@ -95,14 +95,11 @@ class DefaultDeliveryService(
     @Autowired
     var pollingForResult: PollingForResult? = null
 
-    @Autowired
-    private lateinit var metricsCollector: DemoServiceMetricsCollector
-
     var countOrdersWaitingForDeliver = AtomicInteger(0)
 
     override fun getSlots(number: Int): List<Int> {
         var list = mutableListOf<Int>()
-        metricsCollector.currentShippingOrders.set(2)
+        metricsCollector.currentShippingOrdersGauge.set(2)
         var startTime: Int = timer.get_time() + 30 + 3 * countOrdersWaitingForDeliver.get()
         for (i: Int in 1..number) {
             list.add(startTime)
@@ -127,9 +124,8 @@ class DefaultDeliveryService(
     }
 
     override fun delivery(order: OrderDto, times: Int) {
-        metricsCollector.shippingOrdersCounter.increment()
+        metricsCollector.shippingOrdersTotalCounter.increment()
         if (order.deliveryDuration!! < this.timer.get_time()) {
-            metricsCollector.shippingOrdersTotal.increment()
             log.info("order.deliveryDuration "+order.deliveryDuration)
             log.info("this.timer.get_time() "+this.timer.get_time())
             log.info("a delivery EXPIRED")

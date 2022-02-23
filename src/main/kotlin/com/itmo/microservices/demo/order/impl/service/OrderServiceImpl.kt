@@ -18,7 +18,6 @@ import com.itmo.microservices.demo.order.impl.repository.ItemRepository
 import com.itmo.microservices.demo.order.impl.repository.OrderRepository
 import com.itmo.microservices.demo.order.impl.util.toModel
 import com.itmo.microservices.demo.products.api.service.ProductsService
-import io.micrometer.core.instrument.Tag
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -46,7 +45,6 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
     private lateinit var metricsCollector: DemoServiceMetricsCollector
 
    override fun createOrder(user: UserDetails): OrderDto {
-       metricsCollector.itemAdded.increment()
        val order = OrderEntity(
                user.username,
                Date().time,
@@ -81,7 +79,7 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
         val product = productsService.getProduct(productId)
         val result = productsService.removeProduct(productId, amount)
         if (!result) {
-            metricsCollector.itemBookRequestFailed.increment()
+            metricsCollector.itemBookRequestFailedCounter.increment()
             throw Exception("Can't remove $amount items from the warehouse")
         }
         var orderItem = itemRepository.findByIdOrNull(productId)
@@ -100,7 +98,7 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
         itemRepository.save(orderItem)
         order.itemsMap!![orderItem.id!!] = Amount(orderItem.amount)
         orderRepository.save(order)
-        metricsCollector.itemBookRequestSuccess.increment()
+        metricsCollector.itemBookRequestSuccessCounter.increment()
         eventBus.post(ItemAddedToOrder(order.toModel()))
         metricsCollector.itemAddedCounter.increment()
         eventLogger.info(
@@ -113,18 +111,18 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
         val startTime = System.nanoTime()
         val order = orderRepository.findByIdOrNull(orderId)
         if (order == null) {
-            metricsCollector.finalizationAttemptFailed.increment()
+            metricsCollector.finalizationAttemptFailedCounter.increment()
             throw NotFoundException("Order $orderId not found")
         }
         order.status = OrderStatus.BOOKED
         orderRepository.save(order)
-        metricsCollector.finalizationAttemptSuccess.increment()
+        metricsCollector.finalizationAttemptSuccessCounter.increment()
         eventBus.post(OrderRegistered(order.toModel()))
         eventLogger.info(
             OrderServiceNotableEvents.I_ORDER_REGISTERED,
             order
         )
-        metricsCollector.finalizationDuration.record(System.nanoTime() - startTime, TimeUnit.NANOSECONDS)
+        metricsCollector.finalizationDurationSummary.record(System.nanoTime() - startTime, TimeUnit.NANOSECONDS)
         return BookingDto(UUID.randomUUID(), setOf())
     }
 
