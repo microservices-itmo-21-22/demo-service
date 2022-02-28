@@ -1,6 +1,7 @@
 package com.itmo.microservices.demo.bombardier.external.communicator
 
 import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceDescriptor
+import com.itmo.microservices.demo.common.logging.LoggerWrapper
 import okhttp3.*
 import org.slf4j.LoggerFactory
 import org.springframework.boot.configurationprocessor.json.JSONObject
@@ -40,11 +41,15 @@ class TrimmedResponse private constructor(private val body: CachedResponseBody, 
 
 open class ExternalServiceApiCommunicator(private val descriptor: ServiceDescriptor, private val executor: ExecutorService) {
     companion object {
-        val logger = LoggerFactory.getLogger(ExternalServiceApiCommunicator::class.java)
         private val TIMEOUT = Duration.ofSeconds(20)
         private val JSON = MediaType.parse("application/json; charset=utf-8")
         fun JSONObject.toRequestBody() = RequestBody.create(JSON, this.toString())
     }
+
+    val logger = LoggerWrapper(
+        LoggerFactory.getLogger(ExternalServiceApiCommunicator::class.java),
+        descriptor.name
+    )
 
     private val client = OkHttpClient.Builder().run {
         dispatcher(Dispatcher(executor))

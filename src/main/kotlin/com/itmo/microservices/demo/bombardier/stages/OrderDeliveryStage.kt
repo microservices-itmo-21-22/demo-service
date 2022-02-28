@@ -10,6 +10,7 @@ import com.itmo.microservices.demo.bombardier.flow.*
 import com.itmo.microservices.demo.bombardier.logging.OrderCommonNotableEvents
 import com.itmo.microservices.demo.bombardier.logging.OrderDeliveryNotableEvents.*
 import com.itmo.microservices.demo.bombardier.utils.ConditionAwaiter
+import com.itmo.microservices.demo.common.logging.EventLoggerWrapper
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.util.concurrent.TimeUnit
@@ -17,9 +18,16 @@ import java.util.concurrent.TimeUnit
 @Component
 class OrderDeliveryStage : TestStage {
     @InjectEventLogger
-    private lateinit var eventLogger: EventLogger
+    lateinit var eventLog: EventLogger
 
-    override suspend fun run(userManagement: UserManagement, externalServiceApi: ExternalServiceApi): TestStage.TestContinuationType {
+    lateinit var eventLogger: EventLoggerWrapper
+
+    override suspend fun run(
+        userManagement: UserManagement,
+        externalServiceApi: ExternalServiceApi
+    ): TestStage.TestContinuationType {
+        eventLogger = EventLoggerWrapper(eventLog, testCtx().serviceName)
+
         val orderBeforeDelivery = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
 
         if (orderBeforeDelivery.deliveryDuration == null) {

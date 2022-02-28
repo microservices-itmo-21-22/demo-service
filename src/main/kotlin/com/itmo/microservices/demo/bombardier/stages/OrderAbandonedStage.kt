@@ -8,6 +8,7 @@ import com.itmo.microservices.demo.bombardier.flow.CoroutineLoggingFactory
 import com.itmo.microservices.demo.bombardier.flow.UserManagement
 import com.itmo.microservices.demo.bombardier.logging.OrderAbandonedNotableEvents
 import com.itmo.microservices.demo.bombardier.utils.ConditionAwaiter
+import com.itmo.microservices.demo.common.logging.EventLoggerWrapper
 import kotlinx.coroutines.delay
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
@@ -16,10 +17,14 @@ import kotlin.random.Random
 @Component
 class OrderAbandonedStage : TestStage {
     @InjectEventLogger
-    private lateinit var eventLogger: EventLogger
+    private lateinit var eventLog: EventLogger
+
+    lateinit var eventLogger: EventLoggerWrapper
 
 
     override suspend fun run(userManagement: UserManagement, externalServiceApi: ExternalServiceApi): TestStage.TestContinuationType {
+        eventLogger = EventLoggerWrapper(eventLog, testCtx().serviceName)
+
         val shouldBeAbandoned = Random.nextBoolean()
         if (shouldBeAbandoned) {
             val lastBucketTimestamp = externalServiceApi.abandonedCardHistory(testCtx().orderId!!)

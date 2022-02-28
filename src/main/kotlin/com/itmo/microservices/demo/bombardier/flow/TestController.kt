@@ -7,6 +7,7 @@ import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceWith
 import com.itmo.microservices.demo.bombardier.stages.*
 import com.itmo.microservices.demo.bombardier.stages.TestStage.TestContinuationType.CONTINUE
 import com.itmo.microservices.demo.bombardier.stages.TestStage.TestContinuationType.STOP
+import com.itmo.microservices.demo.common.logging.LoggerWrapper
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -17,6 +18,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 import com.itmo.microservices.demo.common.metrics.Metrics
+import net.logstash.logback.marker.Markers.*
 
 @Service
 class TestController(
@@ -54,6 +56,8 @@ class TestController(
         )
 
     fun startTestingForService(params: TestParameters) {
+        val logger = LoggerWrapper(log, params.serviceName)
+
         val testingFlowCoroutine = SupervisorJob()
 
         val v = runningTests.putIfAbsent(params.serviceName, TestingFlow(params, testingFlowCoroutine))
@@ -69,7 +73,7 @@ class TestController(
         }
 
         repeat(params.parallelProcessesNumber) {
-            log.info("Launch coroutine for $descriptor")
+            logger.info("Launch coroutine for $descriptor")
             launchNewTestFlow(descriptor, stuff)
         }
     }
@@ -99,24 +103,26 @@ class TestController(
     )
 
     private fun launchNewTestFlow(descriptor: ServiceDescriptor, stuff: ServiceWithApiAndAdditional) {
+        val logger = LoggerWrapper(log, descriptor.name)
+
         val serviceName = descriptor.name
         val metrics = metrics.withTags(metrics.serviceLabel, serviceName)
 
         val testingFlow = runningTests[serviceName] ?: return
 
         if (testingFlow.testParams.numberOfTests != null && testingFlow.testsFinished.get() >= testingFlow.testParams.numberOfTests) {
-            log.info("Wrapping up test flow. Number of tests exceeded")
+            logger.info("Wrapping up test flow. Number of tests exceeded")
             runningTests.remove(serviceName)
             return
         }
 
         val testNum = testingFlow.testsStarted.getAndIncrement() // data race :(
         if (testingFlow.testParams.numberOfTests != null && testNum > testingFlow.testParams.numberOfTests) {
-            log.info("All tests Started. No new tests")
+            logger.info("All tests Started. No new tests")
             return
         }
 
-        log.info("Starting $testNum test for service $serviceName, parent job is ${testingFlow.testFlowCoroutine}")
+        logger.info("Starting $testNum test for service $serviceName, parent job is ${testingFlow.testFlowCoroutine}")
 
         coroutineScope.launch(testingFlow.testFlowCoroutine + TestContext(serviceName = serviceName)) {
             val testStartTime = System.currentTimeMillis()
@@ -138,9 +144,9 @@ class TestController(
             }
         }.invokeOnCompletion { th ->
             if (th != null) {
-                log.error("Unexpected fail in test", th)
+                logger.error("Unexpected fail in test", th)
             }
-            log.info("Test ${testingFlow.testsFinished.incrementAndGet()} finished")
+            logger.info("Test ${testingFlow.testsFinished.incrementAndGet()} finished")
             launchNewTestFlow(descriptor, stuff)
         }
     }

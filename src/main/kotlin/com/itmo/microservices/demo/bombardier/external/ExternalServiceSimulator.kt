@@ -21,9 +21,6 @@ class ExternalServiceSimulator(
     private val userStorage: UserStorage,
     private val itemStorage: ItemStorage
 ) : ExternalServiceApi {
-    companion object {
-        val log = LoggerFactory.getLogger(ExternalServiceSimulator::class.java)
-    }
 
     override val descriptor = ServiceDescriptor("Simulator", "Support", URL("https://youtube.com/watch?v=dQw4w9WgXcQ"), URL("https://pornhub.com"))
 

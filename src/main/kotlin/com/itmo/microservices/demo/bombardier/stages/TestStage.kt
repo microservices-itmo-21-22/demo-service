@@ -4,6 +4,9 @@ import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
 import com.itmo.microservices.demo.bombardier.flow.TestCtxKey
 import com.itmo.microservices.demo.bombardier.flow.UserManagement
 import com.itmo.microservices.demo.bombardier.logging.UserNotableEvents
+import com.itmo.microservices.demo.common.logging.EventLoggerWrapper
+import com.itmo.microservices.demo.common.logging.testServiceFiledName
+import net.logstash.logback.marker.Markers.append
 import kotlin.coroutines.coroutineContext
 
 interface TestStage {
@@ -42,7 +45,7 @@ interface TestStage {
             while (decoratedStage is DecoratingStage) {
                 decoratedStage = decoratedStage.wrapped
             }
-            ChoosingUserAccountStage.eventLogger.error(UserNotableEvents.E_UNEXPECTED_EXCEPTION, wrapped::class.simpleName, th)
+            ChoosingUserAccountStage.eventLog.error(append(testServiceFiledName, testCtx().serviceName),UserNotableEvents.E_UNEXPECTED_EXCEPTION, wrapped::class.simpleName, th)
             TestContinuationType.ERROR
         }
 

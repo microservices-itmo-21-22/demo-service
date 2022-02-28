@@ -8,6 +8,7 @@ import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
 import com.itmo.microservices.demo.bombardier.flow.UserManagement
 import com.itmo.microservices.demo.bombardier.logging.OrderChangeItemsAfterFinalizationNotableEvents.*
 import com.itmo.microservices.demo.bombardier.utils.ConditionAwaiter
+import com.itmo.microservices.demo.common.logging.EventLoggerWrapper
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
@@ -15,9 +16,12 @@ import kotlin.random.Random
 @Component
 class OrderChangeItemsAfterFinalizationStage : TestStage {
     @InjectEventLogger
-    private lateinit var eventLogger: EventLogger
+    lateinit var eventLog: EventLogger
+
+    lateinit var eventLogger: EventLoggerWrapper
 
     override suspend fun run(userManagement: UserManagement, externalServiceApi: ExternalServiceApi): TestStage.TestContinuationType {
+        eventLogger = EventLoggerWrapper(eventLog, testCtx().serviceName)
         val shouldRunStage = Random.nextBoolean()
         if (!shouldRunStage) {
             eventLogger.info(I_STATE_SKIPPED, testCtx().orderId)

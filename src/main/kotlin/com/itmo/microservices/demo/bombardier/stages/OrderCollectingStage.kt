@@ -6,6 +6,7 @@ import com.itmo.microservices.demo.bombardier.flow.CoroutineLoggingFactory
 import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
 import com.itmo.microservices.demo.bombardier.flow.UserManagement
 import com.itmo.microservices.demo.bombardier.logging.OrderCollectingNotableEvents.*
+import com.itmo.microservices.demo.common.logging.EventLoggerWrapper
 import org.springframework.stereotype.Component
 import java.util.*
 import kotlin.random.Random
@@ -13,9 +14,13 @@ import kotlin.random.Random
 @Component
 class OrderCollectingStage : TestStage {
     @InjectEventLogger
-    private lateinit var eventLogger: EventLogger
+    private lateinit var eventLog: EventLogger
+
+    lateinit var eventLogger: EventLoggerWrapper
 
     override suspend fun run(userManagement: UserManagement, externalServiceApi: ExternalServiceApi): TestStage.TestContinuationType {
+        eventLogger = EventLoggerWrapper(eventLog, testCtx().serviceName)
+
         eventLogger.info(I_ADDING_ITEMS, testCtx().orderId)
 
         val itemIds = mutableMapOf<UUID, Int>()

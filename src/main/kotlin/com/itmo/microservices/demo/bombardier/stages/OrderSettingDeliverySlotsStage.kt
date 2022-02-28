@@ -5,6 +5,7 @@ import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
 import com.itmo.microservices.demo.bombardier.flow.UserManagement
 import com.itmo.microservices.demo.bombardier.logging.OrderSettingsDeliveryNotableEvents.*
+import com.itmo.microservices.demo.common.logging.EventLoggerWrapper
 import org.springframework.stereotype.Component
 import java.time.Duration
 import kotlin.random.Random
@@ -12,9 +13,16 @@ import kotlin.random.Random
 @Component
 class OrderSettingDeliverySlotsStage : TestStage {
     @InjectEventLogger
-    private lateinit var eventLogger: EventLogger
+    lateinit var eventLog: EventLogger
 
-    override suspend fun run(userManagement: UserManagement, externalServiceApi: ExternalServiceApi): TestStage.TestContinuationType {
+    lateinit var eventLogger: EventLoggerWrapper
+
+    override suspend fun run(
+        userManagement: UserManagement,
+        externalServiceApi: ExternalServiceApi
+    ): TestStage.TestContinuationType {
+        eventLogger = EventLoggerWrapper(eventLog, testCtx().serviceName)
+
         eventLogger.info(I_CHOOSE_SLOT, testCtx().orderId)
         val availableSlots = externalServiceApi.getDeliverySlots(
             testCtx().userId!!,

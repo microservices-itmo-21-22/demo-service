@@ -9,15 +9,23 @@ import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
 import com.itmo.microservices.demo.bombardier.flow.UserManagement
 import com.itmo.microservices.demo.bombardier.logging.OrderCommonNotableEvents
 import com.itmo.microservices.demo.bombardier.logging.OrderFinaizingNotableEvents.*
+import com.itmo.microservices.demo.common.logging.EventLoggerWrapper
 import org.springframework.stereotype.Component
 
 @Component
 class OrderFinalizingStage : TestStage {
     @InjectEventLogger
-    private lateinit var eventLogger: EventLogger
+    lateinit var eventLog: EventLogger
+
+    lateinit var eventLogger: EventLoggerWrapper
 
 
-    override suspend fun run(userManagement: UserManagement, externalServiceApi: ExternalServiceApi): TestStage.TestContinuationType {
+    override suspend fun run(
+        userManagement: UserManagement,
+        externalServiceApi: ExternalServiceApi
+    ): TestStage.TestContinuationType {
+        eventLogger = EventLoggerWrapper(eventLog, testCtx().serviceName)
+
         eventLogger.info(I_START_FINALIZING, testCtx().orderId)
         val orderStateBeforeFinalizing = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
 

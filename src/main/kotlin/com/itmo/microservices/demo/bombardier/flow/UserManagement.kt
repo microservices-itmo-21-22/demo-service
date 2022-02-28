@@ -2,6 +2,8 @@ package com.itmo.microservices.demo.bombardier.flow
 
 import com.itmo.microservices.demo.bombardier.external.ExternalServiceApi
 import com.itmo.microservices.demo.bombardier.external.User
+import com.itmo.microservices.demo.bombardier.external.communicator.ExternalServiceApiCommunicator
+import com.itmo.microservices.demo.common.logging.LoggerWrapper
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.*
@@ -12,11 +14,12 @@ import kotlin.NoSuchElementException
 class UserManagement(
     private val externalServiceApi: ExternalServiceApi
 ) {
-    companion object {
-        val log = LoggerFactory.getLogger(UserManagement::class.java)
-    }
-
     private val serviceName = externalServiceApi.descriptor.name
+
+    val log = LoggerWrapper(
+        LoggerFactory.getLogger(UserManagement::class.java),
+        serviceName
+    )
 
     private val userIdsByService = mutableListOf<UUID>()
 

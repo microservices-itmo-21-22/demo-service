@@ -10,15 +10,23 @@ import com.itmo.microservices.demo.bombardier.flow.*
 import com.itmo.microservices.demo.bombardier.logging.OrderCommonNotableEvents
 import com.itmo.microservices.demo.bombardier.logging.OrderPaymentNotableEvents.*
 import com.itmo.microservices.demo.bombardier.utils.ConditionAwaiter
+import com.itmo.microservices.demo.common.logging.EventLoggerWrapper
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
 
 @Component
 class OrderPaymentStage : TestStage {
     @InjectEventLogger
-    private lateinit var eventLogger: EventLogger
+    lateinit var eventLog: EventLogger
 
-    override suspend fun run(userManagement: UserManagement, externalServiceApi: ExternalServiceApi): TestStage.TestContinuationType {
+    lateinit var eventLogger: EventLoggerWrapper
+
+    override suspend fun run(
+        userManagement: UserManagement,
+        externalServiceApi: ExternalServiceApi
+    ): TestStage.TestContinuationType {
+        eventLogger = EventLoggerWrapper(eventLog, testCtx().serviceName)
+
         val order = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!)
 
         val paymentDetails = testCtx().paymentDetails
