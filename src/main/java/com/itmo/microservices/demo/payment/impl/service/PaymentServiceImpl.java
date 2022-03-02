@@ -1,5 +1,6 @@
 package com.itmo.microservices.demo.payment.impl.service;
-
+import com.itmo.microservices.demo.order.api.service.OrderService;
+import io.prometheus.client.Counter;
 
 import com.itmo.microservices.demo.payment.PaymentServiceConstants;
 import com.itmo.microservices.demo.payment.api.model.FinancialOperationType;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class PaymentServiceImpl implements PaymentService {
 
     private final UserAccountFinancialLogRecordRepository userAccountFinancialLogRecordRepository;
+    private final OrderService orderService;
     private final UserService userService;
 
     @Override
@@ -56,8 +58,21 @@ public class PaymentServiceImpl implements PaymentService {
                 .collect(Collectors.toList());
     }
 
+    static final Counter revenue = Counter.build().name("revenue_total").help("Total revenue").register();
+
     @Override
     public PaymentSubmissionDto executeOrderPayment(UserDetails user, UUID orderId) {
+        var order = orderService.getOrder(orderId);
+        if (order != null) {
+            var itemsMap = order.getItemsMap();
+            if (itemsMap != null) {
+                itemsMap.forEach((orderItemDto, items_count) -> {
+                    var price = orderItemDto.getPrice();
+                    if (price != null)
+                        revenue.inc(price * items_count);
+                });
+            }
+        }
         return PaymentSubmissionDto.builder()
                 .timestamp(LocalDateTime.now())
                 .transactionID(UUID.randomUUID()) //TODO:: query to order repo by orderId
