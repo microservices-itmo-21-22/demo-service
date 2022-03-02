@@ -14,8 +14,10 @@ import com.itmo.microservices.demo.users.api.service.UserService
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
+import io.prometheus.client.Counter
 import java.util.*
 import org.webjars.NotFoundException
+
 
 @Service
 class DefaultOrderService(
@@ -24,7 +26,15 @@ class DefaultOrderService(
     private val itemService: WarehouseService,
     private val userService: UserService
     ): OrderService {
+    @Value("\${serivce.name}")
+    val serviceName : String = "";
 
+    private val orderCreatedCount : Counter =
+        Counter.build()
+            .name("order_created")
+            .help("Count of created orders")
+            .labelName("serviceName")
+            .register();
 
     override fun getOrder(orderId: UUID): OrderDto {
         val optionalOrder = orderRepository.findById(orderId)
@@ -42,6 +52,7 @@ class DefaultOrderService(
         }
         val accountData = userService.getAccountData(currentUser)
         orderEntity.userId = accountData.id
+        orderCreatedCount.labels(serviceName).inc();
         return orderRepository.save(orderEntity).toModel(orderItemRepository)
     }
 
