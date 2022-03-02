@@ -1,4 +1,5 @@
 package com.itmo.microservices.demo.payment.impl.service;
+
 import com.itmo.microservices.demo.order.api.service.OrderService;
 import io.prometheus.client.Counter;
 
@@ -28,6 +29,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final UserAccountFinancialLogRecordRepository userAccountFinancialLogRecordRepository;
     private final OrderService orderService;
     private final UserService userService;
+    private static final String serviceName = "p03";
 
     @Override
     public List<UserAccountFinancialLogRecordDto> getFinlog(String name, UUID orderId) throws UserNotFoundException {
@@ -58,7 +60,8 @@ public class PaymentServiceImpl implements PaymentService {
                 .collect(Collectors.toList());
     }
 
-    static final Counter revenue = Counter.build().name("revenue_total").help("Total revenue").register();
+    static final Counter revenue =
+            Counter.build().name("revenue_total").help("Total revenue").labelNames(serviceName).register();
 
     @Override
     public PaymentSubmissionDto executeOrderPayment(UserDetails user, UUID orderId) {
