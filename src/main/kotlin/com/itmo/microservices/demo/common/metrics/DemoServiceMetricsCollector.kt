@@ -41,7 +41,7 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
         finalizationAttemptSuccessCounter = meterRegistry.counter("finalization_attempt", listOf(Tag.of("result", "SUCCESS")))
         finalizationAttemptFailedCounter = meterRegistry.counter("finalization_attempt", listOf(Tag.of("result", "FAILED")))
         //Длительность процесса финализации +0.9 квантиль???
-//        finalizationDurationSummary = meterRegistry.timer("finalization_duration")
+        finalizationDurationSummary = meterRegistry.timer("finalization_duration")
         //Количество заказов, которые прямо сейчас находятся в доставке
 //        currentShippingOrdersGauge = meterRegistry.gauge("current_shipping_orders", AtomicInteger())!!
         //Количество заказов, переданных в доставку
