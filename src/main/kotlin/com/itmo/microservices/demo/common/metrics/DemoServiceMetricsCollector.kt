@@ -35,23 +35,23 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
         //Создание нового заказа
         orderCreatedCounter = meterRegistry.counter("order_created")
         //Количество запросов на бронирование товаров для заказа
-        itemBookRequestSuccessCounter = meterRegistry.counter("item_book_request", listOf(Tag.of("result", "SUCCESS")))
-        itemBookRequestFailedCounter = meterRegistry.counter("item_book_request", listOf(Tag.of("result", "FAILED")))
+//        itemBookRequestSuccessCounter = meterRegistry.counter("item_book_request", listOf(Tag.of("result", "SUCCESS")))
+//        itemBookRequestFailedCounter = meterRegistry.counter("item_book_request", listOf(Tag.of("result", "FAILED")))
         //Количество запросов на финализацию заказа
-        finalizationAttemptSuccessCounter = meterRegistry.counter("finalization_attempt", listOf(Tag.of("result", "SUCCESS")))
-        finalizationAttemptFailedCounter = meterRegistry.counter("finalization_attempt", listOf(Tag.of("result", "FAILED")))
+//        finalizationAttemptSuccessCounter = meterRegistry.counter("finalization_attempt", listOf(Tag.of("result", "SUCCESS")))
+//        finalizationAttemptFailedCounter = meterRegistry.counter("finalization_attempt", listOf(Tag.of("result", "FAILED")))
         //Длительность процесса финализации +0.9 квантиль???
-        finalizationDurationSummary = meterRegistry.timer("finalization_duration")
+//        finalizationDurationSummary = meterRegistry.timer("finalization_duration")
         //Количество заказов, которые прямо сейчас находятся в доставке
-        currentShippingOrdersGauge = meterRegistry.gauge("current_shipping_orders", AtomicInteger())!!
+//        currentShippingOrdersGauge = meterRegistry.gauge("current_shipping_orders", AtomicInteger())!!
         //Количество заказов, переданных в доставку
-        shippingOrdersTotalCounter = meterRegistry.counter("shipping_orders_total")
+//        shippingOrdersTotalCounter = meterRegistry.counter("shipping_orders_total")
         //Время доставки выставлено (выбран таймслот) - количество запросов
-        timeslotSetCounter = meterRegistry.counter("timeslot_set_request_count")
+//        timeslotSetCounter = meterRegistry.counter("timeslot_set_request_count")
         //Количество запросов на изменение заказа (добавление товара) после финализации!
         addToFinilizedOrderRequestCounter = meterRegistry.counter("add_to_finilized_order_request")
         //Количество “брошенных” (не финализированные) корзин - тех, которые были задетектированы и пока не были удалены или восстановлены
-        currentAbandonedOrderNumGauge = meterRegistry.gauge("current_abandoned_order_num", AtomicInteger())!!
+//        currentAbandonedOrderNumGauge = meterRegistry.gauge("current_abandoned_order_num", AtomicInteger())!!
     }
 
     companion object {

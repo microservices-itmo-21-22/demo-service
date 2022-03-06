@@ -1,4 +1,4 @@
-url="http://localhost:8080"
+url="http://77.234.215.138:30017"
 name="string"
 password="string"
 
