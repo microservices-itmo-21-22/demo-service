@@ -24,7 +24,7 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
     lateinit var shippingOrdersTotalCounter: Counter
     lateinit var timeslotSetCounter: Counter
     lateinit var addToFinilizedOrderRequestCounter: Counter
-    lateinit var currentAbandonedOrderNumGauge: AtomicInteger
+//    lateinit var currentAbandonedOrderNumGauge: AtomicInteger
 
     @Autowired
     fun setMetrics(meterRegistry: MeterRegistry) {
@@ -43,7 +43,7 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
         //Длительность процесса финализации +0.9 квантиль???
         finalizationDurationSummary = meterRegistry.timer("finalization_duration")
         //Количество заказов, которые прямо сейчас находятся в доставке
-//        currentShippingOrdersGauge = meterRegistry.gauge("current_shipping_orders", AtomicInteger())!!
+        currentShippingOrdersGauge = meterRegistry.gauge("current_shipping_orders", AtomicInteger())!!
         //Количество заказов, переданных в доставку
         shippingOrdersTotalCounter = meterRegistry.counter("shipping_orders_total")
         //Время доставки выставлено (выбран таймслот) - количество запросов
