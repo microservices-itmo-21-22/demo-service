@@ -59,7 +59,6 @@ class Timer {
 @Suppress("UnstableApiUsage")
 @Service
 class DefaultDeliveryService(
-
     private val deliveryInfoRecordRepository: DeliveryInfoRecordRepository,
     private val eventBus: EventBus,
     private val timer: Timer
