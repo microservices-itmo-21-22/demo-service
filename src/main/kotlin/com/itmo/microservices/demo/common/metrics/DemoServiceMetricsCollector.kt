@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.*
 import org.springframework.beans.factory.annotation.Autowired
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
+import io.prometheus.client.Histogram
 import org.springframework.stereotype.Component
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -35,6 +36,7 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
     lateinit var fromCollectingToBookedStatusCounter: Counter
     lateinit var fromBookedToPaidStatusCounter: Counter
     lateinit var ordersInStatus: AtomicInteger
+    lateinit var ordersInStatusHistogram: Histogram
 
     @Autowired
     fun setMetrics(meterRegistry: MeterRegistry) {
@@ -64,7 +66,11 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
         currentAbandonedOrderNumGauge = meterRegistry.gauge("current_abandoned_order_num", AtomicInteger())!!
 
         //Количество заказов в каждом статусе в текущий момент
-        ordersInStatus = meterRegistry.gauge("orders_in_status", AtomicInteger())!!
+        ordersInStatusHistogram = Histogram.build()
+                .name("orders_in_status")
+                .buckets(1.0, 5.0, 10.0, 25.0, 50.0)
+                .create()
+
         // Количество “брошенных” корзин - тех, которые были удалены
         discardedOrdersCounter = meterRegistry.counter("discarded_orders")
 
