@@ -13,10 +13,14 @@ import com.itmo.microservices.demo.delivery.impl.repository.DeliveryInfoRecordRe
 import com.itmo.microservices.demo.delivery.impl.utils.toModel
 import com.itmo.microservices.demo.notifications.impl.service.StubNotificationService
 import com.itmo.microservices.demo.order.api.model.OrderDto
+import com.itmo.microservices.demo.order.api.model.OrderStatus
+import com.itmo.microservices.demo.order.impl.repository.OrderRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.configurationprocessor.json.JSONObject
+import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.net.URI
 import java.net.http.HttpClient
@@ -57,10 +61,12 @@ class Timer {
 
 
 @Suppress("UnstableApiUsage")
+@EnableScheduling
 @Service
 class DefaultDeliveryService(
 
     private val deliveryInfoRecordRepository: DeliveryInfoRecordRepository,
+    private val orderRepository: OrderRepository,
     private val eventBus: EventBus,
     private val timer: Timer
 ) : DeliveryService {
@@ -97,9 +103,10 @@ class DefaultDeliveryService(
 
     var countOrdersWaitingForDeliver = AtomicInteger(0)
 
+
+
     override fun getSlots(number: Int): List<Int> {
         var list = mutableListOf<Int>()
-        metricsCollector.currentShippingOrdersGauge.set(2)
         var startTime: Int = timer.get_time() + 30 + 3 * countOrdersWaitingForDeliver.get()
         for (i: Int in 1..number) {
             list.add(startTime)
@@ -142,11 +149,24 @@ class DefaultDeliveryService(
             )
         } else {
             try {
+                order.id?.let {
+                    val deliveredOrder = orderRepository.findById(it).get()
+                    if (deliveredOrder.status != OrderStatus.SHIPPING){
+                        deliveredOrder.status = OrderStatus.SHIPPING
+                        orderRepository.save(deliveredOrder)
+                    }
+                }
                 log.info("send delivery requesting")
                 val response = httpClient.send(getPostHeaders(postBody), HttpResponse.BodyHandlers.ofString())
                 val responseJson = JSONObject(response.body())
                 if (response.statusCode() == 200) {
                     log.info("delivery processing , maybe fail")
+                    Thread.sleep(120000)
+                    order.id?.let {
+                        val deliveredOrder = orderRepository.findById(it).get()
+                        deliveredOrder.status = OrderStatus.COMPLETED
+                        orderRepository.save(deliveredOrder)
+                    }
                     pollingForResult?.getDeliveryResult(order, responseJson, 1)
                 } else {
                     Thread.sleep(3000)
@@ -154,9 +174,22 @@ class DefaultDeliveryService(
                 }
             } catch (e: HttpConnectTimeoutException) {
                 log.info("Request timeout!")
+                order.id?.let {
+                    val deliveredOrder = orderRepository.findById(it).get()
+                    if (deliveredOrder.status != OrderStatus.SHIPPING){
+                        deliveredOrder.status = OrderStatus.SHIPPING
+                        orderRepository.save(deliveredOrder)
+                    }
+                }
                 delivery(order)
             }
         }
+    }
+
+    @Scheduled(fixedRate = 10000)
+    override fun checkCountOfShippingOrders() {
+        val shippingOrdersCount = orderRepository.findAll().filter { it.status == OrderStatus.SHIPPING }.count()
+        metricsCollector.currentShippingOrdersGauge.set(shippingOrdersCount)
     }
 }
 
