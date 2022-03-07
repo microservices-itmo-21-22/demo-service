@@ -4,6 +4,7 @@ import com.google.common.eventbus.EventBus
 import com.itmo.microservices.commonlib.annotations.InjectEventLogger
 import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.common.exception.NotFoundException
+import com.itmo.microservices.demo.common.metrics.DemoServiceMetricsCollector
 import com.itmo.microservices.demo.order.api.model.OrderStatus
 import com.itmo.microservices.demo.order.impl.repository.OrderRepository
 import com.itmo.microservices.demo.order.impl.service.OrderServiceImpl
@@ -20,11 +21,13 @@ import com.itmo.microservices.demo.payments.impl.repository.UserAccountFinancial
 import com.itmo.microservices.demo.payments.impl.util.toModel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import java.util.*
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
 import java.util.function.Supplier
 
 
@@ -46,6 +49,9 @@ class DefaultPaymentService(
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
 
+    @Autowired
+    private lateinit var metricsCollector: DemoServiceMetricsCollector
+
     override fun pay(orderId: UUID): PaymentSubmissionDto {
         println(
             "Pay method. "
@@ -53,6 +59,7 @@ class DefaultPaymentService(
         );
         val order = orderRepository.findByIdOrNull(orderId) ?: throw NotFoundException("Order $orderId not found")
         order.status = OrderStatus.PAID
+        metricsCollector.averagedBookingToPayTime.record(System.nanoTime() - order.timeUpdated!!, TimeUnit.NANOSECONDS)
         orderRepository.save(order)
         val amount = order.itemsMap?.map { (id, amount) -> amount }?.sumOf { it.amount ?: 0 }
         val record = UserAccountFinancialLogRecordEntity(
@@ -65,7 +72,6 @@ class DefaultPaymentService(
         userAccountFinancialLogRecordRepository.save(record)
 
         val transactionResponse = transactionRequestService.postRequest()
-
         val paymentSubmission = PaymentSubmissionDto(transactionResponse?.id, Date().time)
         eventBus.post(paymentSubmission)
         eventLogger.info(

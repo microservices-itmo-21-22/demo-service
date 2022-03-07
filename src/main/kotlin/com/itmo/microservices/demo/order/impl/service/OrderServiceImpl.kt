@@ -118,6 +118,7 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
             throw NotFoundException("Order $orderId not found")
         }
         order.status = OrderStatus.BOOKED
+        order.timeUpdated = System.nanoTime()
         orderRepository.save(order)
         metricsCollector.finalizationAttemptSuccessCounter.increment()
         eventBus.post(OrderRegistered(order.toModel()))

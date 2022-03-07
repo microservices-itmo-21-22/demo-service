@@ -34,6 +34,8 @@ class OrderEntity {
 
     var timeCreated: Long? = null
 
+    var timeUpdated: Long? = null
+
     var status: OrderStatus? = null
 
     @ManyToMany(cascade= [CascadeType.ALL])

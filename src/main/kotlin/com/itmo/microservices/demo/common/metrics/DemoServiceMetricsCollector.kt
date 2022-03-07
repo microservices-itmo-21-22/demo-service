@@ -25,6 +25,7 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
     lateinit var timeslotSetCounter: Counter
     lateinit var addToFinilizedOrderRequestCounter: Counter
     lateinit var currentAbandonedOrderNumGauge: AtomicInteger
+    lateinit var averagedBookingToPayTime: Timer
 
     @Autowired
     fun setMetrics(meterRegistry: MeterRegistry) {
@@ -52,6 +53,8 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
         addToFinilizedOrderRequestCounter = meterRegistry.counter("add_to_finilized_order_request")
         //Количество “брошенных” (не финализированные) корзин - тех, которые были задетектированы и пока не были удалены или восстановлены
         currentAbandonedOrderNumGauge = meterRegistry.gauge("current_abandoned_order_num", AtomicInteger())!!
+        //Среднее время, которое проходит от бронирования до оплаты заказа. + 0.9 квантили
+        averagedBookingToPayTime = meterRegistry.timer("avg_booking_to_payed_time")
     }
 
     companion object {
