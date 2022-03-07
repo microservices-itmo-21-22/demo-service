@@ -167,6 +167,7 @@ class DefaultDeliveryService(
                         deliveredOrder.status = OrderStatus.COMPLETED
                         orderRepository.save(deliveredOrder)
                     }
+                    metricsCollector.externalSystemExpenseDeliveryCounter.increment(50.0)
                     pollingForResult?.getDeliveryResult(order, responseJson, 1)
                 } else {
                     Thread.sleep(3000)

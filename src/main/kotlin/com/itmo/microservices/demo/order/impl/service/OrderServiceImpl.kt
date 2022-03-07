@@ -142,4 +142,7 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
         )
         return BookingDto(UUID.randomUUID(), setOf())
     }
+
+    override fun getOrderItemById(orderItemId: UUID): OrderItem =
+        itemRepository.getById(orderItemId)
 }

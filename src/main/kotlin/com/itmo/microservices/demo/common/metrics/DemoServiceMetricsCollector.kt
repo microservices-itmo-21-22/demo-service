@@ -26,6 +26,11 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
     lateinit var addToFinilizedOrderRequestCounter: Counter
     lateinit var currentAbandonedOrderNumGauge: AtomicInteger
     lateinit var averagedBookingToPayTime: Timer
+    lateinit var revenueCounter: Counter
+    lateinit var externalSystemExpensePaymentCounter: Counter
+    lateinit var externalSystemExpenseDeliveryCounter: Counter
+    lateinit var externalSystemExpenseNotificationCounter: Counter
+
 
     @Autowired
     fun setMetrics(meterRegistry: MeterRegistry) {
@@ -55,6 +60,12 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
         currentAbandonedOrderNumGauge = meterRegistry.gauge("current_abandoned_order_num", AtomicInteger())!!
         //Среднее время, которое проходит от бронирования до оплаты заказа. + 0.9 квантили
         averagedBookingToPayTime = meterRegistry.timer("avg_booking_to_payed_time")
+        //Количество денег, которые были заработаны при успешных оплатах
+        revenueCounter = meterRegistry.counter("revenue")
+        //Количество денег, которые были потрачены при обращении во внешние системы
+        externalSystemExpensePaymentCounter = meterRegistry.counter("external_system_expense", listOf(Tag.of("externalSystemType", "PAYMENT")))
+        externalSystemExpenseDeliveryCounter = meterRegistry.counter("external_system_expense", listOf(Tag.of("externalSystemType", "DELIVERY")))
+        externalSystemExpenseNotificationCounter = meterRegistry.counter("external_system_expense", listOf(Tag.of("externalSystemType", "NOTIFICATION")))
     }
 
     companion object {

@@ -6,6 +6,7 @@ import com.itmo.microservices.commonlib.logging.EventLogger
 import com.itmo.microservices.demo.common.exception.NotFoundException
 import com.itmo.microservices.demo.common.metrics.DemoServiceMetricsCollector
 import com.itmo.microservices.demo.order.api.model.OrderStatus
+import com.itmo.microservices.demo.order.api.service.OrderService
 import com.itmo.microservices.demo.order.impl.repository.OrderRepository
 import com.itmo.microservices.demo.order.impl.service.OrderServiceImpl
 import com.itmo.microservices.demo.payments.api.model.FinancialOperationType
@@ -19,6 +20,8 @@ import com.itmo.microservices.demo.payments.impl.repository.PaymentRepository
 import com.itmo.microservices.demo.payments.impl.repository.TransactionRepository
 import com.itmo.microservices.demo.payments.impl.repository.UserAccountFinancialLogRecordRepository
 import com.itmo.microservices.demo.payments.impl.util.toModel
+import com.itmo.microservices.demo.products.impl.repository.ProductsRepository
+import com.itmo.microservices.demo.products.impl.service.DefaultProductsService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -38,6 +41,7 @@ class DefaultPaymentService(
     private val transactionRepository: TransactionRepository,
     private val transactionRequestService: TransactionRequestService,
     private val orderRepository: OrderRepository,
+    private val orderService: OrderService,
     private val userAccountFinancialLogRecordRepository: UserAccountFinancialLogRecordRepository,
     private val eventBus: EventBus
 ) : PaymentService {
@@ -61,7 +65,11 @@ class DefaultPaymentService(
         order.status = OrderStatus.PAID
         metricsCollector.averagedBookingToPayTime.record(System.nanoTime() - order.timeUpdated!!, TimeUnit.NANOSECONDS)
         orderRepository.save(order)
-        val amount = order.itemsMap?.map { (id, amount) -> amount }?.sumOf { it.amount ?: 0 }
+        val amount = order.itemsMap?.entries?.sumOf {
+            it.value.amount?.times(orderService.getOrderItemById(it.key).price!!) ?: 0
+        }
+        metricsCollector.revenueCounter.increment(amount!!.toDouble())
+        metricsCollector.externalSystemExpensePaymentCounter.increment(amount.toDouble())
         val record = UserAccountFinancialLogRecordEntity(
             UUID.randomUUID(),
             FinancialOperationType.WITHDRAW,
