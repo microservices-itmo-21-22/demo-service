@@ -1,4 +1,4 @@
-url="http://77.234.215.138:30017"
+url="http://localhost:8080"
 
 red=$(tput setaf 1)
 reset=$(tput sgr0)
