@@ -18,3 +18,5 @@ curl -sX GET "$url/orders/3fa85f64-5717-4562-b3fc-2c963f66afa6" -H "accept: */*"
 
 echo "${red}Get current order${reset}"
 curl -sX GET "$url/orders/$id" -H "accept: */*" -H  "Authorization: Bearer $token" | jq '.'
+
+echo $token

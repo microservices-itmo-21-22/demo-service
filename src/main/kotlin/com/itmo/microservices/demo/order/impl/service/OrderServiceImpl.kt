@@ -18,10 +18,9 @@ import com.itmo.microservices.demo.order.impl.repository.ItemRepository
 import com.itmo.microservices.demo.order.impl.repository.OrderRepository
 import com.itmo.microservices.demo.order.impl.util.toModel
 import com.itmo.microservices.demo.products.api.service.ProductsService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
@@ -30,14 +29,11 @@ import java.util.concurrent.TimeUnit
 
 
 @Service
+@EnableScheduling
 class OrderServiceImpl(private val orderRepository: OrderRepository,
                        private val itemRepository: ItemRepository,
                        private val productsService: ProductsService,
                        private val eventBus: EventBus): OrderService {
-
-    companion object {
-        val log: Logger = LoggerFactory.getLogger(OrderServiceImpl::class.java)
-    }
 
     @InjectEventLogger
     private lateinit var eventLogger: EventLogger
@@ -55,13 +51,14 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
                listOf()
        )
        orderRepository.save(order)
-       log.info("Order ${order.id} was created")
+
        eventBus.post(OrderCreatedEvent(order.toModel()))
-       metricsCollector.orderCreatedCounter.increment()
        eventLogger.info(
-               OrderServiceNotableEvents.ORDER_CREATED,
-               order
+           OrderServiceNotableEvents.ORDER_CREATED,
+           order
        )
+
+       metricsCollector.orderCreatedCounter.increment()
        return order.toModel()
     }
 
@@ -98,35 +95,38 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
         }
         itemRepository.save(orderItem)
         order.itemsMap!![orderItem.id!!] = Amount(orderItem.amount)
-        orderRepository.save(order)
-        metricsCollector.itemBookRequestSuccessCounter.increment()
+        order.timeCreated = Date().time
+        changeOrderStatus(order, OrderStatus.COLLECTING)
+
         eventBus.post(ItemAddedToOrder(order.toModel()))
-        metricsCollector.itemAddedCounter.increment()
-        if (order.status == OrderStatus.BOOKED) {
-            metricsCollector.addToFinilizedOrderRequestCounter.increment()
-        }
         eventLogger.info(
             OrderServiceNotableEvents.I_ITEM_ADDED_TO_ORDER,
             order
         )
+
+        metricsCollector.itemBookRequestSuccessCounter.increment()
+        metricsCollector.itemAddedCounter.increment()
+        if (order.status == OrderStatus.BOOKED) {
+            metricsCollector.addToFinilizedOrderRequestCounter.increment()
+        }
     }
 
     override fun registerOrder(orderId: UUID): BookingDto {
-        val startTime = System.nanoTime()
         val order = orderRepository.findByIdOrNull(orderId)
         if (order == null) {
             metricsCollector.finalizationAttemptFailedCounter.increment()
             throw NotFoundException("Order $orderId not found")
         }
-        order.status = OrderStatus.BOOKED
-        orderRepository.save(order)
-        metricsCollector.finalizationAttemptSuccessCounter.increment()
+        changeOrderStatus(order, OrderStatus.BOOKED)
+
         eventBus.post(OrderRegistered(order.toModel()))
         eventLogger.info(
             OrderServiceNotableEvents.I_ORDER_REGISTERED,
             order
         )
-        metricsCollector.finalizationDurationSummary.record(System.nanoTime() - startTime, TimeUnit.NANOSECONDS)
+
+        metricsCollector.finalizationAttemptSuccessCounter.increment()
+        metricsCollector.finalizationDurationSummary.record(Date().time - order.timeCreated!!, TimeUnit.MILLISECONDS)
         return BookingDto(UUID.randomUUID(), setOf())
     }
 
@@ -134,14 +134,17 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
         val order = orderRepository.findByIdOrNull(orderId) ?: throw NotFoundException("Order $orderId not found")
         order.deliveryDuration = slotinSec
         orderRepository.save(order)
+
         eventBus.post(OrderDated(order.toModel()))
-        metricsCollector.timeslotSetCounter.increment()
         eventLogger.info(
             OrderServiceNotableEvents.I_ORDER_DATED,
             order
         )
+
+        metricsCollector.timeslotSetCounter.increment()
         return BookingDto(UUID.randomUUID(), setOf())
     }
+
 
     @Scheduled(fixedRate = 60000)
     override fun getOrdersInStatus() {
@@ -152,5 +155,63 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
                 }
                 .count()
         metricsCollector.ordersInStatus.set(count)
+    }
+
+    private fun changeOrderStatus(order: OrderEntity, status: OrderStatus) {
+        val prevStatus = order.status
+        order.status = status
+        orderRepository.save(order)
+        when {
+            prevStatus == OrderStatus.COLLECTING && status == OrderStatus.DISCARD ->
+                metricsCollector.fromCollectingToDiscardStatusCounter.increment()
+            prevStatus == OrderStatus.DISCARD && status == OrderStatus.COLLECTING ->
+                metricsCollector.fromDiscardToCollectingStatusCounter.increment()
+            prevStatus == OrderStatus.COLLECTING && status == OrderStatus.BOOKED ->
+                metricsCollector.fromCollectingToBookedStatusCounter.increment()
+            prevStatus == OrderStatus.BOOKED && status == OrderStatus.PAID ->
+                metricsCollector.fromBookedToPaidStatusCounter.increment()
+        }
+    }
+
+    private val minutesForRefund = 15
+    private val minutesForDelete = 60
+
+    @Scheduled(fixedRate = 60000)
+    fun checkForDiscard() {
+        val currentTime = Date().time
+        val orders = orderRepository.findAll()
+            .filter { it.status == OrderStatus.COLLECTING }
+            .filter { it.timeCreated != null }
+
+        for (order in orders) {
+            val orderCreated = order.timeCreated!!
+            val diff = currentTime - orderCreated
+            val minutes = (diff / 60000).toInt()
+            if (minutes >= minutesForRefund) {
+                changeOrderStatus(order, OrderStatus.DISCARD)
+            }
+        }
+
+        val refundCount = orderRepository.findAll().count { it.status == OrderStatus.DISCARD }
+        metricsCollector.currentAbandonedOrderNumGauge.set(refundCount)
+    }
+
+    @Scheduled(fixedRate = 60000)
+    fun checkForDelete() {
+        val currentTime = Date().time
+        val orders = orderRepository.findAll()
+            .filter { it.status == OrderStatus.DISCARD }
+            .filter { it.timeCreated != null }
+
+        for (order in orders) {
+            val orderCreated = order.timeCreated!!
+            val diff = currentTime - orderCreated
+            val minutes = (diff / 60000).toInt()
+            if (minutes >= minutesForDelete) {
+                orderRepository.delete(order)
+                metricsCollector.discardedOrdersCounter.increment()
+            }
+        }
+
     }
 }

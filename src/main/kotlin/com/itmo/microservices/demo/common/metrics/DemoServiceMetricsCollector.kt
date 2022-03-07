@@ -15,16 +15,25 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
     lateinit var catalogShownCounter: Counter
     lateinit var itemAddedCounter: Counter
     lateinit var orderCreatedCounter: Counter
+
     lateinit var itemBookRequestSuccessCounter: Counter
     lateinit var itemBookRequestFailedCounter: Counter
+
     lateinit var finalizationAttemptSuccessCounter: Counter
     lateinit var finalizationAttemptFailedCounter: Counter
+
     lateinit var finalizationDurationSummary: Timer
+    // Не корректно работает
     lateinit var currentShippingOrdersGauge: AtomicInteger
     lateinit var shippingOrdersTotalCounter: Counter
     lateinit var timeslotSetCounter: Counter
     lateinit var addToFinilizedOrderRequestCounter: Counter
     lateinit var currentAbandonedOrderNumGauge: AtomicInteger
+    lateinit var discardedOrdersCounter: Counter
+    lateinit var fromCollectingToDiscardStatusCounter: Counter
+    lateinit var fromDiscardToCollectingStatusCounter: Counter
+    lateinit var fromCollectingToBookedStatusCounter: Counter
+    lateinit var fromBookedToPaidStatusCounter: Counter
     lateinit var ordersInStatus: AtomicInteger
 
     @Autowired
@@ -56,6 +65,26 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
 
         //Количество заказов в каждом статусе в текущий момент
         ordersInStatus = meterRegistry.gauge("orders_in_status", AtomicInteger())!!
+        // Количество “брошенных” корзин - тех, которые были удалены
+        discardedOrdersCounter = meterRegistry.counter("discarded_orders")
+
+        // Изменение статуса заказа
+        fromCollectingToDiscardStatusCounter = meterRegistry.counter(
+            "order_status_changed",
+            listOf(Tag.of("fromState", "COLLECTING"), Tag.of("toState", "DISCARD"))
+        )
+        fromDiscardToCollectingStatusCounter = meterRegistry.counter(
+            "order_status_changed",
+            listOf(Tag.of("fromState", "DISCARD"), Tag.of("toState", "COLLECTING"))
+        )
+        fromCollectingToBookedStatusCounter = meterRegistry.counter(
+            "order_status_changed",
+            listOf(Tag.of("fromState", "COLLECTING"), Tag.of("toState", "BOOKED"))
+        )
+        fromBookedToPaidStatusCounter = meterRegistry.counter(
+            "order_status_changed",
+            listOf(Tag.of("fromState", "BOOKED"), Tag.of("toState", "PAID"))
+        )
     }
 
     companion object {
