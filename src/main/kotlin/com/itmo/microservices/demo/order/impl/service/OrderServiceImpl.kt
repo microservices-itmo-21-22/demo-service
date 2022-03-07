@@ -157,7 +157,7 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
                     it.status == OrderStatus.COLLECTING
                 }
                 .count()
-        metricsCollector.ordersInStatusHistogram.observe(count.toDouble())
+        //metricsCollector.ordersInStatusHistogram.observe(count.toDouble())
     }
 
     private fun changeOrderStatus(order: OrderEntity, status: OrderStatus) {
