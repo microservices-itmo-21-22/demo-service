@@ -22,6 +22,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import java.util.*
@@ -140,5 +141,16 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
             order
         )
         return BookingDto(UUID.randomUUID(), setOf())
+    }
+
+    @Scheduled(fixedRate = 60000)
+    override fun getOrdersInStatus() {
+        val count = orderRepository
+                .findAll()
+                .filter {
+                    it.status == OrderStatus.COLLECTING
+                }
+                .count()
+        metricsCollector.ordersInStatus.set(count)
     }
 }

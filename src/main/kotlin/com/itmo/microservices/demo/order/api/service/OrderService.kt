@@ -11,4 +11,5 @@ interface OrderService {
     fun addItemToOrder(orderId: UUID, productId: UUID, amount: Int)
     fun registerOrder(orderId: UUID): BookingDto
     fun setDeliveryTime(orderId: UUID, slotinSec: Int): BookingDto
+    fun getOrdersInStatus()
 }
