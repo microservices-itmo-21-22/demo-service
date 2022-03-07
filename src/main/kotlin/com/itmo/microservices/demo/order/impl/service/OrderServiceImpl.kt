@@ -119,6 +119,9 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
         }
         changeOrderStatus(order, OrderStatus.BOOKED)
 
+        order.timeUpdated = System.nanoTime()
+        orderRepository.save(order)
+        metricsCollector.finalizationAttemptSuccessCounter.increment()
         eventBus.post(OrderRegistered(order.toModel()))
         eventLogger.info(
             OrderServiceNotableEvents.I_ORDER_REGISTERED,
@@ -214,4 +217,7 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
         }
 
     }
+
+    override fun getOrderItemById(orderItemId: UUID): OrderItem =
+        itemRepository.getById(orderItemId)
 }

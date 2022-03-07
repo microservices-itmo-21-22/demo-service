@@ -5,7 +5,6 @@ import io.micrometer.core.instrument.*
 import org.springframework.beans.factory.annotation.Autowired
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
-import io.prometheus.client.Histogram
 import org.springframework.stereotype.Component
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -37,6 +36,12 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
     lateinit var fromBookedToPaidStatusCounter: Counter
     lateinit var ordersInStatus: AtomicInteger
     lateinit var ordersInStatusHistogram: Histogram
+    lateinit var averagedBookingToPayTime: Timer
+    lateinit var revenueCounter: Counter
+    lateinit var externalSystemExpensePaymentCounter: Counter
+    lateinit var externalSystemExpenseDeliveryCounter: Counter
+    lateinit var externalSystemExpenseNotificationCounter: Counter
+
 
     @Autowired
     fun setMetrics(meterRegistry: MeterRegistry) {
@@ -91,6 +96,14 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
             "order_status_changed",
             listOf(Tag.of("fromState", "BOOKED"), Tag.of("toState", "PAID"))
         )
+        //Среднее время, которое проходит от бронирования до оплаты заказа. + 0.9 квантили
+        averagedBookingToPayTime = meterRegistry.timer("avg_booking_to_payed_time")
+        //Количество денег, которые были заработаны при успешных оплатах
+        revenueCounter = meterRegistry.counter("revenue")
+        //Количество денег, которые были потрачены при обращении во внешние системы
+        externalSystemExpensePaymentCounter = meterRegistry.counter("external_system_expense", listOf(Tag.of("externalSystemType", "PAYMENT")))
+        externalSystemExpenseDeliveryCounter = meterRegistry.counter("external_system_expense", listOf(Tag.of("externalSystemType", "DELIVERY")))
+        externalSystemExpenseNotificationCounter = meterRegistry.counter("external_system_expense", listOf(Tag.of("externalSystemType", "NOTIFICATION")))
     }
 
     companion object {
