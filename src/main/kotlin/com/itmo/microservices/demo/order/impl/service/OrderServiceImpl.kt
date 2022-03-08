@@ -18,6 +18,7 @@ import com.itmo.microservices.demo.order.impl.repository.ItemRepository
 import com.itmo.microservices.demo.order.impl.repository.OrderRepository
 import com.itmo.microservices.demo.order.impl.util.toModel
 import com.itmo.microservices.demo.products.api.service.ProductsService
+import org.hibernate.criterion.Order
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.scheduling.annotation.EnableScheduling
@@ -96,7 +97,7 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
         itemRepository.save(orderItem)
         order.itemsMap!![orderItem.id!!] = Amount(orderItem.amount)
         order.timeCreated = Date().time
-        changeOrderStatus(order, OrderStatus.COLLECTING)
+        changeOrderStatus(orderId, OrderStatus.COLLECTING)
 
         eventBus.post(ItemAddedToOrder(order.toModel()))
         eventLogger.info(
@@ -117,8 +118,7 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
             metricsCollector.finalizationAttemptFailedCounter.increment()
             throw NotFoundException("Order $orderId not found")
         }
-        changeOrderStatus(order, OrderStatus.BOOKED)
-
+        changeOrderStatus(orderId, OrderStatus.BOOKED)
         order.timeUpdated = System.nanoTime()
         orderRepository.save(order)
         metricsCollector.finalizationAttemptSuccessCounter.increment()
@@ -148,7 +148,9 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
         return BookingDto(UUID.randomUUID(), setOf())
     }
 
-    private fun changeOrderStatus(order: OrderEntity, status: OrderStatus) {
+    override fun changeOrderStatus(orderId: UUID, status: OrderStatus) {
+        val order = orderRepository.findById(orderId).orElse(null) ?: return
+      
         val prevStatus = order.status
         order.status = status
         orderRepository.save(order)
@@ -161,6 +163,8 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
                 metricsCollector.fromCollectingToBookedStatusCounter.increment()
             prevStatus == OrderStatus.BOOKED && status == OrderStatus.PAID ->
                 metricsCollector.fromBookedToPaidStatusCounter.increment()
+            prevStatus == OrderStatus.SHIPPING && status == OrderStatus.COMPLETED ->
+                metricsCollector.fromShippingToCompletedStatusCounter.increment()
         }
     }
 
@@ -179,7 +183,7 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
             val diff = currentTime - orderCreated
             val minutes = (diff / 60000).toInt()
             if (minutes >= minutesForRefund) {
-                changeOrderStatus(order, OrderStatus.DISCARD)
+                order.id?.let { changeOrderStatus(it, OrderStatus.DISCARD) }
             }
         }
 
