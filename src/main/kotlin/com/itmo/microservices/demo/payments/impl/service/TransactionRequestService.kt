@@ -73,7 +73,7 @@ class TransactionRequestService(private val transactionRepository: TransactionRe
             .uri(URL + transactionId.toString())
             .retrieve()
             .bodyToMono(TransactionDto::class.java)
-            .timeout(Duration.ofSeconds(3))
+            .timeout(Duration.ofSeconds(50))
             .block()
     }
 

@@ -150,7 +150,7 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
 
     override fun changeOrderStatus(orderId: UUID, status: OrderStatus) {
         val order = orderRepository.findById(orderId).orElse(null) ?: return
-
+      
         val prevStatus = order.status
         order.status = status
         orderRepository.save(order)
