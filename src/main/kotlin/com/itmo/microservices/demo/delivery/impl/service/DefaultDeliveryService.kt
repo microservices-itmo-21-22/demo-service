@@ -9,6 +9,7 @@ import com.itmo.microservices.demo.delivery.api.model.DeliveryInfoRecordModel
 import com.itmo.microservices.demo.delivery.api.service.DeliveryService
 import com.itmo.microservices.demo.delivery.impl.entity.DeliveryInfoRecord
 import com.itmo.microservices.demo.delivery.impl.entity.DeliverySubmissionOutcome
+import com.itmo.microservices.demo.delivery.impl.event.OrderStatusChanged
 import com.itmo.microservices.demo.delivery.impl.repository.DeliveryInfoRecordRepository
 import com.itmo.microservices.demo.delivery.impl.utils.toModel
 import com.itmo.microservices.demo.notifications.impl.service.StubNotificationService
@@ -42,8 +43,6 @@ import kotlin.time.toJavaDuration
 class Timer {
     //Virtual time
     var time: Int = 0
-
-
 
     @PostConstruct
     fun timerStart() {
@@ -102,8 +101,6 @@ class DefaultDeliveryService(
 
     var countOrdersWaitingForDeliver = AtomicInteger(0)
 
-
-
     override fun getSlots(number: Int): List<Int> {
         var list = mutableListOf<Int>()
         var startTime: Int = timer.get_time() + 30 + 3 * countOrdersWaitingForDeliver.get()
@@ -148,24 +145,13 @@ class DefaultDeliveryService(
             )
         } else {
             try {
-                order.id?.let {
-                    val deliveredOrder = orderRepository.findById(it).get()
-                    if (deliveredOrder.status != OrderStatus.SHIPPING){
-                        deliveredOrder.status = OrderStatus.SHIPPING
-                        orderRepository.save(deliveredOrder)
-                    }
-                }
+                order.id?.let { eventBus.post(OrderStatusChanged(it, OrderStatus.SHIPPING)) }
                 log.info("send delivery requesting")
                 val response = httpClient.send(getPostHeaders(postBody), HttpResponse.BodyHandlers.ofString())
                 val responseJson = JSONObject(response.body())
                 if (response.statusCode() == 200) {
                     log.info("delivery processing , maybe fail")
                     Thread.sleep(120000)
-                    order.id?.let {
-                        val deliveredOrder = orderRepository.findById(it).get()
-                        deliveredOrder.status = OrderStatus.COMPLETED
-                        orderRepository.save(deliveredOrder)
-                    }
                     metricsCollector.externalSystemExpenseDeliveryCounter.increment(50.0)
                     pollingForResult?.getDeliveryResult(order, responseJson, 1)
                 } else {
@@ -174,15 +160,10 @@ class DefaultDeliveryService(
                 }
             } catch (e: HttpConnectTimeoutException) {
                 log.info("Request timeout!")
-                order.id?.let {
-                    val deliveredOrder = orderRepository.findById(it).get()
-                    if (deliveredOrder.status != OrderStatus.SHIPPING){
-                        deliveredOrder.status = OrderStatus.SHIPPING
-                        orderRepository.save(deliveredOrder)
-                    }
-                }
                 delivery(order)
+                return
             }
+            order.id?.let { eventBus.post(OrderStatusChanged(it, OrderStatus.COMPLETED)) }
         }
     }
 

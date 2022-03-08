@@ -31,10 +31,13 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
     lateinit var addToFinilizedOrderRequestCounter: Counter
     lateinit var currentAbandonedOrderNumGauge: AtomicInteger
     lateinit var discardedOrdersCounter: Counter
+
     lateinit var fromCollectingToDiscardStatusCounter: Counter
     lateinit var fromDiscardToCollectingStatusCounter: Counter
     lateinit var fromCollectingToBookedStatusCounter: Counter
     lateinit var fromBookedToPaidStatusCounter: Counter
+    lateinit var fromShippingToCompletedStatusCounter: Counter
+
     lateinit var ordersInStatus: AtomicInteger
     //lateinit var ordersInStatusHistogram: Histogram
     lateinit var averagedBookingToPayTime: Timer
@@ -97,6 +100,11 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
             "order_status_changed",
             listOf(Tag.of("fromState", "BOOKED"), Tag.of("toState", "PAID"))
         )
+        fromShippingToCompletedStatusCounter = meterRegistry.counter(
+            "order_status_changed",
+            listOf(Tag.of("fromState", "SHIPPING"), Tag.of("toState", "COMPLETED"))
+        )
+
         //Среднее время, которое проходит от бронирования до оплаты заказа. + 0.9 квантили
         averagedBookingToPayTime = meterRegistry.timer("avg_booking_to_payed_time")
         //Количество денег, которые были заработаны при успешных оплатах
