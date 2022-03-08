@@ -148,18 +148,6 @@ class OrderServiceImpl(private val orderRepository: OrderRepository,
         return BookingDto(UUID.randomUUID(), setOf())
     }
 
-
-    @Scheduled(fixedRate = 60000)
-    override fun getOrdersInStatus() {
-        val count = orderRepository
-                .findAll()
-                .filter {
-                    it.status == OrderStatus.COLLECTING
-                }
-                .count()
-        metricsCollector.ordersInStatusHistogram.observe(count.toDouble())
-    }
-
     private fun changeOrderStatus(order: OrderEntity, status: OrderStatus) {
         val prevStatus = order.status
         order.status = status

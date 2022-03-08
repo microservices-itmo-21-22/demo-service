@@ -41,7 +41,6 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
     lateinit var externalSystemExpenseDeliveryCounter: Counter
     lateinit var externalSystemExpenseNotificationCounter: Counter
     lateinit var refundedMoneyAmountDeliveryFailedCounter: Counter
-    lateinit var ordersInStatusHistogram: Histogram
 
 
     @Autowired
@@ -102,13 +101,6 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
 
         //Количество денег, возвращенных пользователю
         refundedMoneyAmountDeliveryFailedCounter = meterRegistry.counter("refunded_money_amount", listOf(Tag.of("refundReason", "DELIVERY_FAILED")))
-
-        //Количество заказов в каждом статусе в текущий момент (не работает)
-        ordersInStatusHistogram = Histogram.build()
-                .name("orders_in_status")
-                .help("orders_in_status")
-                .buckets(1.0, 5.0, 10.0, 25.0, 50.0)
-                .register()
     }
 
     companion object {
