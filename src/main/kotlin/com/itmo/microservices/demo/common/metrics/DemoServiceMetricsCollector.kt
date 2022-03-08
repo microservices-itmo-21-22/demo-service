@@ -35,13 +35,13 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
     lateinit var fromDiscardToCollectingStatusCounter: Counter
     lateinit var fromCollectingToBookedStatusCounter: Counter
     lateinit var fromBookedToPaidStatusCounter: Counter
-    lateinit var ordersInStatus: AtomicInteger
-    //lateinit var ordersInStatusHistogram: Histogram
     lateinit var averagedBookingToPayTime: Timer
     lateinit var revenueCounter: Counter
     lateinit var externalSystemExpensePaymentCounter: Counter
     lateinit var externalSystemExpenseDeliveryCounter: Counter
     lateinit var externalSystemExpenseNotificationCounter: Counter
+    lateinit var refundedMoneyAmountDeliveryFailedCounter: Counter
+    lateinit var ordersInStatusHistogram: Histogram
 
 
     @Autowired
@@ -71,12 +71,6 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
         //Количество “брошенных” (не финализированные) корзин - тех, которые были задетектированы и пока не были удалены или восстановлены
         currentAbandonedOrderNumGauge = meterRegistry.gauge("current_abandoned_order_num", AtomicInteger())!!
 
-        //Количество заказов в каждом статусе в текущий момент
-//        ordersInStatusHistogram = Histogram.build()
-//                .name("orders_in_status")
-//                .buckets(1.0, 5.0, 10.0, 25.0, 50.0)
-//                .create()
-
         // Количество “брошенных” корзин - тех, которые были удалены
         discardedOrdersCounter = meterRegistry.counter("discarded_orders")
 
@@ -105,6 +99,16 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
         externalSystemExpensePaymentCounter = meterRegistry.counter("external_system_expense", listOf(Tag.of("externalSystemType", "PAYMENT")))
         externalSystemExpenseDeliveryCounter = meterRegistry.counter("external_system_expense", listOf(Tag.of("externalSystemType", "DELIVERY")))
         externalSystemExpenseNotificationCounter = meterRegistry.counter("external_system_expense", listOf(Tag.of("externalSystemType", "NOTIFICATION")))
+
+        //Количество денег, возвращенных пользователю
+        refundedMoneyAmountDeliveryFailedCounter = meterRegistry.counter("refunded_money_amount", listOf(Tag.of("refundReason", "DELIVERY_FAILED")))
+
+        //Количество заказов в каждом статусе в текущий момент (не работает)
+        ordersInStatusHistogram = Histogram.build()
+                .name("orders_in_status")
+                .help("orders_in_status")
+                .buckets(1.0, 5.0, 10.0, 25.0, 50.0)
+                .register()
     }
 
     companion object {

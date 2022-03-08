@@ -14,7 +14,10 @@ import com.itmo.microservices.demo.delivery.impl.utils.toModel
 import com.itmo.microservices.demo.notifications.impl.service.StubNotificationService
 import com.itmo.microservices.demo.order.api.model.OrderDto
 import com.itmo.microservices.demo.order.api.model.OrderStatus
+import com.itmo.microservices.demo.order.impl.entity.OrderEntity
 import com.itmo.microservices.demo.order.impl.repository.OrderRepository
+import com.itmo.microservices.demo.order.impl.util.toEntity
+import com.itmo.microservices.demo.products.impl.repository.ProductsRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -197,7 +200,9 @@ class DefaultDeliveryService(
 @Service
 class PollingForResult(
     private val deliveryInfoRecordRepository: DeliveryInfoRecordRepository,
-    private val timer: Timer
+    private val timer: Timer,
+    private val metricsCollector: DemoServiceMetricsCollector,
+    private val productsRepository: ProductsRepository
 ) {
     private val postToken = mapOf("clientSecret" to "8ddfb4e8-7f83-4c33-b7ac-8504f7c99205")
     private val objectMapper = ObjectMapper()
@@ -220,6 +225,15 @@ class PollingForResult(
     }
 
     var schedulePool: ScheduledExecutorService = Executors.newScheduledThreadPool(2)
+
+    fun countRefundMoneyAmount(order: OrderDto): Double {
+        var refund = 0.0
+        order.itemsMap?.forEach { (productId, count) ->
+            val product = productsRepository.findById(productId)
+            refund += product.get().price?.times(count) ?: 0
+        }
+        return refund
+    }
 
     fun getDeliveryResult(order: OrderDto, responseJson_post: JSONObject, times: Int) {
         if (times > 3) {
@@ -258,6 +272,8 @@ class PollingForResult(
                             responseJson_poll.getLong("submitTime")
                         )
                     )
+                    val refundMoneyAmount = countRefundMoneyAmount(order)
+                    metricsCollector.refundedMoneyAmountDeliveryFailedCounter.increment(refundMoneyAmount)
                 }
 
             }, (10).toLong(), TimeUnit.SECONDS
