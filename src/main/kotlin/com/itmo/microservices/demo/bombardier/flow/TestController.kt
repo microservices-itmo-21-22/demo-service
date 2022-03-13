@@ -43,16 +43,16 @@ class TestController(
     private val coroutineScope = CoroutineScope(executor.asCoroutineDispatcher())
 
     private val testStages = listOf(
-            choosingUserAccountStage.asErrorFree(),
-            orderCreationStage.asErrorFree(),
-            orderCollectingStage.asErrorFree(),
+        choosingUserAccountStage.asErrorFree(),
+        orderCreationStage.asErrorFree(),
+        orderCollectingStage.asErrorFree(),
 //        OrderAbandonedStage(serviceApi).asErrorFree(),
-            orderFinalizingStage.asErrorFree(),
-            orderSettingDeliverySlotsStage.asErrorFree(),
-            orderChangeItemsAfterFinalizationStage,
-            orderPaymentStage.asRetryable().asErrorFree(),
-            orderDeliveryStage.asErrorFree()
-        )
+        orderFinalizingStage.asErrorFree(),
+        orderSettingDeliverySlotsStage.asErrorFree(),
+        orderChangeItemsAfterFinalizationStage,
+        orderPaymentStage.asRetryable().asErrorFree(),
+        orderDeliveryStage.asErrorFree()
+    )
 
     fun startTestingForService(params: TestParameters) {
         val logger = LoggerWrapper(log, params.serviceName)
@@ -125,7 +125,10 @@ class TestController(
 
         coroutineScope.launch(testingFlow.testFlowCoroutine + TestContext(serviceName = serviceName)) {
             val testStartTime = System.currentTimeMillis()
-            testStages.forEachIndexed { i, stage ->
+
+            var i = 0
+            while (true) {
+                val stage = testStages[i]
                 val stageResult = metrics.withTags(metrics.stageLabel, stage.name())
                     .stageDurationRecord(stage, stuff.userManagement, stuff.api)
                 when {
@@ -137,7 +140,12 @@ class TestController(
                         metrics.testFailDurationRecord(System.currentTimeMillis() - testStartTime)
                         return@launch
                     }
-                    stageResult == CONTINUE -> Unit
+                    stageResult == CONTINUE -> {
+                        i++
+                        if (stage is OrderChangeItemsAfterFinalizationStage && stage.testCtx().wasChangedAfterFinalization) {
+                            i = 3
+                        }
+                    }
                     else -> return@launch
                 }
             }
@@ -158,7 +166,9 @@ data class TestContext(
     val serviceName: String,
     var userId: UUID? = null,
     var orderId: UUID? = null,
-    var paymentDetails: PaymentDetails = PaymentDetails()
+    var paymentDetails: PaymentDetails = PaymentDetails(),
+
+    var wasChangedAfterFinalization: Boolean = false
 ) : CoroutineContext.Element {
     override val key: CoroutineContext.Key<TestContext>
         get() = TestCtxKey
