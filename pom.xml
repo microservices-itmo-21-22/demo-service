@@ -12,7 +12,7 @@
 
     <groupId>com.itmo.microservices</groupId>
     <artifactId>bombardier</artifactId>
-    <version>3.0.4-SNAPSHOT</version>
+    <version>3.0.5-SNAPSHOT</version>
     <name>bombardier</name>
     <description>Trying to kill your PPO projects</description>
 

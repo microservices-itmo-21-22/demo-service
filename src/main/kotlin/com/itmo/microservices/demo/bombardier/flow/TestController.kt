@@ -51,7 +51,6 @@ class TestController(
             orderSettingDeliverySlotsStage.asErrorFree(),
             orderChangeItemsAfterFinalizationStage,
             orderPaymentStage.asRetryable().asErrorFree(),
-            orderCollectingStage.asErrorFree(),
             orderDeliveryStage.asErrorFree()
         )
 
