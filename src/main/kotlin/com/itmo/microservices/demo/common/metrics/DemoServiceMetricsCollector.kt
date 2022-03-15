@@ -38,7 +38,13 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
     lateinit var fromBookedToPaidStatusCounter: Counter
     lateinit var fromShippingToCompletedStatusCounter: Counter
 
-    lateinit var ordersInStatus: AtomicInteger
+    lateinit var ordersInStatusCollecting: AtomicInteger
+    lateinit var ordersInStatusBooked: AtomicInteger
+    lateinit var ordersInStatusCompleted: AtomicInteger
+    lateinit var ordersInStatusDiscard: AtomicInteger
+    lateinit var ordersInStatusPaid: AtomicInteger
+    lateinit var ordersInStatusRefund: AtomicInteger
+    lateinit var ordersInStatusShipping: AtomicInteger
     //lateinit var ordersInStatusHistogram: Histogram
 
     lateinit var averagedBookingToPayTime: Timer
@@ -112,6 +118,14 @@ class DemoServiceMetricsCollector(serviceName: String): CommonMetricsCollector(s
 
         //Количество денег, возвращенных пользователю
         refundedMoneyAmountDeliveryFailedCounter = meterRegistry.counter("refunded_money_amount", listOf(Tag.of("refundReason", "DELIVERY_FAILED")))
+
+        ordersInStatusCollecting = meterRegistry.gauge("orders_in_status_collecting", AtomicInteger())!!
+        ordersInStatusDiscard = meterRegistry.gauge("orders_in_status_discard", AtomicInteger())!!
+        ordersInStatusBooked = meterRegistry.gauge("orders_in_status_booked", AtomicInteger())!!
+        ordersInStatusPaid = meterRegistry.gauge("orders_in_status_paid", AtomicInteger())!!
+        ordersInStatusShipping = meterRegistry.gauge("orders_in_status_shipping", AtomicInteger())!!
+        ordersInStatusRefund = meterRegistry.gauge("orders_in_status_refund", AtomicInteger())!!
+        ordersInStatusCompleted = meterRegistry.gauge("orders_in_status_completed", AtomicInteger())!!
     }
 
     companion object {
