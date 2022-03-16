@@ -3,9 +3,13 @@ package com.itmo.microservices.demo.bombardier.external.communicator
 import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceDescriptor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.util.concurrent.ExecutorService
+import kotlin.time.Duration
+
+private const val REFRESH_TIME_MS: Long = 1000L * (tokenLifetimeSec - 30)
 
 class UserAwareExternalServiceApiCommunicator(descriptor: ServiceDescriptor, ex: ExecutorService) :
     ExtendedExternalServiceApiCommunicator(
@@ -14,7 +18,7 @@ class UserAwareExternalServiceApiCommunicator(descriptor: ServiceDescriptor, ex:
     private val usersMap = mutableMapOf<String, ExternalServiceToken>()
 
     private val refresherCoroutine = CoroutineScope(ex.asCoroutineDispatcher()).launch {
-        //runSessionRefresher()
+        runSessionRefresher()
     }
 
     override suspend fun authenticate(username: String, password: String): ExternalServiceToken {
@@ -35,20 +39,19 @@ class UserAwareExternalServiceApiCommunicator(descriptor: ServiceDescriptor, ex:
         while (refresherLast < 10) {
             refresherLast = runSessionRefresherImpl(refresherLast)
         }
-        throw Exception("Too many attempts")
+        throw Exception("Too many failed attempts to refresh token")
     }
 
     private suspend fun runSessionRefresherImpl(currentRetries: Int): Int {
         while (true) {
-            for ((username, token) in usersMap) {
-                if (token.isTokenExpired()) {
-                    try {
-                        val newToken = reauthenticate(token)
-                        usersMap[username] = newToken
-                    } catch (t: Throwable) {
-                        logger.error("Failed to refresh acc $username with token $token", t)
-                        return currentRetries + 1
-                    }
+            delay(REFRESH_TIME_MS)
+            for ((username, token) in usersMap.filter { it.value.isTokenExpired() && it.value.isNotStale() }) {
+                try {
+                    val newToken = reauthenticate(token)
+                    usersMap[username] = newToken
+                } catch (t: Throwable) {
+                    logger.error("Failed to refresh acc $username with token $token", t)
+                    return currentRetries + 1
                 }
             }
         }

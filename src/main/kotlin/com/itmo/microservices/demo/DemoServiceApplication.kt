@@ -9,6 +9,9 @@ import org.springframework.boot.runApplication
 class DemoServiceApplication
 
 fun main(args: Array<String>) {
+    if (System.getProperty("is.local", "false").toBoolean()) {
+        println("Running locally")
+    }
     runApplication<DemoServiceApplication>(*args)
 
     runBlocking {
