@@ -69,6 +69,7 @@ open class ExternalServiceApiCommunicator(private val descriptor: ServiceDescrip
 
     protected suspend fun reauthenticate(token: ExternalServiceToken) = execute("reauthenticate", "/authentication/refresh") {
         assert(!token.isRefreshTokenExpired())
+        post()
         header(HttpHeaders.AUTHORIZATION, "Bearer ${token.refreshToken}")
     }.run {
         mapper.readValue(body().string(), TokenResponse::class.java).toExternalServiceToken(descriptor.url)
@@ -122,10 +123,6 @@ open class ExternalServiceApiCommunicator(private val descriptor: ServiceDescrip
         credentials: ExternalServiceToken,
         builderContext: CustomRequestBuilder.() -> Unit
     ): TrimmedResponse {
-        if (credentials.isTokenExpired() && props.authEnabled) {
-            reauthenticate(credentials)
-        }
-
         return execute(method, url) {
             if (props.authEnabled) {
                 header(HttpHeaders.AUTHORIZATION, "Bearer ${credentials.accessToken}")

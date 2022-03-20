@@ -44,7 +44,7 @@ class UserAwareExternalServiceApiCommunicator(descriptor: ServiceDescriptor, ex:
     private suspend fun runSessionRefresherImpl(currentRetries: Int): Int {
         while (true) {
             delay(REFRESH_TIME_MS)
-            for ((username, token) in usersMap.filter { it.value.isTokenExpired() && it.value.isNotStale() }) {
+            for ((username, token) in usersMap.filter { it.value.isTokenExpiringSoon() && it.value.isNotStale() }) {
                 try {
                     val newToken = reauthenticate(token)
                     usersMap[username] = newToken

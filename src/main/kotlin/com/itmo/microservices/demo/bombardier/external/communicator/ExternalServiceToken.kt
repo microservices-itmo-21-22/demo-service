@@ -44,10 +44,11 @@ class ExternalServiceToken(val service: URL, accessToken: String, refreshToken: 
         }
 
     fun isTokenExpired() = tokenCreatedAt + tokenLifetimeSec <= Instant.now().epochSecond
+    fun isTokenExpiringSoon() = tokenCreatedAt + tokenLifetimeSec - (15*60) <= Instant.now().epochSecond
     fun isRefreshTokenExpired() = refreshTokenCreatedAt + refreshTokenLifetimeSec <= Instant.now().epochSecond
 
     // считаем что токен до сих пор используется если к нему обращались в течении 24 часов
-    fun isNotStale() = lastAccessedAt + 86400 >= Instant.now().epochSecond
+    fun isNotStale() = true//lastAccessedAt + 86400 >= Instant.now().epochSecond
 
     override fun toString(): String {
         return "[$service: access $_accessToken (alive ${!isTokenExpired()}), refresh $_refreshToken (alive ${!isRefreshTokenExpired()})]"
