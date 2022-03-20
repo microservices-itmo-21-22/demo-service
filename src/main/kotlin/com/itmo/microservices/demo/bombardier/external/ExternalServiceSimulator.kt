@@ -1,6 +1,6 @@
 package com.itmo.microservices.demo.bombardier.external
 
-import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceDescriptor
+import com.itmo.microservices.demo.bombardier.ServiceDescriptor
 import com.itmo.microservices.demo.bombardier.external.storage.ItemStorage
 import com.itmo.microservices.demo.bombardier.external.storage.OrderStorage
 import com.itmo.microservices.demo.bombardier.external.storage.UserStorage
@@ -8,7 +8,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.slf4j.LoggerFactory
 import java.net.URL
 import java.time.Duration
 import java.util.*
@@ -22,7 +21,7 @@ class ExternalServiceSimulator(
     private val itemStorage: ItemStorage
 ) : ExternalServiceApi {
 
-    override val descriptor = ServiceDescriptor("Simulator", "Support", URL("https://youtube.com/watch?v=dQw4w9WgXcQ"), URL("https://pornhub.com"))
+    override val descriptor = ServiceDescriptor("Simulator", URL("https://youtube.com/watch?v=dQw4w9WgXcQ"))
 
     private val financialLog = ConcurrentHashMap<UUID, MutableList<UserAccountFinancialLogRecord>>()
     private val deliveryLog = ConcurrentHashMap<UUID, DeliveryInfoRecord>()

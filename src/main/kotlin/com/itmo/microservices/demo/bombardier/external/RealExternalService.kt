@@ -1,9 +1,10 @@
 package com.itmo.microservices.demo.bombardier.external
 
+import com.itmo.microservices.demo.bombardier.BombardierProperties
 import com.itmo.microservices.demo.bombardier.external.communicator.ExternalServiceToken
 import com.itmo.microservices.demo.bombardier.external.communicator.InvalidExternalServiceResponseException
 import com.itmo.microservices.demo.bombardier.external.communicator.UserAwareExternalServiceApiCommunicator
-import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceDescriptor
+import com.itmo.microservices.demo.bombardier.ServiceDescriptor
 import com.itmo.microservices.demo.bombardier.external.storage.UserStorage
 import org.springframework.http.HttpStatus
 import java.time.Duration
@@ -11,9 +12,9 @@ import java.util.*
 import java.util.concurrent.ForkJoinPool
 class UserNotAuthenticatedException(username: String) : Exception(username)
 
-class RealExternalService(override val descriptor: ServiceDescriptor, private val userStorage: UserStorage) : ExternalServiceApi {
+class RealExternalService(override val descriptor: ServiceDescriptor, private val userStorage: UserStorage, props: BombardierProperties) : ExternalServiceApi {
     private val executorService = ForkJoinPool()
-    private val communicator = UserAwareExternalServiceApiCommunicator(descriptor, executorService)
+    private val communicator = UserAwareExternalServiceApiCommunicator(descriptor, executorService, props)
 
     suspend fun getUserSession(id: UUID): ExternalServiceToken {
         val username = getUser(id).name

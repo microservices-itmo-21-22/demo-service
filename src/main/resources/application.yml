@@ -30,3 +30,27 @@ management:
     web:
       exposure:
         include : "info,health,prometheus,metrics"
+
+bombardier:
+  auth-enabled: true
+  teams:
+    - name: "p03"
+      url: "http://p03:8080"
+    - name: "p04"
+      url: "http://service-304:8080"
+    - name: "p05"
+      url: "http://p05:8080"
+    - name: "p07"
+      url: "http://p07:8080"
+    - name: "p08"
+      url: "http://road-to-scala:8080"
+    - name: "p09"
+      url: "http://p09:8080"
+    - name: "p10"
+      url: "http://p10:8080"
+    - name: "p11"
+      url: "http://p11:8080"
+    - name: "p12"
+      url: "http://p12:8080"
+    - name: "p81"
+      url: "http://p81:8080"

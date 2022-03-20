@@ -2,7 +2,7 @@ package com.itmo.microservices.demo.bombardier.flow
 
 import com.itmo.microservices.demo.bombardier.exception.BadRequestException
 import com.itmo.microservices.demo.bombardier.external.knownServices.KnownServices
-import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceDescriptor
+import com.itmo.microservices.demo.bombardier.ServiceDescriptor
 import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceWithApiAndAdditional
 import com.itmo.microservices.demo.bombardier.stages.*
 import com.itmo.microservices.demo.bombardier.stages.TestStage.TestContinuationType.CONTINUE
@@ -18,10 +18,10 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 import com.itmo.microservices.demo.common.metrics.Metrics
-import net.logstash.logback.marker.Markers.*
 
 @Service
 class TestController(
+    private val knownServices: KnownServices,
     choosingUserAccountStage: ChoosingUserAccountStage,
     orderCreationStage: OrderCreationStage,
     orderCollectingStage: OrderCollectingStage,
@@ -64,8 +64,8 @@ class TestController(
             throw BadRequestException("There is no such feature launch several flows for the service in parallel :(")
         }
 
-        val descriptor = KnownServices.getInstance().descriptorFromName(params.serviceName)
-        val stuff = KnownServices.getInstance().getStuff(params.serviceName)
+        val descriptor = knownServices.descriptorFromName(params.serviceName)
+        val stuff = knownServices.getStuff(params.serviceName)
 
         runBlocking {
             stuff.userManagement.createUsersPool(params.numberOfUsers)

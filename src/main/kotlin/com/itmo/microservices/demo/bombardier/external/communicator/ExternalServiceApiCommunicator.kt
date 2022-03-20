@@ -1,6 +1,7 @@
 package com.itmo.microservices.demo.bombardier.external.communicator
 
-import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceDescriptor
+import com.itmo.microservices.demo.bombardier.BombardierProperties
+import com.itmo.microservices.demo.bombardier.ServiceDescriptor
 import com.itmo.microservices.demo.common.logging.LoggerWrapper
 import okhttp3.*
 import org.slf4j.LoggerFactory
@@ -11,8 +12,6 @@ import java.io.IOException
 import java.net.URL
 import java.time.Duration
 import java.util.concurrent.ExecutorService
-import java.util.logging.Level
-import java.util.logging.Logger
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -39,7 +38,7 @@ class TrimmedResponse private constructor(private val body: CachedResponseBody, 
     fun request() = req
 }
 
-open class ExternalServiceApiCommunicator(private val descriptor: ServiceDescriptor, private val executor: ExecutorService) {
+open class ExternalServiceApiCommunicator(private val descriptor: ServiceDescriptor, private val executor: ExecutorService, private val props: BombardierProperties) {
     companion object {
         private val TIMEOUT = Duration.ofSeconds(20)
         private val JSON = MediaType.parse("application/json; charset=utf-8")
@@ -65,20 +64,20 @@ open class ExternalServiceApiCommunicator(private val descriptor: ServiceDescrip
 
     }.run {
         val resp = body().string()
-        mapper.readValue(resp, TokenResponse::class.java).toExternalServiceToken(descriptor.getServiceAddress())
+        mapper.readValue(resp, TokenResponse::class.java).toExternalServiceToken(descriptor.url)
     }
 
     protected suspend fun reauthenticate(token: ExternalServiceToken) = execute("reauthenticate", "/authentication/refresh") {
         assert(!token.isRefreshTokenExpired())
         header(HttpHeaders.AUTHORIZATION, "Bearer ${token.refreshToken}")
     }.run {
-        mapper.readValue(body().string(), TokenResponse::class.java).toExternalServiceToken(descriptor.getServiceAddress())
+        mapper.readValue(body().string(), TokenResponse::class.java).toExternalServiceToken(descriptor.url)
     }
 
     suspend fun execute(method: String, url: String) = execute(method, url) {}
 
     suspend fun execute(method: String, url: String, builderContext: CustomRequestBuilder.() -> Unit): TrimmedResponse {
-        val requestBuilder = CustomRequestBuilder(descriptor.getServiceAddress()).apply {
+        val requestBuilder = CustomRequestBuilder(descriptor.url).apply {
             _url(url)
             builderContext(this)
         }
@@ -123,12 +122,14 @@ open class ExternalServiceApiCommunicator(private val descriptor: ServiceDescrip
         credentials: ExternalServiceToken,
         builderContext: CustomRequestBuilder.() -> Unit
     ): TrimmedResponse {
-        if (credentials.isTokenExpired()) {
+        if (credentials.isTokenExpired() && props.authEnabled) {
             reauthenticate(credentials)
         }
 
         return execute(method, url) {
-            header(HttpHeaders.AUTHORIZATION, "Bearer ${credentials.accessToken}")
+            if (props.authEnabled) {
+                header(HttpHeaders.AUTHORIZATION, "Bearer ${credentials.accessToken}")
+            }
             builderContext(this)
         }
     }

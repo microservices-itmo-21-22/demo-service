@@ -1,19 +1,18 @@
 package com.itmo.microservices.demo.bombardier.external.communicator
 
-import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceDescriptor
+import com.itmo.microservices.demo.bombardier.BombardierProperties
+import com.itmo.microservices.demo.bombardier.ServiceDescriptor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.slf4j.LoggerFactory
 import java.util.concurrent.ExecutorService
-import kotlin.time.Duration
 
 private const val REFRESH_TIME_MS: Long = 1000L * (tokenLifetimeSec - 30)
 
-class UserAwareExternalServiceApiCommunicator(descriptor: ServiceDescriptor, ex: ExecutorService) :
+class UserAwareExternalServiceApiCommunicator(descriptor: ServiceDescriptor, ex: ExecutorService, props: BombardierProperties) :
     ExtendedExternalServiceApiCommunicator(
-        descriptor, ex
+        descriptor, ex, props
     ) {
     private val usersMap = mutableMapOf<String, ExternalServiceToken>()
 

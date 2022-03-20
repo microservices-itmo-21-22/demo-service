@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.KeyDeserializer
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.itmo.microservices.demo.bombardier.external.OrderStatus.OrderCollecting
-import com.itmo.microservices.demo.bombardier.external.knownServices.ServiceDescriptor
+import com.itmo.microservices.demo.bombardier.ServiceDescriptor
 import java.time.Duration
 import java.util.*
 
