@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.ResponseStatus
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
 class ServiceDescriptorNotFoundException(name: String) : Exception("Descriptor for service $name was not found")
+@ResponseStatus(HttpStatus.BAD_REQUEST)
+class ServiceDescriptorExistsException() : Exception("descriptor already exists")
 
 data class ServiceWithApiAndAdditional(val api: ExternalServiceApi, val userManagement: UserManagement)
 
@@ -27,12 +29,17 @@ class KnownServices(private val props: BombardierProperties) {
     }
 
     fun add(descriptor: ServiceDescriptor) {
+        if (findByName(descriptor.name) != null) {
+            throw ServiceDescriptorExistsException()
+        }
         storage.add(descriptor)
     }
 
     fun descriptorFromName(name: String): ServiceDescriptor {
-        return storage.firstOrNull { it.name == name } ?: throw ServiceDescriptorNotFoundException(name)
+        return findByName(name) ?: throw ServiceDescriptorNotFoundException(name)
     }
+
+    private fun findByName(name: String) = storage.firstOrNull { it.name == name }
 
     fun getStuff(name: String): ServiceWithApiAndAdditional {
         val descriptor = descriptorFromName(name)
