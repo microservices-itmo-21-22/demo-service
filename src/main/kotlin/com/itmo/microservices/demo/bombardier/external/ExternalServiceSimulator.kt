@@ -55,8 +55,8 @@ class ExternalServiceSimulator(
 
     override suspend fun getDeliverySlots(userId: UUID, number: Int): List<Duration> {
         return mutableListOf<Duration>().also {
-            for (i in 0..Random.nextInt(100)) {
-                it.add(Duration.ofSeconds(Random.nextLong(20)))
+            for (i in 0..Random.nextInt(1, 100)) {
+                it.add(Duration.ofSeconds(Random.nextLong(1, 20)))
             }
         }
     }
@@ -149,7 +149,7 @@ class ExternalServiceSimulator(
                 it.copy(status = OrderStatus.OrderRefund)
             }
             order.paymentHistory.last().transactionId
-            if (Random.nextInt(100) < 70) {
+            if (Random.nextInt(1, 100) < 70) {
                 val userId = orderToUser[orderId]!!
                 val currentLog = userFinancialHistory(userId, orderId)
                 financialLog[userId]!!.add(
