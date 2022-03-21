@@ -32,6 +32,9 @@ class OrderSettingDeliverySlotsStage : TestStage {
         var deliverySlot = Duration.ZERO
         repeat(Random.nextInt(1, 4)) {
             deliverySlot = availableSlots.random()
+            if (deliverySlot > Duration.ofSeconds(30)) {
+                deliverySlot = Duration.ofSeconds(Random.nextLong(1, 30))
+            }
             externalServiceApi.setDeliveryTime(testCtx().userId!!, testCtx().orderId!!, deliverySlot)
 
             val resultSlot = externalServiceApi.getOrder(testCtx().userId!!, testCtx().orderId!!).deliveryDuration
