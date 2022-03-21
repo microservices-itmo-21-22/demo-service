@@ -17,6 +17,7 @@ class UserAwareExternalServiceApiCommunicator(descriptor: ServiceDescriptor, ex:
     private val usersMap = mutableMapOf<String, ExternalServiceToken>()
 
     private val refresherCoroutine = CoroutineScope(ex.asCoroutineDispatcher()).launch {
+        if (!props.authEnabled) return@launch
         runSessionRefresher()
     }
 
