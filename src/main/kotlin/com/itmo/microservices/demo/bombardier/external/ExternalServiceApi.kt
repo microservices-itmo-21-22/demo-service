@@ -137,7 +137,7 @@ class OrderStatusDeserializer : JsonDeserializer<OrderStatus>() {
             "PAID" -> OrderStatus.OrderPayed(0)
             "SHIPPING" -> OrderStatus.OrderInDelivery(0)
             "REFUND" -> OrderStatus.OrderRefund
-            "COMPLETED" -> OrderStatus.OrderCompleted
+            "COMPLETED" -> OrderStatus.OrderDelivered(0, System.currentTimeMillis())
             else -> throw Exception("Invalid order status")
         }
     }
