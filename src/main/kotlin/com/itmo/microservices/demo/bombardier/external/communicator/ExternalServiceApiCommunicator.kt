@@ -85,7 +85,7 @@ open class ExternalServiceApiCommunicator(private val descriptor: ServiceDescrip
         val metrics = Metrics().withTags("service", this.descriptor.name, "method", method)
         return suspendCoroutine {
             val req = requestBuilder.build()
-            logger.info("sending request to ${req.url().url()}")
+            logger.info("sending request to ${req.method()} ${req.url().url()}")
             val startTime = System.currentTimeMillis()
 
             client.newCall(req).enqueue(object : Callback {
