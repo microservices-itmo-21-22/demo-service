@@ -58,18 +58,6 @@ class OrderPaymentStage : TestStage {
             PaymentStatus.SUCCESS -> {
                 ConditionAwaiter.awaitAtMost(10, TimeUnit.SECONDS)
                     .condition {
-                        externalServiceApi.getOrder(
-                            testCtx().userId!!,
-                            testCtx().orderId!!
-                        ).status is OrderStatus.OrderPayed
-                    }
-                    .onFailure {
-                        eventLogger.error(E_PAYMENT_STATUS_FAILED, order.id)
-                        throw TestStage.TestStageFailedException("Exception instead of silently fail")
-                    }.startWaiting()
-
-                ConditionAwaiter.awaitAtMost(10, TimeUnit.SECONDS)
-                    .condition {
                         val userChargedRecord =
                             externalServiceApi.userFinancialHistory(testCtx().userId!!, testCtx().orderId!!)
                                 .find { it.paymentTransactionId == paymentSubmissionDto.transactionId }
