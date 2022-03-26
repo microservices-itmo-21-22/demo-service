@@ -39,6 +39,9 @@ class OrderAbandonedStage : TestStage {
                 }
                 .onFailure {
                     eventLogger.error(OrderAbandonedNotableEvents.E_ORDER_ABANDONED, testCtx().orderId)
+                    if (it != null) {
+                        throw it
+                    }
                     throw TestStage.TestStageFailedException("Exception instead of silently fail")
                 }.startWaiting()
 
@@ -66,6 +69,9 @@ class OrderAbandonedStage : TestStage {
                             OrderAbandonedNotableEvents.E_USER_DIDNT_INTERACT_ORDER, testCtx().orderId,
                             OrderStatus.OrderCollecting::class.simpleName, order.status
                         )
+                        if (it != null) {
+                            throw it
+                        }
                         throw TestStage.TestStageFailedException("Exception instead of silently fail")
                     }
             }

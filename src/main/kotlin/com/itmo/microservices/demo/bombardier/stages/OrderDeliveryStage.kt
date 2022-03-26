@@ -47,6 +47,9 @@ class OrderDeliveryStage : TestStage {
             }
             .onFailure {
                 eventLogger.error(E_ORDER_STATUS_NOT_CHANGED_AND_NO_REFUND, orderBeforeDelivery.id)
+                if (it != null) {
+                    throw it
+                }
                 throw TestStage.TestStageFailedException("Exception instead of silently fail")
             }
             .startWaiting()

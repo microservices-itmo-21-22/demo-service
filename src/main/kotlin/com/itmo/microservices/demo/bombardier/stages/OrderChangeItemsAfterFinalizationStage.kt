@@ -47,6 +47,9 @@ class OrderChangeItemsAfterFinalizationStage : TestStage {
                 }
                 .onFailure {
                     eventLogger.error(E_ORDER_CHANGE_AFTER_FINALIZATION_FAILED, itemToAdd.id, amount, testCtx().orderId)
+                    if (it != null) {
+                        throw it
+                    }
                     throw TestStage.TestStageFailedException("Exception instead of silently fail")
                 }.startWaiting()
         }

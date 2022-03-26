@@ -48,6 +48,9 @@ class OrderPaymentStage : TestStage {
             }
             .onFailure {
                 eventLogger.error(E_TIMEOUT_EXCEEDED, order.id)
+                if (it != null) {
+                    throw it
+                }
                 throw TestStage.TestStageFailedException("Exception instead of silently fail")
             }.startWaiting()
 
@@ -66,6 +69,9 @@ class OrderPaymentStage : TestStage {
                     }
                     .onFailure {
                         eventLogger.error(E_WITHDRAW_NOT_FOUND, order.id, testCtx().userId)
+                        if (it != null) {
+                            throw it
+                        }
                         throw TestStage.TestStageFailedException("Exception instead of silently fail")
                     }.startWaiting()
 
