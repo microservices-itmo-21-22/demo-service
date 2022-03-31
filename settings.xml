@@ -2,12 +2,32 @@
 <settings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd"
           xmlns="http://maven.apache.org/SETTINGS/1.1.0">
+     <servers>
+        <server>
+            <id>itmo-snapshots</id>
+            <configuration>
+                <httpConfiguration>
+                    <all>
+                        <connectionTimeout>5000</connectionTimeout>
+                        <readTimeout>120000</readTimeout>
+                    </all>
+                </httpConfiguration>
+            </configuration>
+        </server>
+    </servers>
+          
     <mirrors>
         <mirror>
             <id>maven-default-http-blocker</id>
             <mirrorOf>dummy</mirrorOf>
             <name>Dummy mirror to override default blocking mirror that blocks http</name>
             <url>http://0.0.0.0/</url>
+        </mirror>
+        <mirror>
+            <id>danil-itmo-mirror</id>
+            <name>Danil Proxy of itmo-shapshots</name>
+            <url>https://itmo-artifactory-proxy.danil.co/artifactory/libs-snapshot</url>
+            <mirrorOf>itmo-snapshots</mirrorOf>
         </mirror>
     </mirrors>
 </settings>

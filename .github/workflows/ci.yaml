@@ -1,0 +1,95 @@
+name: Build image
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    branches:
+      - 'main'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Tune the network
+        run: |
+          sudo ethtool -K eth0 tx off rx off
+
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          version: latest
+        id: buildx
+
+      - name: Cache build
+        uses: actions/cache@v3
+        with:
+          path: |
+            target/classes/
+            target/test-classes/
+            target/kotlin-ic/
+          key: ${{ runner.os }}-build-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          server-id: github
+          cache: 'maven'
+
+      - name: Get version from pom.xml
+        id: version
+        run: |
+          POM_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo ::set-output name=version::${POM_VERSION}
+
+      - name: Docker image meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=pr
+            type=sha
+            type=raw,value=${{ steps.version.outputs.version }},enable=${{ endsWith(github.ref, 'main') }}
+            type=raw,value=latest,enable=${{ endsWith(github.ref, 'main') }}
+
+      - name: Build with Maven
+        id: build
+        run: |
+          mvn -B package -DskipTests -s settings.xml
+          JAR_PATH=$(mvn help:evaluate -Dexpression=project.build.finalName -q -DforceStdout)
+          echo ::set-output name=jar::${JAR_PATH}.jar
+
+      - name: Build and push image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          build-args: |
+            JAR_FILE=target/${{ steps.build.outputs.jar }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha, scope=${{ github.workflow }}
+          cache-to: type=gha, scope=${{ github.workflow }}
