@@ -1,6 +1,7 @@
 # Demo service
 
 ## Launch notes
+* Rename `name`, `description`, `github` to corresponding values
 * Configure settings.xml
   * 
     * First option: settings in local maven repository (`~/.m2/settings.xml`)
@@ -22,6 +23,7 @@
 
 * For local app launch, use **dev** profile. It uses in-memory database
 * For production deploy, run app with no profile
+* Your app image will be automatically built and available at `ghcr.io/username/repository` 
 
 ## API
 

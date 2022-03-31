@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.3</version>
+        <version>2.6.6</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -17,11 +17,12 @@
     <description>Demo project for microservices course 21-22</description>
 
     <properties>
+        <github>microservices-itmo-21-22/demo-service</github>
         <java.version>11</java.version>
         <kotlin.version>1.5.21</kotlin.version>
         <guava.version>30.1.1-jre</guava.version>
         <jjwt.version>0.9.1</jjwt.version>
-        <common-lib.version>0.5.0-SNAPSHOT</common-lib.version>
+        <common-lib.version>0.8.0-SNAPSHOT</common-lib.version>
              
         <buildnumber-maven-plugin.version>1.4</buildnumber-maven-plugin.version>
         <jib-maven-plugin.version>2.8.0</jib-maven-plugin.version>
@@ -36,7 +37,8 @@
 
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-stdlib-jdk8</artifactId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>${kotlin.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
@@ -66,11 +68,6 @@
             <optional>true</optional>
         </dependency>
 
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.5.2</version>
-        </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
@@ -129,10 +126,10 @@
     </dependencies>
 
     <scm>
-        <connection>scm:git:https://https://github.com/${github}.git</connection>
-        <developerConnection>scm:git:https://https://github.com/${github}.git</developerConnection>
+        <connection>scm:git:https://github.com/${github}.git</connection>
+        <developerConnection>scm:git:https://github.com/${github}.git</developerConnection>
         <tag>HEAD</tag>
-        <url>https://https://github.com/${github}.git</url>
+        <url>https://github.com/${github}.git</url>
     </scm>
 
     <distributionManagement>
@@ -146,10 +143,6 @@
         <repository>
             <id>central</id>
             <url>https://repo1.maven.org/maven2/</url>
-        </repository>
-        <repository>
-            <id>itmo-central</id>
-            <url>http://77.234.215.138:30031/artifactory/libs-release</url>
         </repository>
         <repository>
             <id>itmo-snapshots</id>
@@ -195,7 +188,7 @@
                                 <annotationProcessorPath>
                                     <groupId>org.springframework.boot</groupId>
                                     <artifactId>spring-boot-configuration-processor</artifactId>
-                                    <version>2.5.3</version>
+                                    <version>2.6.6</version>
                                 </annotationProcessorPath>
                             </annotationProcessorPaths>
                         </configuration>
@@ -205,7 +198,7 @@
                     <dependency>
                         <groupId>org.jetbrains.kotlin</groupId>
                         <artifactId>kotlin-maven-allopen</artifactId>
-                        <version>1.5.0</version>
+                        <version>${kotlin.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>
