@@ -19,7 +19,7 @@
     <properties>
         <github>microservices-itmo-21-22/demo-service</github>
         <java.version>11</java.version>
-        <kotlin.version>1.5.21</kotlin.version>
+        <kotlin.version>1.6.10</kotlin.version>
         <guava.version>30.1.1-jre</guava.version>
         <jjwt.version>0.9.1</jjwt.version>
         <common-lib.version>0.8.0-SNAPSHOT</common-lib.version>
@@ -71,12 +71,12 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.5.2</version>
+            <version>1.6.6</version>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>
-            <version>1.6.2</version>
+            <version>1.6.5</version>
         </dependency>
 
         <dependency>
@@ -206,8 +206,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
                  
