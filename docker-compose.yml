@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  app:
+    image: ghcr.io/microservices-itmo-21-22/demo-service:${APP_VERSION:-latest}
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-app:5432/app
+      SPRING_DATASOURCE_USERNAME: app
+      SPRING_DATASOURCE_PASSWORD: app
+    depends_on:
+      postgres-app:
+        condition: service_healthy
+
+  postgres-app:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_DB: app
+      POSTGRES_PASSWORD: app
+      PGUSER: app # for healthchecks
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-U app"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pg_data:

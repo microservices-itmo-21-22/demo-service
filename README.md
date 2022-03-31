@@ -1,7 +1,8 @@
 # Demo service
 
 ## Launch notes
-* Rename `name`, `description`, `github` to corresponding values
+* Rename `name`, `description`, `github` to corresponding values in `pom.xml`
+* Rename `postgres-app` to `postgres-YOUR-APP-NAME`, `image` to `ghcr.io/USERNAME/REPOSITORY` in `docker-compose.yml`
 * Configure settings.xml
   * 
     * First option: settings in local maven repository (`~/.m2/settings.xml`)
@@ -23,7 +24,9 @@
 
 * For local app launch, use **dev** profile. It uses in-memory database
 * For production deploy, run app with no profile
-* Your app image will be automatically built and available at `ghcr.io/username/repository` 
+* Your app docker image will be automatically built and available at `ghcr.io/username/repository` 
+* You can override app version using environment variable `APP_VERSION`, e.g. `APP_VERSION=0.1.0-SNAPSHOT docker compose up -d`
+* To run project on shared instance do `cp docker-compose.override.example.yml docker-compose.override.yml`. It will join the infra network with Logstash, etc
 
 ## API
 

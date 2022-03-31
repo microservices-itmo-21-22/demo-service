@@ -1,0 +1,10 @@
+services:
+  app:
+    environment:
+      - "LOGSTASH_URL=logstash:5000"
+
+networks:
+  default:
+    external:
+      name: microservices
+      
