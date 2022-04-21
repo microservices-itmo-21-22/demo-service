@@ -1,6 +1,6 @@
 package com.itmo.microservices.demo.payment.impl.entity
 
-import com.itmo.microservices.demo.order.api.model.PaymentStatus
+import com.itmo.microservices.demo.payment.api.model.PaymentStatus
 import com.itmo.microservices.demo.warehouse.impl.entity.OrderEntity
 import java.util.*
 import javax.persistence.*
