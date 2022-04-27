@@ -1,1 +1,33 @@
-f
+REQUEST:
+	HTTP verb: GET
+	URL: /delivery/slots?number={number}
+	HEADERS:
+		Authorization: Bearer access_token
+	PARAMETERS:
+		number: Int [Positive] // number of slots we want to get
+
+RESPONSE:
+	HTTP CODES: 2** | any other
+	BODY FORMAT: List<Int> # от 1 до 30 (секунды)
+
+
+
+REQUST:
+	HTTP VERB: POST
+	URL: /orders/{order_id}/delivery?slot={slot_in_sec}
+	HEADERS:
+		Authorization: Bearer access_token
+	PARAMETERS:
+		order_id: UUID
+		slot_in_sec: Int
+
+RESPONSE:
+	HTTP CODES: 2** | any other
+	BODY FORMAT: BookingDto
+
+
+
+BookingDto {
+	id: UUID,
+	failedItems: Set<UUID>
+}
