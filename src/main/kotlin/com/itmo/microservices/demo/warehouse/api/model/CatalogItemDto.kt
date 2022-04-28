@@ -3,9 +3,9 @@ import java.util.*
 import java.util.UUID.randomUUID
 
 data class CatalogItemDto(
-    val id: UUID = randomUUID(),
-    val title: String = "",
-    val description: String = "",
-    val price: Int = 100,
-    val amount: Int = 0
+    var id: UUID,
+    var title: String,
+    var description: String,
+    var price: Int,
+    var amount: Int
 )
