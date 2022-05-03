@@ -6,7 +6,7 @@ data class OrderModel(
     val id: UUID,
     val timeCreated: Long,
     val status: OrderStatus,
-    var itemsMap: Map<UUID, Int>,
+    var itemsMap: List<ItemMap>,
     var deliveryDuration: Int?,
     var paymentHistory: List<PaymentLogRecord>)
 {
