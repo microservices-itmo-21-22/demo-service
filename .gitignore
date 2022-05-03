@@ -34,4 +34,4 @@ build/
 
 docker-compose.override.yml
 .env
-.DS_Store
+/.DS_Store

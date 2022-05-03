@@ -1,7 +1,5 @@
 package com.itmo.microservices.demo.order.api.model
 
-import com.itmo.microservices.demo.order.impl.entity.OrderStatus
-import com.itmo.microservices.demo.order.impl.entity.PaymentLogRecord
 import java.util.*
 
 data class OrderModel(
