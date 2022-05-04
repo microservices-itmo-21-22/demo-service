@@ -1,8 +1,12 @@
 package com.itmo.microservices.demo.order.api.model
 
 import java.util.*
+import javax.persistence.Entity
+import javax.persistence.Id
 
-data class ItemMap(
-    val id : UUID,
-    val item : Int,
-)
+@Entity
+class ItemMap {
+    @Id
+    var id : UUID? = null
+    var item : Int? = null
+}
