@@ -15,13 +15,13 @@ class PaymentController(private val paymentServiceImpl: PaymentServiceImpl) {
 
     //Оплата заказа
     @PostMapping("/orders/{order_id}/payment")
-    fun postPaymentSubmission(order_id: UUID): PaymentSubmissionDto {
-        return paymentServiceImpl.orderPayment(order_id)
+    fun postPaymentSubmission(orderId: UUID): PaymentSubmissionDto {
+        return paymentServiceImpl.orderPayment(orderId)
     }
     //Получение информации о финансовых операциях с аккаунтом пользователя
     @GetMapping("/finlog")
-    fun getUserAccountFinInfoLog(@RequestParam order_id: UUID): List<UserAccountFinancialLogRecordDto> {
-        return paymentServiceImpl.getPaymentFinLog(order_id)
+    fun getUserAccountFinInfoLog(@RequestParam orderId: UUID): List<UserAccountFinancialLogRecordDto> {
+        return paymentServiceImpl.getPaymentFinLog(orderId)
     }
 
 }

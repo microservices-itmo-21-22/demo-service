@@ -11,13 +11,13 @@ import java.util.*
 @Service
 class PaymentServiceImpl(private val paymentSubmissionRepository: PaymentSubmissionRepository,
                          private val userAccountFinancialLogRecordRepository: UserAccountFinancialLogRecordRepository): PaymentService {
-    override fun getPaymentFinLog(order_id: UUID): List<UserAccountFinancialLogRecordDto> {
-        return userAccountFinancialLogRecordRepository.getUserAccountFinancialLogRecordEntitiesByOrderId(order_id)
+    override fun getPaymentFinLog(orderId: UUID): List<UserAccountFinancialLogRecordDto> {
+        return userAccountFinancialLogRecordRepository.getUserAccountFinancialLogRecordEntitiesByOrderId(orderId)
             .map { x -> UserAccountFinancialLogRecordDto(x.type, x.amount, x.orderId, x.paymentTransactionId, x.timestamp) }
     }
 
-    override fun orderPayment(order_id: UUID): PaymentSubmissionDto {
-        val order = paymentSubmissionRepository.getByOrderByTransactionId(order_id)
+    override fun orderPayment(orderId: UUID): PaymentSubmissionDto {
+        val order = paymentSubmissionRepository.getByOrderByTransactionId(orderId)
         return PaymentSubmissionDto(order.timestamp!!, order.transactionId!!)
     }
 
