@@ -1,4 +1,4 @@
-package com.itmo.microservices.demo.order.api.model
+package com.itmo.microservices.demo.order.common
 
 enum class OrderStatus {
     COLLECTING,

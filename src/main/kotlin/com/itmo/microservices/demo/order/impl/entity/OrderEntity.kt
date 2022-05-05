@@ -1,8 +1,6 @@
 package com.itmo.microservices.demo.order.impl.entity
 
-import com.itmo.microservices.demo.order.api.model.ItemMap
-import com.itmo.microservices.demo.order.api.model.OrderStatus
-import com.itmo.microservices.demo.payment.api.model.PaymentLogRecord
+import com.itmo.microservices.demo.order.common.OrderStatus
 import java.util.*
 import javax.persistence.*
 
@@ -16,19 +14,19 @@ class OrderEntity {
     var timeCreated: Long? = null
     var status: OrderStatus? = null
     @OneToMany
-    var itemsMap: List<ItemMap> = emptyList()
+    var itemsMap: List<ItemMapEntity> = emptyList()
     var deliveryDuration: Int? = null
     @OneToMany
-    var paymentHistory: List<PaymentLogRecord>? = emptyList()
+    var paymentHistory: List<PaymentLogRecordEntity> = emptyList()
 
     constructor()
 
     constructor(id: UUID?,
                 timeCreated: Long?,
                 status: OrderStatus?,
-                itemsMap: List<ItemMap>,
+                itemsMap: List<ItemMapEntity>,
                 deliveryDuration: Int?,
-                paymentHistory: List<PaymentLogRecord>) {
+                paymentHistory: List<PaymentLogRecordEntity>) {
         this.id = id
         this.timeCreated = timeCreated
         this.status = status
