@@ -19,15 +19,20 @@
     <properties>
         <github>microservices-itmo-21-22/demo-service</github>
         <java.version>11</java.version>
-        <kotlin.version>1.6.10</kotlin.version>
-        <guava.version>30.1.1-jre</guava.version>
+        <kotlin.version>1.7.10</kotlin.version>
+        <common-lib.version>0.9.0-SNAPSHOT</common-lib.version>
+
+        <guava.version>31.1-jre</guava.version>
+        <h2.version>2.1.214</h2.version>
         <jjwt.version>0.9.1</jjwt.version>
-        <common-lib.version>0.8.0-SNAPSHOT</common-lib.version>
-             
+        <logstash.version>7.2</logstash.version>
+        <psql.version>42.5.0</psql.version>
+        <swagger.version>1.6.11</swagger.version>
+
         <buildnumber-maven-plugin.version>1.4</buildnumber-maven-plugin.version>
         <jib-maven-plugin.version>2.8.0</jib-maven-plugin.version>
     </properties>
-         
+
     <dependencies>
         <dependency>
             <groupId>com.itmo.microservices</groupId>
@@ -45,10 +50,12 @@
             <artifactId>kotlin-reflect</artifactId>
         </dependency>
 
+        <!--suppress VulnerableLibrariesLocal -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        <!--suppress VulnerableLibrariesLocal -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
@@ -71,22 +78,19 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.6.6</version>
-        </dependency>
-        <dependency>
-            <groupId>io.swagger</groupId>
-            <artifactId>swagger-annotations</artifactId>
-            <version>1.6.5</version>
+            <version>${swagger.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+            <version>${h2.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+            <version>${psql.version}</version>
             <scope>runtime</scope>
         </dependency>
 
@@ -110,7 +114,7 @@
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
-            <version>6.6</version>
+            <version>${logstash.version}</version>
         </dependency>
 
         <dependency>
@@ -152,7 +156,7 @@
             </snapshots>
         </repository>
     </repositories>
-         
+
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
         <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
@@ -210,7 +214,7 @@
                     <target>${java.version}</target>
                 </configuration>
             </plugin>
-                 
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
@@ -238,7 +242,7 @@
                         <tags>${scmBranch}_${project.version}</tags>
                     </to>
                     <allowInsecureRegistries>true</allowInsecureRegistries>
-                    
+
                 </configuration>
                 <executions>
                     <execution>
