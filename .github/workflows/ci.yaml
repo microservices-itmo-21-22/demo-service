@@ -8,6 +8,10 @@ on:
     branches:
       - 'main'
 
+env:
+  SERVICE_NAME: test
+  GROUP_ID: m3400
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -73,8 +77,12 @@ jobs:
             type=sha
             type=raw,value=${{ steps.version.outputs.version }},enable=${{ endsWith(github.ref, 'main') }}
             type=raw,value=latest,enable=${{ endsWith(github.ref, 'main') }}
+            type=raw,value=${{ env.SERVICE_NAME }}-${{ env.GROUP_ID }},enable=true
 
       - name: Build with Maven
+        env:
+          GITHUB_USERNAME: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         id: build
         run: |
           mvn -B package -DskipTests -s settings.xml
@@ -82,7 +90,7 @@ jobs:
           echo ::set-output name=jar::${JAR_PATH}.jar
 
       - name: Build and push image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: .
           builder: ${{ steps.buildx.outputs.name }}
