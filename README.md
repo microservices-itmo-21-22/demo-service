@@ -1,7 +1,7 @@
 # Demo service
 
 ## Launch notes
-* Rename repository with `GROUP-ID`-`YOUR-APP-NAME`
+* Create template repository with the name `GROUP-ID`-`YOUR-APP-NAME` and select this organization as an account
 * Rename `name`, `description`, `github` to corresponding values in `pom.xml`
 * Rename `postgres-app` to `postgres-YOUR-APP-NAME`, `image` to `ghcr.io/USERNAME/REPOSITORY` in `docker-compose.yml`
 * Configure settings.xml
