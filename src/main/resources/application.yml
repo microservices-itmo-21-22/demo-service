@@ -3,8 +3,8 @@ spring:
     name: demo-service
   datasource:
     url: jdbc:postgresql://postgresql:5432/app
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    username: app
+    password: app
     driver-class-name: org.postgresql.Driver
   jpa:
     database: postgresql
