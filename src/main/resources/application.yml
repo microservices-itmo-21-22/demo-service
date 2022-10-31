@@ -4,7 +4,7 @@ spring:
   datasource:
     url: jdbc:postgresql://postgresql:5432/app
     username: app
-    password: app
+    password: changeme
     driver-class-name: org.postgresql.Driver
   jpa:
     database: postgresql
@@ -23,7 +23,7 @@ security:
   refresh-token-lifetime: 30d
 
 logstash:
-  url: logstash:9600
+  url: logstash:50000
 
 management:
   metrics:
