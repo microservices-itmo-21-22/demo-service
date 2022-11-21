@@ -17,8 +17,8 @@ class DefaultAuthService(private val userService: UserService,
                          private val passwordEncoder: PasswordEncoder) : AuthService {
 
     override fun authenticate(request: AuthenticationRequest): AuthenticationResult {
-        val user = userService.findUser(request.username)
-                ?: throw NotFoundException("User with username ${request.username} not found")
+        val user = userService.findUserbyName(request.name)
+                ?: throw NotFoundException("User with username ${request.name} not found")
 
         if (!passwordEncoder.matches(request.password, user.password))
             throw AccessDeniedException("Invalid password")

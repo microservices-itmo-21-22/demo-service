@@ -6,8 +6,8 @@
     <servers>
         <server>
             <id>github</id>
-            <username>${env.GITHUB_USERNAME}</username>
-            <password>${env.GITHUB_TOKEN}</password>
+            <username>FogggyFox</username>
+            <password>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</password>
         </server>
     </servers>
 
